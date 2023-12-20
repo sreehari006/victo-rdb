@@ -17,7 +17,6 @@ double* normalize_vector(int vdim, double* vp) {
 
     double weight = sqrt(sum);
 
-    // printf("Weight: %f", weight);
     n_vp = malloc(sizeof(double) * vdim);
     for(int i=0; i<vdim; i++) {
         n_vp[i] = vp[i] / weight;
@@ -31,7 +30,6 @@ double euclidean_distance(int vdim, double* vp1, double* vp2) {
     double sum = 0;
     for(int i=0; i<vdim; i++) {
         sum += pow(vp2[i] - vp1[i],2);
-        //printf("--------> %f ###### %f ++++++ %f\n", vp2[i], vp1[i], sum);
     }
     return sqrt(sum);
 }
@@ -101,7 +99,6 @@ double dot_product(int vdim, double* vp1, double* vp2) {
     double sum = 0;
     for(int i=0; i<vdim; i++) {
         sum += pow(vp2[i] - vp1[i],2);
-        //printf("--------> %f ###### %f ++++++ %f\n", vp2[i], vp1[i], sum);
     }
     return sqrt(sum);
 }

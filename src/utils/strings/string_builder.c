@@ -5,7 +5,7 @@
 
 void initStringBuilder(StringBuilder *builder, size_t initialCapacity) {
     builder->data = (char *)malloc(initialCapacity * sizeof(char));
-    builder->data[0] = '\0';  // Initialize with an empty string
+    builder->data[0] = '\0';
     builder->length = 0;
     builder->capacity = initialCapacity;
 }
@@ -13,13 +13,11 @@ void initStringBuilder(StringBuilder *builder, size_t initialCapacity) {
 void appendToStringBuilder(StringBuilder *builder, const char *str) {
     size_t strLength = strlen(str);
     
-    // Check if the capacity is sufficient, otherwise, reallocate memory
     while (builder->length + strLength + 1 > builder->capacity) {
         builder->capacity *= 2;
         builder->data = (char *)realloc(builder->data, builder->capacity * sizeof(char));
     }
 
-    // Append the new string
     strcat(builder->data, str);
     builder->length += strLength;
 }
@@ -59,21 +57,8 @@ bool isValidObjName(char *str) {
     return true;
 }
 
-int safeAtoi(const char *str) {
+bool isValidInteger(const char *str) {
     char *endptr;
-    long result = strtol(str, &endptr, 10);
-
-    if (*endptr != '\0') {
-        // fprintf(stderr, "Error: Invalid input for atoi\n");
-        // exit(EXIT_FAILURE);
-        return 0;
-    }
-
-    if (result > INT_MAX || result < INT_MIN) {
-        // fprintf(stderr, "Error: Integer overflow or underflow\n");
-        // exit(EXIT_FAILURE);
-        return 0;
-    }
-
-    return (int) result;
+    strtol(str, &endptr, 10);
+    return (*endptr == '\0' || *endptr == '\n');
 }

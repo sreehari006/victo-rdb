@@ -392,10 +392,10 @@ char* query_vector_wrapper_rs_to_string(QueryVectorRSWrapper* rs) {
     char* result = strdup(resultSB.data);
     freeStringBuilder(&resultSB);
 
-    if (result == NULL) {
+    /* if (result == NULL) {
         perror("Memory allocation failed");
         exit(EXIT_FAILURE);
-    } 
+    } */
     return result;
 }
 
@@ -502,7 +502,6 @@ char* do_db_ops(char* payload) {
     appendToStringBuilder(&resultSB, "\"result\": [");
     appendToStringBuilder(&clientResponseSB, "{");
 
-    // printf("Payload Inside Json Parser: %s", payload);
     char* db = getDatabasePath();
     JsonNode* root = loadJson(payload);
     if(db == NULL) {
@@ -530,6 +529,7 @@ char* do_db_ops(char* payload) {
                 if(!isError) {
                     Response rs = add_db(dbNode->value); 
                     char* result = response_to_string(&rs);
+                    free(rs.errMsg);
                     appendToStringBuilder(&resultSB, result);
                     free(result);
                 }
@@ -551,12 +551,13 @@ char* do_db_ops(char* payload) {
                 if(!isError) {
                     Response rs = add_collection(dbNode->value, collectionNode->value); 
                     char* result = response_to_string(&rs);
+                    free(rs.errMsg);
                     appendToStringBuilder(&resultSB, result);
                     free(result);
                 }
 
             } else if(strcmp(op, "delete") == 0 && strcmp(obj, "collection") == 0) {
-                JsonNode* dbNode = searchJson(argsNode, "db");
+                /* JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
@@ -573,9 +574,15 @@ char* do_db_ops(char* payload) {
                 if(!isError) {
                     Response rs = delete_collection(dbNode->value, collectionNode->value); 
                     char* result = response_to_string(&rs);
+                    free(rs.errMsg);
                     appendToStringBuilder(&resultSB, result);
                     free(result);
-                }
+                } */
+                
+                //char* result = strdup("Operation not supported in this version");
+                // return result;
+
+                appendToStringBuilder(&resultSB, "\"Operation not supported in this version\"");
 
             } else if(strcmp(op, "count") == 0 && strcmp(obj, "collection") == 0) {
                 JsonNode* dbNode = searchJson(argsNode, "db");
@@ -588,6 +595,7 @@ char* do_db_ops(char* payload) {
                 if(!isError) {
                     CountRS rs = count_collection(dbNode->value); 
                     char* result = count_rs_to_string(&rs);
+                    free(rs.errMsg);
                     appendToStringBuilder(&resultSB, result);
                     free(result);
                 }
@@ -603,6 +611,15 @@ char* do_db_ops(char* payload) {
                 if(!isError) {
                     CollectionListRS rs = list_collection(dbNode->value); 
                     char* result = collection_list_rs_to_string(&rs);
+                    int i=0;
+                    if(rs.collections != NULL) {
+                        while(rs.collections[i] != NULL) {
+                            free(rs.collections[i]);
+                            i++;
+                        }
+                        free(rs.collections);
+                    }
+                    
                     appendToStringBuilder(&resultSB, result);
                     free(result);
                 }
@@ -630,6 +647,7 @@ char* do_db_ops(char* payload) {
                 if(!isError) {
                     Response rs = delete_vector(dbNode->value, collectionNode->value, hashNode->value); 
                     char* result = response_to_string(&rs);
+                    free(rs.errMsg);
                     appendToStringBuilder(&resultSB, result);
                     free(result);
                 }
@@ -651,6 +669,7 @@ char* do_db_ops(char* payload) {
                 if(!isError) {
                     CountRS rs = count_vector(dbNode->value, collectionNode->value); 
                     char* result = count_rs_to_string(&rs);
+                    free(rs.errMsg);
                     appendToStringBuilder(&resultSB, result);
                     free(result);
                 }
@@ -671,7 +690,15 @@ char* do_db_ops(char* payload) {
 
                 if(!isError) {
                     VectorListRS rs = list_vector(dbNode->value, collectionNode->value); 
-                    char* result = vector_list_rs_to_string(&rs);   
+                    char* result = vector_list_rs_to_string(&rs);
+                    int i=0;
+                    if(rs.vectors != NULL) {
+                        while(rs.vectors[i] != NULL) {
+                            free(rs.vectors[i]);
+                            i++;
+                        }
+                        free(rs.vectors);
+                    }   
                     appendToStringBuilder(&resultSB, result);
                     free(result);                     
                 }
@@ -698,6 +725,7 @@ char* do_db_ops(char* payload) {
                 if(!isError) {
                     GetVectorRS rs = get_vector(dbNode->value, collectionNode->value, hashNode->value); 
                     char* result = vector_rs_to_string(&rs);
+                    free(rs.errMsg);
                     appendToStringBuilder(&resultSB, result);
                     free(result);             
                 }
@@ -713,7 +741,7 @@ char* do_db_ops(char* payload) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
-
+                
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
@@ -725,15 +753,15 @@ char* do_db_ops(char* payload) {
                 } 
 
                 int vdim = 0;
-                double vp[vdim];
 
-                if(vdimNode == NULL || vdimNode->value == NULL) {
+                if(vdimNode == NULL || vdimNode->value == NULL || !isValidInteger(vdimNode->value)) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
                 } else {
                     vdim = atoi(vdimNode->value);
                 }
 
+                double vp[vdim];
                 if(vpNode == NULL) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector points (vp)\"");
@@ -742,6 +770,7 @@ char* do_db_ops(char* payload) {
                     while(i<vdim && vpNode->children[i] != NULL) {
                         char* errptr;
                         vp[i] = strtod(vpNode->children[i]->value, &errptr);
+                        
                         if (*errptr != '\0') {
                             (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                             appendToStringBuilder(&errorSB, "\"Invalid vector points\"");
@@ -764,6 +793,8 @@ char* do_db_ops(char* payload) {
                     free(hash);
 
                     char* result = put_vector_rs_to_string(&rs);
+                    free(rs.errMsg);
+                    free(rs.hash);
                     appendToStringBuilder(&resultSB, result);
                     free(result);  
                 }
@@ -779,35 +810,34 @@ char* do_db_ops(char* payload) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
-
+                
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                 } 
-
+                
                 if(aiModelNode == NULL || aiModelNode->value == NULL) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
                 } 
-
+                
                 int vdim = 0; 
-                if(vdimNode == NULL || vdimNode->value == NULL) {
+                if(vdimNode == NULL || vdimNode->value == NULL || !isValidInteger(vdimNode->value)) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
                 } else {
-                    atoi(vdimNode->value);
+                    vdim = atoi(vdimNode->value);
                 }
-
+                
                 if(vpNode == NULL) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector points (vp)\"");
                 } 
                 
-                char* errptr;
-                int i=0;
                 double vp[vdim];
-
+                char* errptr;
                 if(!isError) { 
+                    int i=0;
                     while(vpNode->children[i] != NULL && i<vdim) {
                         vp[i] = strtod(vpNode->children[i]->value, &errptr);
                         if (*errptr != '\0') {
@@ -825,16 +855,16 @@ char* do_db_ops(char* payload) {
                     JsonNode* queryOptionsNode = searchJson(argsNode, "qOps");
                     
                     JsonNode* vdMethodNode = searchJson(queryOptionsNode, "vd_method");
-                    queryOptions.vector_distance_method = vdMethodNode != NULL ? atoi(vdMethodNode->value): 0;
+                    queryOptions.vector_distance_method = (vdMethodNode != NULL && !isValidInteger(vdMethodNode->value)) ? atoi(vdMethodNode->value): 0;
                     
                     JsonNode* limitNode = searchJson(queryOptionsNode, "limit");
-                    queryOptions.query_limit = limitNode != NULL ? atoi(limitNode->value): -99;
+                    queryOptions.query_limit = (limitNode != NULL && !isValidInteger(vdMethodNode->value)) ? atoi(limitNode->value): -99;
                     
                     JsonNode* logicalOpNode = searchJson(queryOptionsNode, "logical_op");
-                    queryOptions.query_logical_op = logicalOpNode != NULL ? atoi(logicalOpNode->value): 0;
+                    queryOptions.query_logical_op = (logicalOpNode != NULL && !isValidInteger(vdMethodNode->value))? atoi(logicalOpNode->value): 0;
                     
                     JsonNode* queryValueNode = searchJson(queryOptionsNode, "k_value");
-                    double query_value = queryValueNode != NULL ? strtod(queryValueNode->value, &errptr): 0;
+                    double query_value = (queryValueNode != NULL && !isValidInteger(vdMethodNode->value)) ? strtod(queryValueNode->value, &errptr): 0;
                     if (*errptr != '\0') {
                         query_value = 0;
                     }   
@@ -858,6 +888,11 @@ char* do_db_ops(char* payload) {
 
                     QueryVectorRSWrapper rs = query_vector(dbNode->value, collectionNode->value, aiModelNode->value, vdim, vp, queryOptions); 
                     char* result = query_vector_wrapper_rs_to_string(&rs);
+                    free(rs.errMsg);
+                    free(rs.queryVectorRS);
+                    if(rs.faultCount > 0) {
+                        free(rs.faultVectorRS);
+                    }
                     appendToStringBuilder(&resultSB, result);
                     free(result);  
                 }

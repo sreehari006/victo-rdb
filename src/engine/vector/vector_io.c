@@ -36,7 +36,6 @@ PutVectorRS put_vector(char* filename, char* ai_model, char* hash, int vdim, dou
     PutVectorRS rs;
     Node node;
 
-    
     strncpy(node.ai_model, ai_model, 64);
     strncpy(node.hash, hash, 64);
     strncpy(node.normal, normal, 2);
@@ -50,18 +49,18 @@ PutVectorRS put_vector(char* filename, char* ai_model, char* hash, int vdim, dou
     outfile = fopen(filename, "wb");
     if (outfile == NULL) {
         rs.errCode = FILE_OPEN_ERROR_CODE;
-        rs.errMsg = FILE_OPEN_ERROR_MSG;
+        rs.errMsg = strdup(FILE_OPEN_ERROR_MSG);
         return rs;
     }
     if(fwrite(&node, sizeof(Node), 1, outfile) == 1) {
         rs.errCode = SUCCESS_CODE;
-        rs.errMsg = SUCESS_MSG;
-        rs.hash = node.hash;
+        rs.errMsg = strdup(SUCESS_MSG);
+        rs.hash = strdup(node.hash);
         return rs;
     }
 
     rs.errCode = FILE_WRITE_ERROR_CODE;
-    rs.errMsg = FILE_WRITE_ERROR_MSG;
+    rs.errMsg = strdup(FILE_WRITE_ERROR_MSG);
 
     fclose(outfile);
 
@@ -78,7 +77,7 @@ GetVectorRS getVector(char* filename) {
     if (infile == NULL) {
         // printf("\nError opening file\n");
         rs.errCode = FILE_OPEN_ERROR_CODE;
-        rs.errMsg = FILE_OPEN_ERROR_MSG;
+        rs.errMsg = strdup(FILE_OPEN_ERROR_MSG);
         return rs;
     }
 
@@ -86,7 +85,7 @@ GetVectorRS getVector(char* filename) {
     fclose(infile);
 
     rs.errCode = SUCCESS_CODE;
-    rs.errMsg = SUCESS_MSG;
+    rs.errMsg = strdup(SUCESS_MSG);
     rs.node = node;
     
     return rs;
@@ -95,18 +94,18 @@ GetVectorRS getVector(char* filename) {
 __attribute__((visibility("hidden"))) 
 Response deleteVector(char* filename) {
     Response rs;
-    switch(deleteJunoFile(filename)) {
+    switch(deleteVictoFile(filename)) {
         case 0:
             rs.errCode = SUCCESS_CODE;
-            rs.errMsg = SUCESS_MSG;
+            rs.errMsg = strdup(SUCESS_MSG);
             break;
         case 1:
             rs.errCode = VECTOR_DELETE_FAILED_ERROR_CODE;
-            rs.errMsg = VECTOR_DELETE_FAILED_ERROR_MSG;
+            rs.errMsg = strdup(VECTOR_DELETE_FAILED_ERROR_MSG);
             break;
         case -1:
-            rs.errCode = FILE_NOT_JUNO_ERROR_CODE;
-            rs.errMsg = FILE_NOT_JUNO_ERROR_MSG;
+            rs.errCode = FILE_NOT_VICTO_ERROR_CODE;
+            rs.errMsg = strdup(FILE_NOT_VICTO_ERROR_MSG);
             break;
     }
 
@@ -117,11 +116,11 @@ CountRS vectorCount(char* location) {
     CountRS rs;
     if(dirExists(location)) {
         rs.errCode = SUCCESS_CODE;
-        rs.errMsg = SUCESS_MSG;
-        rs.count = get_juno_files_count(location);
+        rs.errMsg = strdup(SUCESS_MSG);
+        rs.count = get_victo_files_count(location);
     } else {
         rs.errCode = DIR_NOT_EXIST_ERROR_CODE;
-        rs.errMsg = DIR_NOT_EXIST_ERROR_MSG;
+        rs.errMsg = strdup(DIR_NOT_EXIST_ERROR_MSG);
         rs.count = -1;        
     }
     return rs;
@@ -133,29 +132,28 @@ VectorListRS vectorList(const char* location) {
     VectorListRS rs;
     if(dirExists(location)) {
         rs.errCode = SUCCESS_CODE;
-        rs.errMsg = SUCESS_MSG;
+        rs.errMsg = strdup(SUCESS_MSG);
         rs.vectors = list_files(location, FILE_NAME_WITHOUT_EXTENSION);
     } else {
         rs.errCode = DIR_NOT_EXIST_ERROR_CODE;
-        rs.errMsg = DIR_NOT_EXIST_ERROR_MSG;
+        rs.errMsg = strdup(DIR_NOT_EXIST_ERROR_MSG);
     }
     return rs;
 }
 
 __attribute__((visibility("hidden"))) 
-// QueryVectorRSWrapper queryVector(char* location, int method, char* ai_model, int vdim, double* vp, bool include_fault, int limit, int op, double value) {
 QueryVectorRSWrapper queryVector(char* location, char* ai_model, int vdim, double* vp, QueryOptions queryOptions) {    
     QueryVectorRSWrapper rs;
 
     DIR *dir;
     char path[PATH_MAX];
     struct dirent *entry;
-    char extension[] = JUNO_FILE_EXT;
+    char extension[] = VICTO_FILE_EXT;
 
     dir = opendir(location);
     if(dir == NULL) {
         rs.errCode = DIR_OPEN_ERROR_CODE;
-        rs.errMsg = DIR_OPEN_ERROR_MSG;
+        rs.errMsg = strdup(DIR_OPEN_ERROR_MSG);
         return rs;
     }
 
@@ -169,8 +167,6 @@ QueryVectorRSWrapper queryVector(char* location, char* ai_model, int vdim, doubl
         for(int i=0; vectors[i] != NULL; i++) {
                 bool fault = false;
                 strncpy(path, vectors[i], PATH_MAX);
-                // snprintf(path, sizeof(path),"%s%s", location, entry->d_name);
-                // printf("filename: %s \n", path);
                 GetVectorRS rvRS = getVector(path);
 
                 // Check if returns a valid vector node
@@ -199,7 +195,7 @@ QueryVectorRSWrapper queryVector(char* location, char* ai_model, int vdim, doubl
 
     // Iterate LinkedList
     rs.errCode = SUCCESS_CODE;
-    rs.errMsg = SUCESS_MSG;
+    rs.errMsg = strdup(SUCESS_MSG);
 
     if(queryOptions.query_limit > 0 && queryOptions.query_limit <= queryNodesCount) {
         rs.queryCount = queryOptions.query_limit;
@@ -209,7 +205,6 @@ QueryVectorRSWrapper queryVector(char* location, char* ai_model, int vdim, doubl
     
     QueryVectorRS* tempQueryVectorRS = convert_to_query_vector_from_list(queryNodesHead, queryNodesCount, queryOptions.query_limit);
     rs.queryVectorRS = tempQueryVectorRS;
-    free(tempQueryVectorRS);
     
 
    if(queryOptions.include_fault) {
@@ -220,7 +215,6 @@ QueryVectorRSWrapper queryVector(char* location, char* ai_model, int vdim, doubl
         }
         QueryVectorRS* tempQueryVectorRS = convert_to_query_vector_from_list(faultNodesHead, faultNodesCount, queryOptions.query_limit);
         rs.faultVectorRS = tempQueryVectorRS;
-        free(tempQueryVectorRS);
     }
 
     free_linked_list(queryNodesHead);
@@ -241,7 +235,14 @@ QueryVectorRS* convert_to_query_vector_from_list(QueryVectorLinkedList* listHead
             break;
         }
 
-        rs[i] = this_node->queryVectorRS;
+        rs[i].errCode = this_node->queryVectorRS.errCode;
+        strncpy(rs[i].errMsg, this_node->queryVectorRS.errMsg, 18);
+        strncpy(rs[i].ai_model, this_node->queryVectorRS.ai_model, 64);
+        strncpy(rs[i].normal, this_node->queryVectorRS.normal, 2);
+        strncpy(rs[i].hash, this_node->queryVectorRS.hash, 64);
+        rs[i].vdim = this_node->queryVectorRS.vdim;
+        rs[i].distance = this_node->queryVectorRS.distance;
+
         this_node = this_node->next;
         i++;
     }
@@ -257,9 +258,6 @@ QueryVectorRS convert_to_query_vector_from_query(Node node, char* ai_model, int 
     strncpy(qvRS.normal, node.normal, 2);
     qvRS.vdim = node.vdim;
 
-    // printf("%s - %s", ai_model, node.ai_model);
-    // printf("%d - %d", vdim, node.vdim);
-    // Check if the ai_model in query matches with current node
     if(strcmp(ai_model, node.ai_model) == 0 && vdim == node.vdim) {
         VectorDistanceRS vdRS = vector_distance(queryOptions.vector_distance_method, vdim, vp, node.vp, queryOptions);
         if(vdRS.errCode == 0) {
@@ -270,6 +268,7 @@ QueryVectorRS convert_to_query_vector_from_query(Node node, char* ai_model, int 
             qvRS.errCode = vdRS.errCode;
             strncpy(qvRS.errMsg, vdRS.errMsg, 18);
         }
+        free(vdRS.errMsg);
     } else {
         qvRS.errCode = RECORD_MISMATCH_ERROR_CODE;
         strncpy(qvRS.errMsg, RECORD_MISMATCH_ERROR_MSG, 18);
@@ -312,32 +311,32 @@ VectorDistanceRS vector_distance(int vector_distance_method, int vdim, double* v
     switch(vector_distance_method) {
         case EUCLIDEAN_DISTANCE:
             rs.errCode = SUCCESS_CODE;
-            rs.errMsg = SUCESS_MSG;
+            rs.errMsg = strdup(SUCESS_MSG);
             rs.distance = euclidean_distance(vdim, vp1, vp2);
             break;
         case COSINE_SIMILARITY:
             rs.errCode = SUCCESS_CODE;
-            rs.errMsg = SUCESS_MSG;
+            rs.errMsg = strdup(SUCESS_MSG);
             rs.distance = cosineSimilarity(vdim, vp1, vp2);
             break;
         case MANHATTAN_DISTANCE:
             rs.errCode = SUCCESS_CODE;
-            rs.errMsg = SUCESS_MSG;
+            rs.errMsg = strdup(SUCESS_MSG);
             rs.distance = manhattanDistance(vdim, vp1, vp2);
             break;
         case MINKOWSKI_DISTANCE:
             rs.errCode = SUCCESS_CODE;
-            rs.errMsg = SUCESS_MSG;
+            rs.errMsg = strdup(SUCESS_MSG);
             rs.distance = minskowskiDistance(vdim, vp1, vp2, queryOptions.p_value);
             break;
         case DOT_PRODUCT:
             rs.errCode = SUCCESS_CODE;
-            rs.errMsg = SUCESS_MSG;
+            rs.errMsg = strdup(SUCESS_MSG);
             rs.distance = dot_product(vdim, vp1, vp2);
             break;
         default:
             rs.errCode = VECTOR_DIST_METH_UNDEFINED_ERR;
-            rs.errMsg = VECTOR_DIST_METH_UNDEFINED_MSG;
+            rs.errMsg = strdup(VECTOR_DIST_METH_UNDEFINED_MSG);
 
     }
     return rs;

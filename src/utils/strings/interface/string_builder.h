@@ -12,3 +12,4 @@ void initStringBuilder(StringBuilder *builder, size_t initialCapacity);
 void appendToStringBuilder(StringBuilder *builder, const char *str);
 void freeStringBuilder(StringBuilder *builder);
 bool isValidObjName(char* name);
+bool isValidInteger(const char *str);

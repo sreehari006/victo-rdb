@@ -101,8 +101,10 @@ void freeJson(JsonNode* node) {
             free(node->children[i]);
         }
         i++;
-    }
+    }   
+
     free(node);
+
 }
 
 JsonNode* loadJson(char* jsonStr) {
@@ -338,13 +340,7 @@ JsonNode* loadJson(char* jsonStr) {
         }
     }
 
-    // printf("Key Tracker: %d", isEmptyDSS(&keyTracker));
     freeDSS(&keyTracker);
-
-    // printf("Node Tracker: %d", isEmptyDSS(&jsonNodeStack));
-    // freeJNS(&jsonNodeStack);
-    // printJson(root);
-    // freeJson(root);
 
     if(isError) {
         return NULL;    

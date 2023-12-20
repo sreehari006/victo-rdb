@@ -8,19 +8,15 @@
 #include "engine/collection/interface/collection.h"
 #include "engine/db/interface/db.h"
 #include "engine/vector/interface/vector_math_private.h"
-// #include "servers/tcp/interface/server.h"
-// #include "servers/websock/interface/server.h"
-// #include "utils/uuid/interface/uuid.h"
-// #include "utils/json/interface/json.h"
 
 PutVectorRS putVectorSL(char* location, char* ai_model, char* hash, int vdim, double* vp, bool is_normal, bool overwrite) {
     PutVectorRS rs;
 
-    char filename[strlen(location) + strlen(hash) + strlen(JUNO_FILE_EXT) + 2];
+    char filename[strlen(location) + strlen(hash) + strlen(VICTO_FILE_EXT) + 2];
     strcpy(filename, location);
     strcat(filename, "/");
     strcat(filename, hash);
-    strcat(filename, JUNO_FILE_EXT);
+    strcat(filename, VICTO_FILE_EXT);
 
     if(!overwrite) {
         if(fileExists(filename)) {
@@ -35,11 +31,11 @@ PutVectorRS putVectorSL(char* location, char* ai_model, char* hash, int vdim, do
 
 GetVectorRS getVectorSL(char* location, char* hash) {
     
-    char filename[strlen(location) + strlen(hash) + strlen(JUNO_FILE_EXT) + 2];
+    char filename[strlen(location) + strlen(hash) + strlen(VICTO_FILE_EXT) + 2];
     strcpy(filename, location);
     strcat(filename, "/");
     strcat(filename, hash);
-    strcat(filename, JUNO_FILE_EXT);
+    strcat(filename, VICTO_FILE_EXT);
 
     return getVector(filename);
 }
@@ -95,11 +91,11 @@ VectorListRS vectorListSL(const char* location) {
 
 Response deleteVectorSL(char* location, char* hash) {
     Response rs;
-    char filename[strlen(location) + strlen(hash) + strlen(JUNO_FILE_EXT) + 2];
+    char filename[strlen(location) + strlen(hash) + strlen(VICTO_FILE_EXT) + 2];
     strcpy(filename, location);
     strcat(filename, "/");
     strcat(filename, hash);
-    strcat(filename, JUNO_FILE_EXT);
+    strcat(filename, VICTO_FILE_EXT);
     if(fileExists(filename)) {
         rs = deleteVector(filename);
     } else {
@@ -109,27 +105,4 @@ Response deleteVectorSL(char* location, char* hash) {
 
     return rs;
 }
-
-/* void startTCPServerSL() {
-    startTCPServer();
-} */
-
-/* void startWebSockServerSL() {
-    startWebSockServer();
-} */
-
-/* char* getUUIDSL() {
-    // printf("hello");
-    return getUUID();
-} */
-
-/* void loadJsonSL() {
-    char* jsonStr = "{\"op\":\"add\", \"obj\":\"collection\", args:{\"location\":\"/Users/sreehari/projects/c/data/ws1\"}}";
-    JsonNode* root = loadJson(jsonStr);
-    JsonNode* argsNode =  searchJson(root, "args");
-    JsonNode* locationNode =  searchJson(argsNode, "location");
-    printf("%s \n", locationNode->type);
-    // printJson(result);
-    freeJson(root);
-} */
 
