@@ -32,14 +32,14 @@ Response newCollection(const char* location) {
     #else
         if(mkdir(location, 0777) == 0) {
             rs.errCode = SUCCESS_CODE;
-            rs.errMsg = SUCESS_MSG;
+            rs.errMsg = strdup(SUCESS_MSG);
         } else {
             if(errno == EEXIST) {
                 rs.errCode = COLLECTION_EXIST_ERROR_CODE;
-                rs.errMsg = COLLECTION_EXIST_ERROR_MSG;
+                rs.errMsg = strdup(COLLECTION_EXIST_ERROR_MSG);
             } else {
                 rs.errCode = COLLECTION_CREATE_FAILED_ERROR_CODE;
-                rs.errMsg = COLLECTION_CREATE_FAILED_ERROR_MSG;
+                rs.errMsg = strdup(COLLECTION_CREATE_FAILED_ERROR_MSG);
             }
         }
     #endif
@@ -61,13 +61,13 @@ Response deleteCollection(const char* location) {
     #else
         if(rmdir(location) != 0) {
             rs.errCode = COLLECTION_DELETE_FAILED_ERROR_CODE;
-            rs.errMsg = COLLECTION_DELETE_FAILED_ERROR_MSG;
+            rs.errMsg = strdup(COLLECTION_DELETE_FAILED_ERROR_MSG);
             return rs;
         }
     #endif
 
     rs.errCode = SUCCESS_CODE;
-    rs.errMsg = SUCESS_MSG;
+    rs.errMsg = strdup(SUCESS_MSG);
     return rs;
 }
 
@@ -76,11 +76,11 @@ CountRS collectionCount(const char* location) {
     CountRS rs;
     if(dirExists(location)) {
         rs.errCode = SUCCESS_CODE;
-        rs.errMsg = SUCESS_MSG;
+        rs.errMsg = strdup(SUCESS_MSG);
         rs.count = get_directory_count(location);
     } else {
         rs.errCode = DIR_NOT_EXIST_ERROR_CODE;
-        rs.errMsg = DIR_NOT_EXIST_ERROR_MSG;
+        rs.errMsg = strdup(DIR_NOT_EXIST_ERROR_MSG);
         rs.count = -1;        
     }
     return rs;
@@ -91,11 +91,11 @@ CollectionListRS collectionList(const char* location) {
     CollectionListRS rs;
     if(dirExists(location)) {
         rs.errCode = SUCCESS_CODE;
-        rs.errMsg = SUCESS_MSG;
+        rs.errMsg = strdup(SUCESS_MSG);
         rs.collections = list_directory(location);
     } else {
-        rs.errCode = DIR_NOT_EXIST_ERROR_CODE;
-        rs.errMsg = DIR_NOT_EXIST_ERROR_MSG;
+        rs.errCode = DB_NOT_EXIST_ERROR_CODE;
+        rs.errMsg = strdup(DB_NOT_EXIST_ERROR_MSG);
     }
     return rs;
 }

@@ -21,7 +21,6 @@ int pushDSS(DynamicStringStack *stack, const char *value) {
     stack->items[stack->top] = strdup(value);
     if (stack->items[stack->top] == NULL) {
         fprintf(stderr, "Memory allocation error\n");
-        // exit(EXIT_FAILURE);
         return -1;
     }
     return 0;
@@ -30,7 +29,6 @@ int pushDSS(DynamicStringStack *stack, const char *value) {
 char* popDSS(DynamicStringStack *stack) {
     if (isEmptyDSS(stack)) {
         printf("\nDynamic String Stack Stack underflow\n");
-        // exit(EXIT_FAILURE);
         return NULL;
     }
     char *value = stack->items[stack->top];
@@ -41,7 +39,6 @@ char* popDSS(DynamicStringStack *stack) {
 char* peekDSS(DynamicStringStack *stack) {
     if (isEmptyDSS(stack)) {
         printf("Stack is empty\n");
-        // exit(EXIT_FAILURE);
         return NULL;
     }
     return stack->items[stack->top];

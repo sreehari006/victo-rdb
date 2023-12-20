@@ -21,7 +21,6 @@ int pushJNS(JsonNodeStack *stack, JsonNode* node) {
     stack->items[stack->top] = node;
     if (stack->items[stack->top] == NULL) {
         fprintf(stderr, "Memory allocation error\n");
-        // exit(EXIT_FAILURE);
         return -1;
     }
     return 0;
@@ -30,7 +29,6 @@ int pushJNS(JsonNodeStack *stack, JsonNode* node) {
 JsonNode* popJNS(JsonNodeStack *stack) {
     if (isEmptyJNS(stack)) {
         printf("\n");
-        // exit(EXIT_FAILURE);
         return NULL;
     }
     JsonNode *value = stack->items[stack->top];
@@ -41,7 +39,6 @@ JsonNode* popJNS(JsonNodeStack *stack) {
 JsonNode* peekJNS(JsonNodeStack *stack) {
     if (isEmptyJNS(stack)) {
         printf("\nJNS Stack is empty\n");
-        // exit(EXIT_FAILURE);
         return NULL;
     }
     return stack->items[stack->top];

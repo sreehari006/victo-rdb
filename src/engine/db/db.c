@@ -30,14 +30,14 @@ Response newDB(const char* location) {
     #else
         if(mkdir(location, 0777) == 0) {
             rs.errCode = SUCCESS_CODE;
-            rs.errMsg = SUCESS_MSG;
+            rs.errMsg = strdup(SUCESS_MSG);
         } else {
             if(errno == EEXIST) {
                 rs.errCode = DB_EXIST_ERROR_CODE;
-                rs.errMsg = DB_EXIST_ERROR_MSG;
+                rs.errMsg = strdup(DB_EXIST_ERROR_MSG);
             } else {
                 rs.errCode = DB_CREATE_FAILED_ERROR_CODE;
-                rs.errMsg = DB_CREATE_FAILED_ERROR_MSG;
+                rs.errMsg = strdup(DB_CREATE_FAILED_ERROR_MSG);
             }
         }
     #endif

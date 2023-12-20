@@ -21,8 +21,6 @@ int main(int argc, char *argv[]) {
         printf("## Invalid server configuration. ##");
     }
 
-    // startTCPServerSL();
-
     return 0;
 }
 

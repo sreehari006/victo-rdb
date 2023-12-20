@@ -312,7 +312,7 @@ char** list_files(const char* dirPath, int option) {
             #endif
 
             if(isRegularFile) {
-                if(strstr(entry->d_name, JUNO_FILE_EXT) != NULL) {
+                if(strstr(entry->d_name, VICTO_FILE_EXT) != NULL) {
                     char* fileName;
                     switch(option) {
                         case FILE_NAME_WITH_EXTENSION: 
@@ -363,7 +363,7 @@ char* remove_file_extension(const char* fileName) {
 }
 
 __attribute__((visibility("hidden"))) 
-int get_juno_files_count(const char* dirPath) {
+int get_victo_files_count(const char* dirPath) {
     int count=0;
     #if defined(_WIN32) || defined(_WIN64)
         WIN32_FIND_DATA findFileData;
@@ -433,7 +433,7 @@ int get_juno_files_count(const char* dirPath) {
             #endif
 
             if(isRegularFile) {
-                if(strstr(entry->d_name, JUNO_FILE_EXT) != NULL) {
+                if(strstr(entry->d_name, VICTO_FILE_EXT) != NULL) {
                     count++; 
                 }
                 
@@ -446,7 +446,7 @@ int get_juno_files_count(const char* dirPath) {
 }
 
 __attribute__((visibility("hidden"))) 
-int deleteJunoFile(const char* filePath) {
+int deleteVictoFile(const char* filePath) {
     #if defined(_WIN32) || defined(_WIN64)
         if(DeleteFile(filePath) == 0) {
             return 1;
@@ -454,7 +454,7 @@ int deleteJunoFile(const char* filePath) {
             return 0;
         }
     #else
-        if(strstr(filePath, JUNO_FILE_EXT) != NULL) {
+        if(strstr(filePath, VICTO_FILE_EXT) != NULL) {
             if(remove(filePath) !=  0) {
                 return 1;
             } else {

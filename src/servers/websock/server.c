@@ -9,7 +9,6 @@ struct ClientData {
 struct ServerData {
     int server_socket;
     struct ClientData client_connection[MAX_CLIENTS];
-    //int client_socket[MAX_CLIENTS];
     int isRunning;
 };
 
@@ -150,8 +149,7 @@ void *threadFunction(void *arg) {
 
     while (1) {
         int bytes_received = recv(data->sd, buffer, sizeof(buffer), 0);
-        // printf("**** %d ", bytes_received);
-
+        
         if (client_message == NULL) {
             client_message = malloc(bytes_received + 1); 
             if (client_message == NULL) {
@@ -172,26 +170,16 @@ void *threadFunction(void *arg) {
 
         client_message[client_message_size] = '\0';
 
-
         if(bytes_received < 1024) {
             break;
         }
     }
 
-    // printf("-- %d --", strlen(client_message));
-
     struct WebSocketFrame frame;
-    // memset(frame.payload, '\0', sizeof(frame.payload));
-
     frame.fin = (client_message[0] & 0x80) >> 7;
     frame.opcode = client_message[0] & 0x0F;
     frame.mask = (client_message[1] & 0x80) >> 7;
     frame.payload_length = client_message[1] & 0x7F;
-
-    // printf("Fin: %u \n", frame.fin);
-    // printf("OpCode: %u \n", frame.opcode);
-    // printf("Mask: %u \n", frame.mask);
-    // printf("Payload Length: %llu \n", frame.payload_length);
 
     if (frame.opcode == 0x0) {
         // Implement continuation frame
@@ -232,11 +220,6 @@ void *threadFunction(void *arg) {
             }
         }    
         frame.payload[frame.payload_length] = '\0';
-        // printf("Fin: %u \n", frame.fin);
-        // printf("OpCode: %u \n", frame.opcode);
-        // printf("Mask: %u \n", frame.mask);
-        // printf("Payload Length: %llu \n", frame.payload_length);
-        // printf("Payload: %s\n", frame.payload);
 
         char* result = do_db_ops(frame.payload);
         if(result != NULL) {
@@ -247,6 +230,9 @@ void *threadFunction(void *arg) {
         }
 
         free(frame.payload);
+        free(client_message);
+        client_message = NULL;
+        client_message_size = 0;
     } else if (frame.opcode == 0x2) {
         // Implement binary frame
     } else if (frame.opcode == 0x8) {
@@ -272,7 +258,6 @@ void startWebSockServer() {
     struct sockaddr_in server_addr;
     fd_set master_set, readfds;
     int i, max_clients = MAX_CLIENTS;
-    // char server_message[2000], client_message[2000];
 
     serverData.server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverData.server_socket < 0) {
@@ -303,7 +288,6 @@ void startWebSockServer() {
     }
 
     serverData.isRunning = 1;
-    // signal(SIGINT, sigint_handler);
     while (serverData.isRunning) {    
         FD_ZERO(&readfds);
         FD_SET(serverData.server_socket, &readfds);

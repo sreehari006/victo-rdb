@@ -12,7 +12,3 @@ QueryVectorRSWrapper queryVectorSL(char* location, char* ai_model, int vdim, dou
 CountRS vectorCountSL(char* location);
 VectorListRS vectorListSL(const char* location);
 Response deleteVectorSL(char* location, char* hash);
-// void startTCPServerSL();
-// void startWebSockServerSL();
-// char* getUUIDSL();
-// void loadJsonSL();

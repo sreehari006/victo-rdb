@@ -1,4 +1,4 @@
-#define JUNO_FILE_EXT                           ".juno"
+#define VICTO_FILE_EXT                           ".victo"
 #define VP_MAX                                  2048
 
 #define SUCCESS_CODE                            0
@@ -17,8 +17,8 @@
 #define DIR_OPEN_ERROR_MSG                      "Collection Opening Error"     
 #define DIR_NOT_EXIST_ERROR_CODE                203
 #define DIR_NOT_EXIST_ERROR_MSG                 "Collection does not Exist" 
-#define FILE_NOT_JUNO_ERROR_CODE                204
-#define FILE_NOT_JUNO_ERROR_MSG                 "Not a valid Victo File" 
+#define FILE_NOT_VICTO_ERROR_CODE               204
+#define FILE_NOT_VICTO_ERROR_MSG                 "Not a valid Victo File" 
 
 #define VECTOR_DIST_METH_UNDEFINED_ERR          300
 #define VECTOR_DIST_METH_UNDEFINED_MSG          "Invalid Method"
@@ -36,6 +36,10 @@
 #define DB_EXIST_ERROR_MSG                      "DB already exist"
 #define DB_CREATE_FAILED_ERROR_CODE             501
 #define DB_CREATE_FAILED_ERROR_MSG              "Error creating DB"
+#define DB_OPEN_ERROR_CODE                      502
+#define DB_OPEN_ERROR_MSG                       "DB Opening Error"     
+#define DB_NOT_EXIST_ERROR_CODE                 503
+#define DB_NOT_EXIST_ERROR_MSG                  "DB does not Exist" 
 
 #define FILE_FULL_PATH                          0
 #define FILE_NAME_WITH_EXTENSION                1
