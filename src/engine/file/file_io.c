@@ -45,69 +45,6 @@ bool dirExists(const char* dirPath) {
 }
 
 __attribute__((visibility("hidden"))) 
-void delete_files_and_subdirectories(const char* dirPath) {
-    #if defined(_WIN32) || defined(_WIN64)
-        WIN32_FIND_DATA findFileData;
-        HANDLE hFind = INVALID_HANDLE_VALUE;
-        char targetPath[MAX_PATH];
-
-        snprintf(targetPath, sizeof(targetPath), "%s\\*", dirPath);
-        hFind = FindFirstFile(targetPath, &findFileData);
-
-        if(hFind == INVALID_HANDLE_VALUE) {
-            return;
-        }
-
-        do {
-            if(strcmp(findFileData.cFileName, ".") == 0 || strcmp(findFileData.cFileName, "..")) {
-                continue;
-            }
-
-            snprintf(targetPath, sizeof(targetPath), "%s\\%s", dirPath, findFileData.cFileName);
-
-            if(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-                delete_files_and_subdirectories(targetPath);
-                RemoveDirectory(targetPath);
-            } else {
-                DeleteFile(targetPath);
-            }
-
-        } while(FindNextFile(hFind, &findFileData) != 0);
-
-        FindClose(hFind);
-    #else
-        struct dirent *entry;
-        DIR *dir = opendir(dirPath);
-
-        if(dir == NULL) {
-            return;
-        }
-
-        while((entry = readdir(dir)) != NULL) {
-            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-                continue;
-            }
-
-            char targetPath[PATH_MAX];
-            snprintf(targetPath, sizeof(targetPath), "%s/%s", dirPath, entry->d_name);
-
-            struct stat st;
-            if(lstat(targetPath, &st) == -1) {
-                continue;
-            }
-
-            if(S_ISDIR(st.st_mode)) {
-                delete_files_and_subdirectories(targetPath);
-                rmdir(targetPath);
-            } else {
-                remove(targetPath);
-            }
-        }
-        closedir(dir);
-    #endif
-}
-
-__attribute__((visibility("hidden"))) 
 int get_directory_count(const char* dirPath) {
     int count=0;
     #if defined(_WIN32) || defined(_WIN64)
@@ -465,4 +402,80 @@ int deleteVictoFile(const char* filePath) {
         }
         
     #endif
+}
+
+__attribute__((visibility("hidden"))) 
+int delete_victo_collection(const char* dirPath) {
+    int errCode = 0;
+    #if defined(_WIN32) || defined(_WIN64)
+        WIN32_FIND_DATA findFileData;
+        HANDLE hFind = INVALID_HANDLE_VALUE;
+        char targetPath[MAX_PATH];
+
+        snprintf(targetPath, sizeof(targetPath), "%s\\*", dirPath);
+        hFind = FindFirstFile(targetPath, &findFileData);
+
+        if(hFind == INVALID_HANDLE_VALUE) {
+            return;
+        }
+
+        do {
+            if(strcmp(findFileData.cFileName, ".") == 0 || strcmp(findFileData.cFileName, "..")) {
+                continue;
+            }
+
+            snprintf(targetPath, sizeof(targetPath), "%s\\%s", dirPath, findFileData.cFileName);
+
+            if(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                delete_files_and_subdirectories(targetPath);
+                RemoveDirectory(targetPath);
+            } else {
+                DeleteFile(targetPath);
+            }
+
+        } while(FindNextFile(hFind, &findFileData) != 0);
+
+        FindClose(hFind);
+    #else
+        struct dirent *entry;
+        DIR *dir = opendir(dirPath);
+
+        if(dir == NULL) {
+            printf("Error Code: %d \n", errCode);
+            return errCode | 4;
+        }
+
+        if(!dirExists(dirPath)) {
+            printf("Error Code: %d \n", errCode);
+            return errCode | 8;
+        }
+
+        while((entry = readdir(dir)) != NULL) {
+            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+                continue;
+            }
+
+            char targetPath[PATH_MAX];
+            snprintf(targetPath, sizeof(targetPath), "%s/%s", dirPath, entry->d_name);
+
+            struct stat st;
+            if(lstat(targetPath, &st) == -1) {
+                continue;
+            }
+
+            if(S_ISDIR(st.st_mode)) {
+                errCode = errCode | 1;
+                // delete_files_and_subdirectories(targetPath);
+                // rmdir(targetPath);
+            } else {
+                if(deleteVictoFile(targetPath) < 0) {
+                    errCode = errCode | 2;
+                }
+                
+            }
+        }
+        closedir(dir);
+    #endif
+    printf("Error Code: %d \n", errCode);
+    return errCode;
 }
