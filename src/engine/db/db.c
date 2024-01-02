@@ -28,7 +28,14 @@ Response newDB(const char* location) {
             rs.errMsg = SCHEMA_FAILED_ERROR_MSG;
         }
     #else
+        char collections[strlen(location) + strlen(COLLECTIONS) + 1];
+        strcpy(collections, location);
+        strcat(collections, "/");
+        strcat(collections, COLLECTIONS);
+
         if(mkdir(location, 0777) == 0) {
+            mkdir(collections, 0777);
+            
             rs.errCode = SUCCESS_CODE;
             rs.errMsg = strdup(SUCESS_MSG);
         } else {

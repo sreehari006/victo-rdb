@@ -31,6 +31,18 @@ Response newCollection(const char* location) {
         }
     #else
         if(mkdir(location, 0777) == 0) {
+            char vectors[strlen(location) + strlen(VECTORS) + 1];
+            strcpy(vectors, location);
+            strcat(vectors, "/");
+            strcat(vectors, VECTORS);
+            mkdir(vectors, 0777);
+
+            char subscriptions[strlen(location) + strlen(SUBSCRIPTIONS) + 1];
+            strcpy(subscriptions, location);
+            strcat(subscriptions, "/");
+            strcat(subscriptions, SUBSCRIPTIONS);
+            mkdir(subscriptions, 0777);
+
             rs.errCode = SUCCESS_CODE;
             rs.errMsg = strdup(SUCESS_MSG);
         } else {
@@ -50,7 +62,18 @@ Response newCollection(const char* location) {
 __attribute__((visibility("hidden"))) 
 Response deleteCollection(const char* location) {
     Response rs;
-    delete_files_and_subdirectories(location);
+    char vectors[strlen(location) + strlen(VECTORS) + 1];
+    strcpy(vectors, location);
+    strcat(vectors, "/");
+    strcat(vectors, VECTORS);
+    int errCode = delete_victo_collection(vectors);
+    rmdir(vectors);
+
+    char subscriptions[strlen(location) + strlen(SUBSCRIPTIONS) + 1];
+    strcpy(subscriptions, location);
+    strcat(subscriptions, "/");
+    strcat(subscriptions, SUBSCRIPTIONS);
+    rmdir(subscriptions);
 
     #if defined(_WIN32) || defined(_WIN64)
         if(!RemoveDirectory(location)) {
@@ -63,7 +86,7 @@ Response deleteCollection(const char* location) {
             rs.errCode = COLLECTION_DELETE_FAILED_ERROR_CODE;
             rs.errMsg = strdup(COLLECTION_DELETE_FAILED_ERROR_MSG);
             return rs;
-        }
+        } 
     #endif
 
     rs.errCode = SUCCESS_CODE;

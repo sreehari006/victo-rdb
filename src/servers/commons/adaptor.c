@@ -4,6 +4,7 @@
 #include "../../utils/strings/interface/string_builder.h"
 #include "../../utils/uuid/interface/uuid.h"
 #include "interface/globals.h"
+#include "../../commons/constants.h"
 
 
 char* string_array_to_string(char** array) {
@@ -59,6 +60,46 @@ char* double_array_to_string(double* array, int size) {
     return resultCopy;
 }
 
+char* db_full_path(char* db) {
+    StringBuilder resultSB;
+    initStringBuilder(&resultSB, 10);
+
+    appendToStringBuilder(&resultSB, getDatabasePath());
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, db);
+
+    char* result = strdup(resultSB.data);
+    freeStringBuilder(&resultSB);
+
+    if (result == NULL) {
+        perror("Memory allocation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    return result;
+}
+
+char* collection_base_path(char* db) {
+    StringBuilder resultSB;
+    initStringBuilder(&resultSB, 10);
+
+    appendToStringBuilder(&resultSB, getDatabasePath());
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, db);
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, COLLECTIONS);
+
+    char* result = strdup(resultSB.data);
+    freeStringBuilder(&resultSB);
+
+    if (result == NULL) {
+        perror("Memory allocation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    return result;
+}
+
 char* collection_full_path(char* db, char* collection) {
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
@@ -66,6 +107,8 @@ char* collection_full_path(char* db, char* collection) {
     appendToStringBuilder(&resultSB, getDatabasePath());
     appendToStringBuilder(&resultSB, "/");
     appendToStringBuilder(&resultSB, db);
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, COLLECTIONS);
     appendToStringBuilder(&resultSB, "/");
     appendToStringBuilder(&resultSB, collection);
 
@@ -80,13 +123,19 @@ char* collection_full_path(char* db, char* collection) {
     return result;
 }
 
-char* db_full_path(char* db) {
+char* vector_base_path(char* db, char* collection) {
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
     appendToStringBuilder(&resultSB, getDatabasePath());
     appendToStringBuilder(&resultSB, "/");
     appendToStringBuilder(&resultSB, db);
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, COLLECTIONS);
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, collection);
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, VECTORS);
 
     char* result = strdup(resultSB.data);
     freeStringBuilder(&resultSB);
@@ -421,58 +470,58 @@ Response delete_collection(char* db, char* collection) {
 }
 
 CountRS count_collection(char* db) {
-    char* dbFP = db_full_path(db);
-    CountRS rs = collectionCountSL(dbFP);
-    free(dbFP);
+    char* collectionsBP = collection_base_path(db);
+    CountRS rs = collectionCountSL(collectionsBP);
+    free(collectionsBP);
     return rs;
 }
 
 CollectionListRS list_collection(char* db) {
-    char* dbFP = db_full_path(db);
-    CollectionListRS rs = collectionListSL(dbFP);
-    free(dbFP);
+    char* collectionsBP = collection_base_path(db);
+    CollectionListRS rs = collectionListSL(collectionsBP);
+    free(collectionsBP);
     return rs;
 }
 
 Response delete_vector(char* db, char* collection, char* hash) {
-    char* collectionFP = collection_full_path(db, collection);
-    Response rs = deleteVectorSL(collectionFP, hash);
-    free(collectionFP);
+    char* vectorBP = vector_base_path(db, collection);
+    Response rs = deleteVectorSL(vectorBP, hash);
+    free(vectorBP);
     return rs;
 }
 
 CountRS count_vector(char* db, char* collection) {
-    char* collectionFP = collection_full_path(db, collection);
-    CountRS rs = vectorCountSL(collectionFP);
-    free(collectionFP);
+    char* vectorBP = vector_base_path(db, collection);
+    CountRS rs = vectorCountSL(vectorBP);
+    free(vectorBP);
     return rs;
 }
 
 VectorListRS list_vector(char* db, char* collection) {
-    char* collectionFP = collection_full_path(db, collection);
-    VectorListRS rs = vectorListSL(collectionFP);
-    free(collectionFP);
+    char* vectorBP = vector_base_path(db, collection);
+    VectorListRS rs = vectorListSL(vectorBP);
+    free(vectorBP);
     return rs;
 }
 
 GetVectorRS get_vector(char* db, char* collection, char* hash) {
-    char* collectionFP = collection_full_path(db, collection);
-    GetVectorRS rs = getVectorSL(collectionFP, hash);
-    free(collectionFP);
+    char* vectorBP = vector_base_path(db, collection);
+    GetVectorRS rs = getVectorSL(vectorBP, hash);
+    free(vectorBP);
     return rs;
 }
 
 PutVectorRS add_vector(char* db, char* collection, char* ai_model, char* hash, int vdim, double* vp, bool is_normal, bool overwrite) {
-    char* collectionFP = collection_full_path(db, collection);
-    PutVectorRS rs = putVectorSL(collectionFP, ai_model, hash, vdim, vp, is_normal, overwrite);
-    free(collectionFP);
+    char* vectorBP = vector_base_path(db, collection);
+    PutVectorRS rs = putVectorSL(vectorBP, ai_model, hash, vdim, vp, is_normal, overwrite);
+    free(vectorBP);
     return rs;
 }
 
 QueryVectorRSWrapper query_vector(char* db, char* collection, char* ai_model, int vdim, double* vp, QueryOptions queryOptions) {
-    char* collectionFP = collection_full_path(db, collection);
-    QueryVectorRSWrapper rs = queryVectorSL(collectionFP, ai_model, vdim, vp, queryOptions);
-    free(collectionFP);
+    char* vectorBP = vector_base_path(db, collection);
+    QueryVectorRSWrapper rs = queryVectorSL(vectorBP, ai_model, vdim, vp, queryOptions);
+    free(vectorBP);
     return rs;
 }
 
@@ -557,7 +606,7 @@ char* do_db_ops(char* payload) {
                 }
 
             } else if(strcmp(op, "delete") == 0 && strcmp(obj, "collection") == 0) {
-                /* JsonNode* dbNode = searchJson(argsNode, "db");
+                JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
@@ -577,12 +626,12 @@ char* do_db_ops(char* payload) {
                     free(rs.errMsg);
                     appendToStringBuilder(&resultSB, result);
                     free(result);
-                } */
+                }
                 
-                //char* result = strdup("Operation not supported in this version");
+                // char* result = strdup("Operation not supported in this version");
                 // return result;
 
-                appendToStringBuilder(&resultSB, "\"Operation not supported in this version\"");
+                // appendToStringBuilder(&resultSB, "\"Operation not supported in this version\"");
 
             } else if(strcmp(op, "count") == 0 && strcmp(obj, "collection") == 0) {
                 JsonNode* dbNode = searchJson(argsNode, "db");
@@ -934,3 +983,5 @@ char* do_db_ops(char* payload) {
     
     return result;
 }
+
+
