@@ -178,7 +178,7 @@ char** list_directory(const char* dirPath) {
 
 
 __attribute__((visibility("hidden"))) 
-char** list_files(const char* dirPath, int option) {
+char** list_files(const char* dirPath, int option, const char* ext) {
     char** files = NULL;
     int count=0;
     #if defined(_WIN32) || defined(_WIN64)
@@ -249,7 +249,7 @@ char** list_files(const char* dirPath, int option) {
             #endif
 
             if(isRegularFile) {
-                if(strstr(entry->d_name, VICTO_FILE_EXT) != NULL) {
+                if(strstr(entry->d_name, ext) != NULL) {
                     char* fileName;
                     switch(option) {
                         case FILE_NAME_WITH_EXTENSION: 
