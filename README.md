@@ -10,7 +10,7 @@ We hope you enjoy using Victo.
 
 # Get Started
 
-<div align="center"><h2>The current version of Victo works only in Unix and Unix-like OS</h2></div>
+<div align="center"><h4>The current version of Victo works only in Unix and Unix-like OS</h4></div>
 
 ## Prerequisites
 1. GCC
