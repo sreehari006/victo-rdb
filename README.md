@@ -64,8 +64,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 | Key     | Description                                           | Valid values                                                  |
 |---------|-------------------------------------------------------|---------------------------------------------------------------|
 | op      | operation on the Database                             | "add" if the obj is db                                        |
-          |                                                       | "add", "delete", "list" or "count" if obj is collection       |
-          |                                                       | "put", "get", "list", "count" or "query" if obj is vector     |
+|         |                                                       | "add", "delete", "list" or "count" if obj is collection       |
+|         |                                                       | "put", "get", "list", "count" or "query" if obj is vector     |
 | obj     | Database object on which the operation is executed    | "db" or "collection" or "vector"                              |
 | args    | arguments                                             | 
 
