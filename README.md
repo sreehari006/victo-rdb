@@ -82,8 +82,9 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
-Key     | Description           | Is Mandatory?     | Data Type     | Valid values
-db      | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
+| Key     | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|---------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db      | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
 
 #### Response
 ```
@@ -119,9 +120,10 @@ db      | DB Name               | Yes               | String        | Alphanumer
 }
 ```
 
-Key         | Description           | Is Mandatory?     | Data Type     | Valid values
-db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
-collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
 
 #### Response
 ```
@@ -157,9 +159,10 @@ collection  | Collection Name       | Yes               | String        | Alphan
 }
 ```
 
-Key         | Description           | Is Mandatory?     | Data Type     | Valid values
-db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
-collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
 
 #### Response
 ```
@@ -194,8 +197,9 @@ collection  | Collection Name       | Yes               | String        | Alphan
 }
 ```
 
-Key         | Description           | Is Mandatory?     | Data Type     | Valid values
-db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
 
 #### Response
 ```
@@ -232,8 +236,9 @@ db          | DB Name               | Yes               | String        | Alphan
 }
 ```
 
-Key         | Description           | Is Mandatory?     | Data Type     | Valid values
-db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
 
 #### Response
 ```
@@ -275,12 +280,13 @@ db          | DB Name               | Yes               | String        | Alphan
 }
 ```
 
-Key         | Description           | Is Mandatory?     | Data Type     | Valid values
-db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
-collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore
-ai_model    | AI Model              | Yes               | String        |
-vdim        | Vector Dimension      | Yes               | Integer       |
-vp          | Vector Points         | Yes               | Decimal Array |
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| ai_model    | AI Model              | Yes               | String        |                                                 |
+| vdim        | Vector Dimension      | Yes               | Integer       |                                                 |
+| vp          | Vector Points         | Yes               | Decimal Array |                                                 |
 
 #### Response
 ```
@@ -318,10 +324,11 @@ vp          | Vector Points         | Yes               | Decimal Array |
 }
 ```
 
-Key         | Description           | Is Mandatory?     | Data Type     | Valid values
-db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
-collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore
-hash        | Vector ID             | Yes               | UUID          |
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| hash        | Vector ID             | Yes               | UUID          |                                                 |
 
 #### Response
 ```
@@ -363,10 +370,11 @@ hash        | Vector ID             | Yes               | UUID          |
 }
 ```
 
-Key         | Description           | Is Mandatory?     | Data Type     | Valid values
-db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
-collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore
-hash        | Vector ID             | Yes               | UUID          |
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| hash        | Vector ID             | Yes               | UUID          |                                                 |
 
 #### Response
 ```
@@ -402,9 +410,10 @@ hash        | Vector ID             | Yes               | UUID          |
 }
 ```
 
-Key         | Description           | Is Mandatory?     | Data Type     | Valid values
-db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
-collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
 
 #### Response
 ```
@@ -441,9 +450,10 @@ collection  | Collection Name       | Yes               | String        | Alphan
 }
 ```
 
-Key         | Description           | Is Mandatory?     | Data Type     | Valid values
-db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore
-collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
 
 #### Response
 ```
@@ -495,36 +505,37 @@ collection  | Collection Name       | Yes               | String        | Alphan
 }
 ```
 
-Key             | Description                                       | Is Mandatory?     | Data Type     | Valid values
-db              | DB Name                                           | Yes               | String        | Alphanumeric value with hyphen and underscore
-collection      | Collection Name                                   | Yes               | String        | Alphanumeric value with hyphen and underscore
-ai_model        | AI Model                                          | Yes               | String        |
-vdim            | Vector Dimension                                  | Yes               | Integer       |
-vp              | Vector Points                                     | Yes               | Decimal Array |
-vd_method       | Vector Distance Calculation Method                | No                | Integer       | Default value is 0
-                                                                                                        | 0 - EUCLIDEAN_DISTANCE
-                                                                                                        | 1 - COSINE_SIMILARITY
-                                                                                                        | 2 - MANHATTAN_DISTANCE
-                                                                                                        | 3 - MINKOWSKI_DISTANCE
-                                                                                                        | 4 - DOT_PRODUCT          
-k_value         | base value used for query on calculated distance  | No                | Decimal       | Default 0.0
-logical_op      | logical operation against k_value while query     | No                | Integer       | Default 0
-                                                                                                        | 2  - GREATER_THAN_OR_EQUAL_TO
-                                                                                                        | 1  - GREATER_THAN
-                                                                                                        | 0  - EQUAL_TO
-                                                                                                        | -1 - LESS_THAN 
-                                                                                                        | -2 - LESS_THAN_OR_EQUAL_TO
-limit           | Number of vector points returned                  | No                | Integer       | Positive Integer
-order           | Ascending or descending based on k_value          | No                | Boolean       | Default is false
-                                                                                                        | false - Ascending
-                                                                                                        | true - Descending
-include_fault   | Include fault nodes                               | No                | Boolean       | Default is false
-                                                                                                        | false - do not include fault nodes
-                                                                                                        | true - include fault nodes
-do_normal       | Normalize vector points while query               | No                | Boolean       | Default is false
-                                                                                                        | false - do not normalize
-                                                                                                        | true - normalize vector
-p_value         | Applicable only for Minskowski Method             | Conditional       | Decimal       |     
+| Key             | Description                                       | Is Mandatory?     | Data Type     | Valid values                                    |
+|-----------------|-----------------------|-------------------|---------------|-----------------------------------------------------------------------------|
+| db              | DB Name                                           | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection      | Collection Name                                   | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| ai_model        | AI Model                                          | Yes               | String        |                                                 |
+| vdim            | Vector Dimension                                  | Yes               | Integer       |                                                 |
+| vp              | Vector Points                                     | Yes               | Decimal Array |                                                 |
+| vd_method       | Vector Distance Calculation Method                | No                | Integer       | Default value is 0                              |
+|                                                                                                         | 0 - EUCLIDEAN_DISTANCE                          |
+|                                                                                                         | 1 - COSINE_SIMILARITY                           |
+|                                                                                                         | 2 - MANHATTAN_DISTANCE                          |
+|                                                                                                         | 3 - MINKOWSKI_DISTANCE                          |
+|                                                                                                         | 4 - DOT_PRODUCT                                 |
+| k_value         | base value used for query on calculated distance  | No                | Decimal       | Default 0.0                                     |
+| logical_op      | logical operation against k_value while query     | No                | Integer       | Default 0                                       |
+|                                                                                                         | 2  - GREATER_THAN_OR_EQUAL_TO                   |
+|                                                                                                         | 1  - GREATER_THAN                               |
+|                                                                                                         | 0  - EQUAL_TO                                   |
+|                                                                                                         | -1 - LESS_THAN                                  |
+|                                                                                                         | -2 - LESS_THAN_OR_EQUAL_TO                      |
+| limit           | Number of vector points returned                  | No                | Integer       | Positive Integer                                |
+| order           | Ascending or descending based on k_value          | No                | Boolean       | Default is false                                |
+|                                                                                                         | false - Ascending                               |
+|                                                                                                         | true - Descending                               |
+| include_fault   | Include fault nodes                               | No                | Boolean       | Default is false                                |
+|                                                                                                         | false - do not include fault nodes              |
+|                                                                                                         | true - include fault nodes                      |
+| do_normal       | Normalize vector points while query               | No                | Boolean       | Default is false                                |
+|                                                                                                         | false - do not normalize                        |
+|                                                                                                         | true - normalize vector                         |
+| p_value         | Applicable only for Minskowski Method             | Conditional       | Decimal       |                                                 |
 
 <i>Fault nodes are something where the query vector and vectors are incompatible. For example, if the query vector dimension is not same as vector data points dimension</i>
 
