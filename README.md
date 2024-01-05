@@ -61,12 +61,13 @@ The following list of DB operations can be executed on the server using any webs
 ### Basic structure of a query
 As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic components
 
-Key     | Description                                           | Valid values
-op      | operation on the Database                             | "add" if the obj is db
-        |                                                       | "add", "delete", "list" or "count" if obj is collection
-        |                                                       | "put", "get", "list", "count" or "query" if obj is vector
-obj     | Database object on which the operation is executed    | "db" or "collection" or "vector"
-args    | arguments                                             | 
+| Key     | Description                                           | Valid values
+|---------|-------------------------------------------------------|-----------------------------------------------------------
+| op      | operation on the Database                             | "add" if the obj is db
+          |                                                       | "add", "delete", "list" or "count" if obj is collection
+          |                                                       | "put", "get", "list", "count" or "query" if obj is vector
+| obj     | Database object on which the operation is executed    | "db" or "collection" or "vector"
+| args    | arguments                                             | 
 
 ### Add a database 
 
