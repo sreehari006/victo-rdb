@@ -50,10 +50,10 @@ ws://<host-ip>:2018/
 
 # How it works
 The fundamental components of Victo Database are:
-<b>db: </b>The basic components which holds a list of collections. Victo databse server can have multiple database objects.
-<b>collection: </b>Collection holds a list of vectors
-<b>vector: <b>Vectors are data points or entities which represent vector embeddings
-<b>queries: </b>Queries are JSON-like string used to interact with database for storing and retriving db objects. 
+* <b>db: </b>The basic components which holds a list of collections. Victo databse server can have multiple database objects.
+* <b>collection: </b>Collection holds a list of vectors
+* <b>vector: </b>Vectors are data points or entities which represent vector embeddings
+* <b>queries: </b>Queries are JSON-like string used to interact with database for storing and retriving db objects. 
 
 ## DB Operations and Syntax
 The following list of DB operations can be executed on the server using any websocket client
