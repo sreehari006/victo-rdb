@@ -133,7 +133,7 @@ VectorListRS vectorList(const char* location) {
     if(dirExists(location)) {
         rs.errCode = SUCCESS_CODE;
         rs.errMsg = strdup(SUCESS_MSG);
-        rs.vectors = list_files(location, FILE_NAME_WITHOUT_EXTENSION);
+        rs.vectors = list_files(location, FILE_NAME_WITHOUT_EXTENSION, VICTO_FILE_EXT);
     } else {
         rs.errCode = DIR_NOT_EXIST_ERROR_CODE;
         rs.errMsg = strdup(DIR_NOT_EXIST_ERROR_MSG);
@@ -162,7 +162,7 @@ QueryVectorRSWrapper queryVector(char* location, char* ai_model, int vdim, doubl
     int queryNodesCount = 0;
     int faultNodesCount = 0;
 
-    char** vectors = list_files(location, FILE_FULL_PATH);
+    char** vectors = list_files(location, FILE_FULL_PATH, VICTO_FILE_EXT);
     if(vectors != NULL) {
         for(int i=0; vectors[i] != NULL; i++) {
                 bool fault = false;
