@@ -537,7 +537,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 |                                                                                                         | true - normalize vector                         |
 | p_value         | Applicable only for Minskowski Method             | Conditional       | Decimal       |                                                 |
 
-<i>Fault nodes are something where the query vector and vectors are incompatible. For example, if the query vector dimension is not same as vector data points dimension</i>
+<i>Fault nodes are something where the query vector and vectors are incompatible. For example, if the query vector dimension is not same as vector data points dimension.</i>
 
 #### Response
 ```
