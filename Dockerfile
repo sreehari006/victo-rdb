@@ -9,12 +9,13 @@ RUN apk --no-cache add gcc g++ cmake git make openssl-dev openssl
 
 # Set the working directory
 WORKDIR /app
+RUN mkdir /app/victodb
 
 # Clone the Git repository
 RUN git clone -b docker https://github.com/sreehari006/victo-rdb.git .
 
-cmake -S . -B ./build
-make -C ./build/
+RUN cmake -S . -B ./build
+RUN make -C ./build/
 
 # Set the entry point for the container
 ENTRYPOINT ["./build/victo-exe", "/app/victodb"]
