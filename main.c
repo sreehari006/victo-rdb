@@ -12,12 +12,12 @@ void sigint_handler(int sig) {
 }
 
 int main(int argc, char *argv[]) {
+    signal(SIGINT, sigint_handler);
     if(argv[1] != NULL) {
         printf("## Program Started with argument %s ##\n", argv[1]);
-        signal(SIGINT, sigint_handler);
+        initServiceLocator();
         setDatabasePath(argv[1]);
         startWebSockServer();
-        initServiceLocator();
     } else {
         printf("## Invalid server configuration. ##");
     }
