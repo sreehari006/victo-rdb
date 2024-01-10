@@ -18,7 +18,7 @@ RUN git clone -b docker https://github.com/sreehari006/victo-rdb.git /app/source
 RUN cmake -S /app/source -B /app/source/build
 RUN make -C /app/source/build/
 
-EXPOSE 8000
+EXPOSE 2018
 
 # Set the entry point for the container
-ENTRYPOINT ["/app/source/build/victo-exe", "/app/victodb"]
+ENTRYPOINT ["/app/source/build/victo-exe", "/app/victodb/"]
