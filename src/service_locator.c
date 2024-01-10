@@ -106,3 +106,7 @@ Response deleteVectorSL(char* location, char* hash) {
     return rs;
 }
 
+void initServiceLocator() {
+    printf("\n## Initialize Service Locator ##\n");
+}
+
