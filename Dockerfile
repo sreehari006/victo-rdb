@@ -5,13 +5,13 @@ FROM alpine:latest
 RUN apk --no-cache add busybox
 
 # Install GCC and CMake using the package manager
-RUN apk --no-cache add gcc g++ cmake git make openssl-dev
+RUN apk --no-cache add gcc g++ cmake git make openssl-dev openssl
 
 # Set the working directory
 WORKDIR /app
 
 # Clone the Git repository
-RUN git clone https://github.com/sreehari006/victo-rdb.git .
+RUN git clone -b docker https://github.com/sreehari006/victo-rdb.git .
 
 cmake -S . -B ./build
 make -C ./build/
