@@ -12,8 +12,8 @@ WORKDIR /app
 RUN mkdir -p /app/victodb
 
 # Clone the Git repository
-# RUN git clone https://github.com/sreehari006/victo-rdb.git /app/source
-COPY . /app/source
+RUN git clone -b docker https://github.com/sreehari006/victo-rdb.git /app/source
+# COPY . /app/source
 
 RUN cmake -S /app/source -B /app/build
 RUN make -C /app/build/
