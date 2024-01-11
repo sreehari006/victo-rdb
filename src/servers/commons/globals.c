@@ -2,29 +2,37 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include "interface/globals.h"
 
-static char *globalString = NULL;  
+static WebsocketParams websocketParams;
 static bool isInitialized = false;  
 
-void setDatabasePath(char* db) {
+void setWebSocketParams(WebsocketParams params) {
     if (!isInitialized) {
-        globalString = (char *)malloc(strlen(db) * sizeof(char));  // Allocate memory for a string
-        if (globalString == NULL) {
-            fprintf(stderr, "Memory allocation failed.\n");
-            exit(EXIT_FAILURE);
-        }
-        strcpy(globalString, db);
+        websocketParams.dbBasePath = strdup(params.dbBasePath);
+        websocketParams.ipAddress = strdup(params.ipAddress);
+        websocketParams.port = params.port;
+        websocketParams.maxStackSize = params.maxStackSize;
         isInitialized = true;
-    }
+    }  
 }
 
 char* getDatabasePath() {
-    return globalString;
+    return websocketParams.dbBasePath;
+}
+
+char* getWebsockInitIP() {
+    return websocketParams.ipAddress;
+}
+
+int getWebsockInitPort() {
+    return websocketParams.port;
 }
 
 void cleanupDatabasePath() {
     if (isInitialized) {
-        free(globalString);
+        free(websocketParams.dbBasePath);
+        free(websocketParams.ipAddress);
         isInitialized = false;
     }
 }

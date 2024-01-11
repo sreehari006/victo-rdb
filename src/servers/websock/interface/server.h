@@ -30,9 +30,6 @@
 
 #define MAX_CLIENTS 10
 #define BUFFER_SIZE 1024
-#define WEBSOCK_PORT 8080
-
-
 
 void startWebSockServer();
 void stopWebSockServer();
