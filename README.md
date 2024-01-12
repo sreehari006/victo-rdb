@@ -615,7 +615,10 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
     - [ ] Subscribe on collections
 
 ## Version
-[6th Jan 2024] - 1.0.0 (Latest stable version)
+[12 Jan 2024] - 1.1.0 (Latest stable version)
+Added support for Docker and containerization
+
+[6th Jan 2024] - 1.0.0 
 
 ## License
 
