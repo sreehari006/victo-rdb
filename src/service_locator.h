@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include "ds/datastructures.h"
 
+void initServiceLocator();
 Response newDBSL(const char* location);
 Response newCollectionSL(const char* location);
 Response deleteCollectionSL(const char* location);

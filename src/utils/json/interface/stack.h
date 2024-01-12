@@ -3,7 +3,7 @@
 #include <string.h>
 #include "./json.h"
 
-#define STACK_MAX_SIZE 16384
+#define STACK_MAX_SIZE 2048
 
 typedef struct {
     char* items[STACK_MAX_SIZE];

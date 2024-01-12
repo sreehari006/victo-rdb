@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include "src/service_locator.h"
 #include "src/servers/websock/interface/server.h"
 #include "src/servers/commons/interface/globals.h"
+#include "src/utils/strings/interface/string_builder.h"
 
 void sigint_handler(int sig) {
     printf("## Data cleanup ##\n");
@@ -12,13 +14,39 @@ void sigint_handler(int sig) {
 }
 
 int main(int argc, char *argv[]) {
-    if(argv[1] != NULL) {
-        printf("## Program Started with argument %s ##\n", argv[1]);
-        signal(SIGINT, sigint_handler);
-        setDatabasePath(argv[1]);
+    WebsocketParams params;
+    int i=1;
+    
+    params.dbBasePath = NULL;
+    params.ipAddress = strdup("127.0.0.1");
+    params.port = 2018;
+    
+    while(i<argc) {
+        if(strncmp(argv[i], "-", 1) == 0) {
+            if(strcmp(argv[i], "-d") == 0) {
+                params.dbBasePath = strdup(argv[i+1]);
+                i++;
+            } else if(strcmp(argv[i], "-i") == 0) {
+                params.ipAddress = strdup(argv[i+1]);
+                i++;
+            } else if(strcmp(argv[i], "-p") == 0) {
+                if(isValidInteger(argv[i+1])) {
+                    params.port = atoi(argv[i+1]);
+                }
+                i++;
+            } 
+        }
+        i++;
+    }
+    
+    signal(SIGINT, sigint_handler);
+    if(params.dbBasePath) {
+        printf("## Program Started with argument %s ##\n", params.dbBasePath);
+        initServiceLocator();
+        setWebSocketParams(params);
         startWebSockServer();
     } else {
-        printf("## Invalid server configuration. ##");
+        printf("## Invalid server configuration. ##\n");
     }
 
     return 0;

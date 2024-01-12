@@ -69,6 +69,13 @@ victo-exe
 
 .vscode
 
+build/
+
 build.sh
 docker_build.sh
 
+.git
+*.md
+
+Dockerfile
+LICENSE

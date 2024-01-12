@@ -1,5 +1,6 @@
 #include "./interface/server.h"
 #include "../commons/interface/adaptor.h"
+#include "../commons/interface/globals.h"
 
 struct ClientData {
     int client_socket;
@@ -266,8 +267,8 @@ void startWebSockServer() {
     }
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(WEBSOCK_PORT);
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_port = htons(getWebsockInitPort());
+    server_addr.sin_addr.s_addr = inet_addr(getWebsockInitIP());
     
     if(bind(serverData.server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr))<0){
         printf("Couldn't bind to the port\n");
