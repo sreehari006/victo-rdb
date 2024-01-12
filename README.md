@@ -41,6 +41,20 @@ It is in this path the actual victo database objects and files are stored in the
 ws://<host-ip>:2018/
 ```
 
+## Docker Support
+
+Alternatively, you can run Victo as a Docker container. 
+
+### How to start Victo as a Docker Container?
+
+Starting a Victo Server Instance as a Docker container is simple
+```
+docker run --name some-name -p <host-port>:8080 -v <host-path>:/app/victodb  -d sreehari006/victo:tag
+```
+... where "some-name" is the name you want to provide to the container. Inside the container Victo runs on port 8080. <host-port> is the port on host machine that you want to map to the container port. <host-path> is the path on host machine where the volume data is stored. "tag" is the version of Victo that you want to run.
+
+For more detail, please visit [https://hub.docker.com/repository/docker/sreehari006/victo/general](https://hub.docker.com/repository/docker/sreehari006/victo/general)
+
 # Technologies/Concepts
 1. AI and Vector analysis
 2. WebSockets and Socket programming
