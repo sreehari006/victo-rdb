@@ -36,6 +36,7 @@ make -C ./build/
 ./build/victo-exe /preferred/path/for/victo/data/files
 ```
 It is in this path the actual victo database objects and files are stored in the disk.
+
 7. By default, the db server is started listening on port 2018. We can connect to the server with any websocket client using the URL as below
 ```
 ws://<host-ip>:2018/
