@@ -106,7 +106,15 @@ Response deleteVectorSL(char* location, char* hash) {
     return rs;
 }
 
-void initServiceLocator() {
-    printf("\n## Initialize Service Locator ##\n");
+bool initDBConfigSL(const char* location) {
+    Response rs = initDBConfig(location);
+    return rs.errCode == 0;
 }
 
+char* getDBBasePathSL(const char* location) {
+    return getDBBasePath(location);
+}
+
+char* getDBLogPathSL(const char* location) {
+    return getDBLogPath(location);
+}

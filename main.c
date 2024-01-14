@@ -16,7 +16,6 @@ void sigint_handler(int sig) {
 }
 
 int main(int argc, char *argv[]) {
-    initLogUtil("/Users/sreehari/projects/c/data/victodb/logs/log.txt");
     WebsocketParams params;
     int i=1;
     
@@ -27,7 +26,7 @@ int main(int argc, char *argv[]) {
     while(i<argc) {
         if(strncmp(argv[i], "-", 1) == 0) {
             if(strcmp(argv[i], "-d") == 0) {
-                params.dbBasePath = strdup(argv[i+1]);
+                params.dbServerPath = strdup(argv[i+1]);
                 i++;
             } else if(strcmp(argv[i], "-i") == 0) {
                 params.ipAddress = strdup(argv[i+1]);
@@ -39,22 +38,29 @@ int main(int argc, char *argv[]) {
                 i++;
             } 
         }
+        
         i++;
     }
     
     signal(SIGINT, sigint_handler);
-    if(params.dbBasePath) {
-        printf("## Program Started with argument %s ##\n", params.dbBasePath);
-        logWriter("1. Program Started");
-        logWriter("2. Program Started");
-        logWriter("3. Program Started");
-        logWriter("4. Program Started");
 
-        initServiceLocator();
+    if(params.dbServerPath && initDBConfigSL(params.dbServerPath)) {
+        params.dbBasePath = getDBBasePathSL(params.dbServerPath);
+        params.dbLogPath = getDBLogPathSL(params.dbServerPath);
+        
+        initLogUtil(params.dbLogPath);
+        logWriter("Staring Victo server instance");
+        logWriter("DB Server Path: ");
+        logWriter(params.dbServerPath);
+        logWriter("DB Base Path: ");
+        logWriter(params.dbBasePath);
+        logWriter("DB Log Path: ");
+        logWriter(params.dbLogPath);
+
         setWebSocketParams(params);
         startWebSockServer();
     } else {
-        printf("## Invalid server configuration. ##\n");
+        logWriter("Invalid server configuration.");
     }
 
     return 0;

@@ -1,5 +1,7 @@
 typedef struct {
+    char* dbServerPath;
     char* dbBasePath;
+    char* dbLogPath;
     char* ipAddress;
     int port;
     int maxStackSize;

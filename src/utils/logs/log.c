@@ -3,17 +3,22 @@
 static FILE* logfile;
 static LogMessageQueue messageQueue; 
 
+void freeLogMessageNode(LogMessageNode* node) {
+    node->message = NULL;
+    free(node->message);
+    free(node);
+}
+
 void enqueueLogMessage(const char* message) {
     LogMessageNode* newNode = (LogMessageNode*)malloc(sizeof(LogMessageNode));
     if (newNode == NULL) {
-        perror("Failed to allocate memory for a new message node");
-        exit(EXIT_FAILURE);
+        printf("Failed to allocate memory for a new message node \n");
+        return;
     }
 
     newNode->message = strdup(message);
     newNode->next = NULL;
     
-    printf("\n Current Node Message: %s", newNode->message);
     pthread_mutex_lock(&messageQueue.mutex);
 
     if (messageQueue.head == NULL) {
@@ -27,7 +32,6 @@ void enqueueLogMessage(const char* message) {
     }
 
     pthread_cond_signal(&messageQueue.cond);
-
     pthread_mutex_unlock(&messageQueue.mutex);
 }
 
@@ -42,8 +46,7 @@ char* dequeueLogMessage() {
     char* message = strdup(head->message);
 
     messageQueue.head = head->next;
-    free(head->message);
-    free(head);
+    freeLogMessageNode(head);
 
     pthread_mutex_unlock(&messageQueue.mutex);
 
@@ -51,13 +54,15 @@ char* dequeueLogMessage() {
 }
 
 void* logReaderThreadFunction(void* arg) {
-    printf("Inside Thread Fucntion");
     while (1) {
-        printf("Keep reading message");
         char* message = dequeueLogMessage();
-        printf("\n\n Before Writing to log: %s \n\n", message);
-        fprintf(logfile, "%s\n", message);
-        fflush(logfile);
+
+        if(logfile != NULL && fprintf(logfile, "%s\n", message) >= 0) {
+            fflush(logfile);
+        } else {
+            printf("%s\n", message);
+        }
+        
         free(message);
     }
 
@@ -65,24 +70,28 @@ void* logReaderThreadFunction(void* arg) {
 }
 
 void initLogUtil(const char* path) {
-    printf("## Inside Log Util Init Method ##\n");
-    logfile = fopen(path, "a");
-    if (logfile == NULL) {
-        perror("Error opening file for writing");
-        exit(EXIT_FAILURE);
-    }
-    printf("## Log File Opened ##\n");
+    printf("Inside Log Util Init Method.\n");
+
+    char logFilePath[strlen(path) + strlen("/log.txt") + 1];
+    strcpy(logFilePath, path);
+    strcat(logFilePath, "/log.txt");
 
     messageQueue.head = NULL;
     pthread_mutex_init(&messageQueue.mutex, NULL);
     pthread_cond_init(&messageQueue.cond, NULL);
 
+    printf("Writing logs to: %s\n", logFilePath);
+    logfile = fopen(logFilePath, "a");
+    if (logfile == NULL) {
+        printf("Error opening log file for writing.\n");
+    }
+
     pthread_t reader;
     if (pthread_create(&reader, NULL, logReaderThreadFunction, NULL) != 0) {
-        perror("Error creating reader thread");
-        exit(EXIT_FAILURE);
+        printf("Error creating thread for async log.\n");
+    } else {
+        printf("Log message reader Thread Started.\n");
     }
-    printf("## Reader Thread Started ##\n");
 }
 
 void logWriter(const char* message) {
@@ -101,5 +110,10 @@ void freeLogUtil() {
 
     pthread_mutex_destroy(&messageQueue.mutex);
     pthread_cond_destroy(&messageQueue.cond);
-    fclose(logfile);
+
+    logWriter("Log util resources cleanup successfull.");
+
+    if(fclose(logfile) != 0) {
+        printf("Error closing Log File.\n");
+    }
 }

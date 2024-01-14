@@ -1,4 +1,6 @@
 #define VICTO_FILE_EXT                          ".victo"
+#define DB                                      "db"
+#define LOGS                                    "logs"
 #define COLLECTIONS                             "collections"
 #define VECTORS                                 "vectors"
 #define SUBSCRIPTIONS                           "subscriptions"
@@ -6,6 +8,8 @@
 
 #define SUCCESS_CODE                            0
 #define SUCESS_MSG                              "SUCCESS"
+#define FAILED_CODE                             -1
+#define FAILED_MSG                              "FAILED"
 
 #define RECORD_EXIST_ERROR_CODE                 100
 #define RECORD_EXIST_ERROR_MSG                  "Record exist"

@@ -9,6 +9,7 @@ static bool isInitialized = false;
 
 void setWebSocketParams(WebsocketParams params) {
     if (!isInitialized) {
+        websocketParams.dbServerPath = strdup(params.dbServerPath);
         websocketParams.dbBasePath = strdup(params.dbBasePath);
         websocketParams.ipAddress = strdup(params.ipAddress);
         websocketParams.port = params.port;
@@ -31,6 +32,7 @@ int getWebsockInitPort() {
 
 void cleanupWebSocketParams() {
     if (isInitialized) {
+        free(websocketParams.dbServerPath);
         free(websocketParams.dbBasePath);
         free(websocketParams.ipAddress);
         isInitialized = false;
