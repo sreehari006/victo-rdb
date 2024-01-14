@@ -6,14 +6,17 @@
 #include "src/servers/websock/interface/server.h"
 #include "src/servers/commons/interface/globals.h"
 #include "src/utils/strings/interface/string_builder.h"
+#include "src/utils/logs/interface/log.h"
 
 void sigint_handler(int sig) {
     printf("## Data cleanup ##\n");
     stopWebSockServer();
-    void cleanupDatabasePath();
+    cleanupWebSocketParams();
+    freeLogUtil();
 }
 
 int main(int argc, char *argv[]) {
+    initLogUtil("/Users/sreehari/projects/c/data/victodb/logs/log.txt");
     WebsocketParams params;
     int i=1;
     
@@ -42,6 +45,11 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, sigint_handler);
     if(params.dbBasePath) {
         printf("## Program Started with argument %s ##\n", params.dbBasePath);
+        logWriter("1. Program Started");
+        logWriter("2. Program Started");
+        logWriter("3. Program Started");
+        logWriter("4. Program Started");
+
         initServiceLocator();
         setWebSocketParams(params);
         startWebSockServer();

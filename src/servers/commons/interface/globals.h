@@ -5,8 +5,8 @@ typedef struct {
     int maxStackSize;
 } WebsocketParams;
 
-void setWebSocketParams(WebsocketParams websocketParams);
+void setWebSocketParams(WebsocketParams params);
 char* getDatabasePath();
 char* getWebsockInitIP();
 int getWebsockInitPort();
-void cleanupDatabasePath();
+void cleanupWebSocketParams();

@@ -29,7 +29,7 @@ int getWebsockInitPort() {
     return websocketParams.port;
 }
 
-void cleanupDatabasePath() {
+void cleanupWebSocketParams() {
     if (isInitialized) {
         free(websocketParams.dbBasePath);
         free(websocketParams.ipAddress);
