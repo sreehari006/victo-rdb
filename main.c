@@ -16,6 +16,7 @@ void sigint_handler(int sig) {
 }
 
 int main(int argc, char *argv[]) {
+    char* log_level = "INFO";
     WebsocketParams params;
     int i=1;
     
@@ -36,7 +37,10 @@ int main(int argc, char *argv[]) {
                     params.port = atoi(argv[i+1]);
                 }
                 i++;
-            } 
+            } else if(strcmp(argv[i], "-l") == 0) {
+                log_level = strdup(argv[i+1]);
+                i++;
+            }
         }
         
         i++;
@@ -48,19 +52,19 @@ int main(int argc, char *argv[]) {
         params.dbBasePath = getDBBasePathSL(params.dbServerPath);
         params.dbLogPath = getDBLogPathSL(params.dbServerPath);
         
-        initLogUtil(params.dbLogPath);
-        logWriter("Staring Victo server instance");
-        logWriter("DB Server Path: ");
-        logWriter(params.dbServerPath);
-        logWriter("DB Base Path: ");
-        logWriter(params.dbBasePath);
-        logWriter("DB Log Path: ");
-        logWriter(params.dbLogPath);
+        initLogUtil(log_level, params.dbLogPath);
+        logWriter(LOG_INFO, "Staring Victo server instance");
+        logWriter(LOG_INFO, "DB Server Path: ");
+        logWriter(LOG_INFO, params.dbServerPath);
+        logWriter(LOG_INFO, "DB Base Path: ");
+        logWriter(LOG_INFO, params.dbBasePath);
+        logWriter(LOG_DEBUG, "DB Log Path: ");
+        logWriter(LOG_INFO, params.dbLogPath);
 
         setWebSocketParams(params);
         startWebSockServer();
     } else {
-        logWriter("Invalid server configuration.");
+        logWriter(LOG_CRITICAL, "Invalid server configuration.");
     }
 
     return 0;

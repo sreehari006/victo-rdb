@@ -13,7 +13,7 @@ struct ServerData {
     int isRunning;
 };
 
-struct ServerData serverData;
+static struct ServerData serverData;
 
 struct WebSocketFrame {
     uint8_t fin;
