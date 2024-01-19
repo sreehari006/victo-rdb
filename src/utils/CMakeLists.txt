@@ -11,5 +11,7 @@ add_library(
     strings/string_builder.c
     logs/interface/log.h
     logs/log.c
+    ds/interface/hashmap.h
+    ds/hashmap.c
 )
 

@@ -1,9 +1,9 @@
 #include "interface/adaptor.h"
+#include "interface/globals.h"
 #include "../../utils/json/interface/json.h"
 #include "../../service_locator.h"
 #include "../../utils/strings/interface/string_builder.h"
 #include "../../utils/uuid/interface/uuid.h"
-#include "interface/globals.h"
 #include "../../commons/constants.h"
 
 
@@ -525,7 +525,7 @@ QueryVectorRSWrapper query_vector(char* db, char* collection, char* ai_model, in
     return rs;
 }
 
-char* do_db_ops(char* payload) {
+char* do_db_ops(char* threadUUID, char* payload) {    
     char* result;
 
     StringBuilder metadataSB;
@@ -542,7 +542,7 @@ char* do_db_ops(char* payload) {
 
     appendToStringBuilder(&metadataSB, "\"metadata\": [");
     appendToStringBuilder(&metadataSB, "{\"response_id\": \"");
-    char* responseID = getUUID();
+    char* responseID = strdup(threadUUID);
     appendToStringBuilder(&metadataSB, responseID);
     free(responseID);
     appendToStringBuilder(&metadataSB, "\"}");

@@ -1,8 +1,10 @@
 #include "interface/log.h"
+#include "../ds/interface/hashmap.h"
 
 static FILE* logfile;
 static int serverLogLevel;
-static LogMessageQueue messageQueue; 
+static LogMessageQueue messageQueue;
+static HashMap threadRegister;
 
 char* getLogLevelString(int code) {
     switch (code) {
@@ -38,11 +40,12 @@ int getLogLevelCode(char* loglevelStr) {
 
 void freeLogMessageNode(LogMessageNode* node) {
     node->message = NULL;
+    free(node->threadUUID);
     free(node->message);
     free(node);
 }
 
-void enqueueLogMessage(const int log_level, const char* message) {
+void enqueueLogMessage(const int log_level, const char* threadUUID, const char* message) {
     LogMessageNode* newNode = (LogMessageNode*)malloc(sizeof(LogMessageNode));
     if (newNode == NULL) {
         printf("Failed to allocate memory for a new message node \n");
@@ -50,6 +53,7 @@ void enqueueLogMessage(const int log_level, const char* message) {
     }
 
     newNode->log_level = log_level;
+    newNode->threadUUID = strdup(threadUUID);
     newNode->message = strdup(message);
     newNode->next = NULL;
     
@@ -80,6 +84,7 @@ LogMessageNode dequeueLogMessage() {
     LogMessageNode* head = messageQueue.head;
     messageNode.log_level = head->log_level;
     messageNode.message = strdup(head->message);
+    messageNode.threadUUID = strdup(head->threadUUID);
 
     messageQueue.head = head->next;
     freeLogMessageNode(head);
@@ -102,12 +107,12 @@ void* logReaderThreadFunction(void* arg) {
             struct tm *timeInfo = localtime(&currentTime);
             strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", timeInfo);
 
-
-            if(logfile != NULL && fprintf(logfile, "%s %s %s\n", timestamp, log_level_str, messageNode.message) >= 0) {
+            if(logfile != NULL && fprintf(logfile, "%s %s %s %s\n", timestamp, log_level_str, messageNode.threadUUID, messageNode.message) >= 0) {
                 fflush(logfile);
             } else {
-                printf("%s %s %s\n", timestamp, log_level_str, messageNode.message);
+                printf("%s %s %s %s\n", timestamp, log_level_str, messageNode.threadUUID, messageNode.message);
             }
+
         }
 
     }
@@ -116,7 +121,7 @@ void* logReaderThreadFunction(void* arg) {
 }
 
 void initLogUtil(char* log_level, const char* path) {
-    printf("Inside Log Util Init Method.\n");
+    printf("log initLogUtil started\n");
 
     char logFilePath[strlen(path) + strlen("/log.txt") + 1];
     strcpy(logFilePath, path);
@@ -133,23 +138,40 @@ void initLogUtil(char* log_level, const char* path) {
     }
 
     serverLogLevel = getLogLevelCode(log_level);
-    printf("Server Log Level: %d", serverLogLevel);
+    printf("Server Log Level: %d\n", serverLogLevel);
+    
+    initializeHashMap(&threadRegister);
+    printf("Map for Thead ID Register created.\n");
     pthread_t reader;
     if (pthread_create(&reader, NULL, logReaderThreadFunction, NULL) != 0) {
         printf("Error creating thread for async log.\n");
     } else {
         printf("Log message reader Thread Started.\n");
     }
+
+    printf("log initLogUtil completed\n");
 }
 
 void logWriter(const int log_level, const char* message) {
-    enqueueLogMessage(log_level, message);
+    pthread_t thread = pthread_self();
+    char buffer[25]; 
+    snprintf(buffer, sizeof(buffer), "%p", (void *) thread);
+
+    char* threadUUID = get(&threadRegister, buffer);
+    if(threadUUID == NULL) {
+        threadUUID = buffer;
+    }
+    
+    enqueueLogMessage(log_level, threadUUID, message);
 }
 
 void freeLogUtil() {
+    cleanupHashMap(&threadRegister);
+
     LogMessageNode* current = messageQueue.head;
     while (current != NULL) {
         LogMessageNode* nextNode = current->next;
+        free(current->threadUUID);
         free(current->message);
         free(current);
         current = nextNode;
@@ -159,9 +181,17 @@ void freeLogUtil() {
     pthread_mutex_destroy(&messageQueue.mutex);
     pthread_cond_destroy(&messageQueue.cond);
 
-    printf("Log util resources cleanup successfull.");
+    printf("Log util resources cleanup successfull.\n");
 
     if(fclose(logfile) != 0) {
         printf("Error closing Log File.\n");
     }
+}
+
+void setLogThreadRegisterUUID(char* threadID, char* UUID) {
+    insert(&threadRegister, threadID, UUID);
+}
+
+void removeLogThreadRegisterUUID(char* threadID) {
+    delete(&threadRegister, threadID);
 }

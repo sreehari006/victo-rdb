@@ -52,13 +52,14 @@ int main(int argc, char *argv[]) {
         params.dbBasePath = getDBBasePathSL(params.dbServerPath);
         params.dbLogPath = getDBLogPathSL(params.dbServerPath);
         
+        printf("Starting server\n");
         initLogUtil(log_level, params.dbLogPath);
         logWriter(LOG_INFO, "Staring Victo server instance");
         logWriter(LOG_INFO, "DB Server Path: ");
         logWriter(LOG_INFO, params.dbServerPath);
         logWriter(LOG_INFO, "DB Base Path: ");
         logWriter(LOG_INFO, params.dbBasePath);
-        logWriter(LOG_DEBUG, "DB Log Path: ");
+        logWriter(LOG_INFO, "DB Log Path: ");
         logWriter(LOG_INFO, params.dbLogPath);
 
         setWebSocketParams(params);

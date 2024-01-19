@@ -13,6 +13,7 @@
 
 typedef struct LogMessageNode {
     int log_level;
+    char* threadUUID;
     char* message;
     struct LogMessageNode* next;
 } LogMessageNode;
@@ -26,3 +27,5 @@ typedef struct {
 void initLogUtil(char* log_level, const char* logPath);
 void logWriter(const int log_level, const char* message);
 void freeLogUtil();
+void setLogThreadRegisterUUID(char* threadID, char* UUID);
+void removeLogThreadRegisterUUID(char* threadID);
