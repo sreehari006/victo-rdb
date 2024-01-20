@@ -37,6 +37,7 @@ make -C ./build/
 ```
 It is in this path the actual victo database objects and files are stored in the disk. Other supported flags including -d are:
 
+
 | flag     | Description                                          | Default Value           | Valid values  | Mandatory?  |
 |---------|-------------------------------------------------------|-----------------------------------------|-------------|
 |   -d    | Preferred path to victo database                      |                         | File Path     | Yes         |
@@ -47,6 +48,7 @@ It is in this path the actual victo database objects and files are stored in the
 |         |                                                       |                         | WARN          |             |  
 |         |                                                       |                         | ERROR         |             |  
 |         |                                                       |                         | CRITICAL      |             |              
+
 
 7. By default, the db server is started listening on port 2018. We can connect to the server with any websocket client using the URL as below
 ```
