@@ -37,6 +37,10 @@ make -C ./build/
 ```
 It is in this path the actual victo database objects and files are stored in the disk. Other supported flags including -d are:
 
+| Flag     | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|---------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db      | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+
 | flag     | Description                                          | Default Value           | Valid values  | Mandatory?  |
 |---------|-------------------------------------------------------|-----------------------------------------|-------------|
 |   -d    | Preferred path to victo database                      |                         | File Path     | Yes         |
