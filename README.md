@@ -37,20 +37,16 @@ make -C ./build/
 ```
 It is in this path the actual victo database objects and files are stored in the disk. Other supported flags including -d are:
 
-| Flag     | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
-|---------|-----------------------|-------------------|----------------|-------------------------------------------------|
-| db      | DB Name               | Yes               | String         | Alphanumeric value with hyphen and underscore   |
-
-| Flag     | Description                                          | Default Value           | Valid values  | Mandatory?  |
-|---------|-------------------------------------------------------|-----------------------------------------|-------------|
-|   -d    | Preferred path to victo database                      |                         | File Path     | Yes         |
-|   -i    | overwrite ip (useful while starting in container)     | 127.0.0.1 or 0.0.0.0    | IP Address    | No          |
-|   -p    | overwrite port                                        | 2018                    | Port Number   | No          |
-|   -l    | Logger Level                                          | INFO                    | DEBUG         | No          |
-|         |                                                       |                         | INFO          |             |
-|         |                                                       |                         | WARN          |             |
-|         |                                                       |                         | ERROR         |             |
-|         |                                                       |                         | CRITICAL      |             |
+| Flag     | Description                                          | Mandatory?        | Default Value        | Valid values  |
+|----------|------------------------------------------------------|-------------------|----------------------|---------------|
+|   -d    | Preferred path to victo database                      | Yes               |                      | File Path     |
+|   -i    | overwrite ip (useful while starting in container)     | No                | 127.0.0.1 or 0.0.0.0 | IP Address    |
+|   -p    | overwrite port                                        | No                | 2018                 | Port Number   |
+|   -l    | Logger Level                                          | No                | INFO                 | DEBUG         |
+|         |                                                       |                   |                      | INFO          |
+|         |                                                       |                   |                      | WARN          |
+|         |                                                       |                   |                      | ERROR         |
+|         |                                                       |                   |                      | CRITICAL      |
 
 
 7. By default, the db server is started listening on port 2018. We can connect to the server with any websocket client using the URL as below
