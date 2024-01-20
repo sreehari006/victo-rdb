@@ -149,10 +149,15 @@ void initLogUtil(char* log_level, const char* path) {
         printf("Log message reader Thread Started.\n");
     }
 
-    printf("log initLogUtil completed\n");
+    printf("log initLogUtil completed.\n");
 }
 
 void logWriter(const int log_level, const char* message) {
+
+    if(log_level < serverLogLevel) {
+        return;
+    }
+
     pthread_t thread = pthread_self();
     char buffer[25]; 
     snprintf(buffer, sizeof(buffer), "%p", (void *) thread);

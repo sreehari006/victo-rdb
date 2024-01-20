@@ -1,4 +1,5 @@
 #include "interface/stack.h"
+#include "../logs/interface/log.h"
 
 void initializeDSS(DynamicStringStack *stack) {
     stack->top = -1; 
@@ -14,13 +15,13 @@ int isFullDSS(DynamicStringStack *stack) {
 
 int pushDSS(DynamicStringStack *stack, const char *value) {
     if (isFullDSS(stack)) {
-        printf("Stack overflow\n");
+        logWriter(LOG_WARN, "ds_stack pushDSS Stack Overflow");
         return -1;
     }
     stack->top++;
     stack->items[stack->top] = strdup(value);
     if (stack->items[stack->top] == NULL) {
-        fprintf(stderr, "Memory allocation error\n");
+        logWriter(LOG_ERROR, "ds_stack pushDSS Memory allocation failed");
         return -1;
     }
     return 0;
@@ -28,7 +29,7 @@ int pushDSS(DynamicStringStack *stack, const char *value) {
 
 char* popDSS(DynamicStringStack *stack) {
     if (isEmptyDSS(stack)) {
-        printf("\nDynamic String Stack Stack underflow\n");
+        logWriter(LOG_WARN, "ds_stack popDSS Stack is empty");
         return NULL;
     }
     char *value = stack->items[stack->top];
@@ -38,7 +39,7 @@ char* popDSS(DynamicStringStack *stack) {
 
 char* peekDSS(DynamicStringStack *stack) {
     if (isEmptyDSS(stack)) {
-        printf("Stack is empty\n");
+        logWriter(LOG_WARN, "ds_stack peekDSS Stack is empty");
         return NULL;
     }
     return stack->items[stack->top];

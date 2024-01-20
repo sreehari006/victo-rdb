@@ -9,7 +9,7 @@
 #include "src/utils/logs/interface/log.h"
 
 void sigint_handler(int sig) {
-    printf("## Data cleanup ##\n");
+    printf("## Server resource cleanup ##\n");
     stopWebSockServer();
     cleanupWebSocketParams();
     freeLogUtil();

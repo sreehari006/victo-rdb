@@ -608,7 +608,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 * Social Networks
 
 ## Roadmap
-- [ ] Enhance logging mechanism and Error Handling
+- [x] Enhance logging mechanism and Error Handling
 - [ ] Build scheduler for threads handling db operations
 - [ ] Enable support for secure websockets (wss)
 - [ ] Enhance DB features
@@ -616,7 +616,10 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
     - [ ] Subscribe on collections
 
 ## Version
-[12 Jan 2024] - 1.1.0 (Latest stable version)
+[20 Jan 2024] - 1.2.0 (Latest stable version)
+Enhanced logging mechanism and error handling
+
+[12 Jan 2024] - 1.1.0
 Added support for Docker and containerization
 
 [6th Jan 2024] - 1.0.0 

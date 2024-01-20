@@ -322,10 +322,8 @@ void startWebSockServer() {
     
     if(listen(serverData.server_socket, 1) < 0){
         logWriter(LOG_CRITICAL, "Error while listening");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
-
-    logWriter(LOG_INFO, "Listening for incoming connections.....");
 
     logWriter(LOG_DEBUG, "Initiatize serverData with client sockets and client name");
     for (i = 0; i < max_clients; i++) {
@@ -333,7 +331,7 @@ void startWebSockServer() {
         serverData.client_connection[i].client_name = NULL;
     }
 
-    logWriter(LOG_DEBUG, "Inside infinte loop listening incoming connections and message");
+    logWriter(LOG_DEBUG, "Listening for incoming connections and message");
     serverData.isRunning = 1;
     while (serverData.isRunning) {    
         FD_ZERO(&readfds);

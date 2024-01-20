@@ -22,22 +22,32 @@ void setWebSocketParams(WebsocketParams params) {
 }
 
 char* getDatabasePath() {
+    logWriter(LOG_DEBUG, "globals getDatabasePath started");
+    logWriter(LOG_DEBUG, "globals getDatabasePath completed");
     return websocketParams.dbBasePath;
 }
 
 char* getWebsockInitIP() {
+    logWriter(LOG_DEBUG, "globals getWebsockInitIP started");
+    logWriter(LOG_DEBUG, "globals getWebsockInitIP completed");
     return websocketParams.ipAddress;
 }
 
 int getWebsockInitPort() {
+    logWriter(LOG_DEBUG, "globals getWebsockInitPort started");
+    logWriter(LOG_DEBUG, "globals getWebsockInitPort completed");
     return websocketParams.port;
 }
 
 void cleanupWebSocketParams() {
+    logWriter(LOG_DEBUG, "globals cleanupWebSocketParams started");
+
     if (isInitialized) {
         free(websocketParams.dbServerPath);
         free(websocketParams.dbBasePath);
         free(websocketParams.ipAddress);
         isInitialized = false;
     }
+    
+    logWriter(LOG_DEBUG, "globals cleanupWebSocketParams completed");
 }

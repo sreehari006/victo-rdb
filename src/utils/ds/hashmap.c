@@ -1,13 +1,10 @@
 #include "interface/hashmap.h"
-#include "../logs/interface/log.h"
 
 void initializeHashMap(HashMap *map) {
-    logWriter(LOG_DEBUG, "hashmap initializeHashMap started");
     for (int i = 0; i < HASHMAP_SIZE; i++) {
         map->buckets[i] = NULL;
         pthread_mutex_init(&map->locks[i], NULL);
     }
-    logWriter(LOG_DEBUG, "hashmap initializeHashMap completed");
 }
 
 unsigned int hash(const char *key) {
@@ -20,7 +17,7 @@ unsigned int hash(const char *key) {
 }
 
 void insert(HashMap *map, const char *key, char* value) {
-    unsigned int index = hash(key);
+        unsigned int index = hash(key);
 
     pthread_mutex_lock(&map->locks[index]);
 

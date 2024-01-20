@@ -441,12 +441,10 @@ int delete_victo_collection(const char* dirPath) {
         DIR *dir = opendir(dirPath);
 
         if(dir == NULL) {
-            printf("Error Code: %d \n", errCode);
             return errCode | 4;
         }
 
         if(!dirExists(dirPath)) {
-            printf("Error Code: %d \n", errCode);
             return errCode | 8;
         }
 
@@ -476,6 +474,5 @@ int delete_victo_collection(const char* dirPath) {
         }
         closedir(dir);
     #endif
-    printf("Error Code: %d \n", errCode);
     return errCode;
 }
