@@ -38,10 +38,10 @@ make -C ./build/
 It is in this path the actual victo database objects and files are stored in the disk. Other supported flags including -d are:
 
 | Flag     | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
-|---------|-----------------------|-------------------|---------------|-------------------------------------------------|
-| db      | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+|---------|-----------------------|-------------------|----------------|-------------------------------------------------|
+| db      | DB Name               | Yes               | String         | Alphanumeric value with hyphen and underscore   |
 
-| flag     | Description                                          | Default Value           | Valid values  | Mandatory?  |
+| Flag     | Description                                          | Default Value           | Valid values  | Mandatory?  |
 |---------|-------------------------------------------------------|-----------------------------------------|-------------|
 |   -d    | Preferred path to victo database                      |                         | File Path     | Yes         |
 |   -i    | overwrite ip (useful while starting in container)     | 127.0.0.1 or 0.0.0.0    | IP Address    | No          |
