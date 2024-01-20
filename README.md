@@ -37,17 +37,16 @@ make -C ./build/
 ```
 It is in this path the actual victo database objects and files are stored in the disk. Other supported flags including -d are:
 
-
 | flag     | Description                                          | Default Value           | Valid values  | Mandatory?  |
 |---------|-------------------------------------------------------|-----------------------------------------|-------------|
 |   -d    | Preferred path to victo database                      |                         | File Path     | Yes         |
 |   -i    | overwrite ip (useful while starting in container)     | 127.0.0.1 or 0.0.0.0    | IP Address    | No          |
 |   -p    | overwrite port                                        | 2018                    | Port Number   | No          |
 |   -l    | Logger Level                                          | INFO                    | DEBUG         | No          |
-|         |                                                       |                         | INFO          |             | 
-|         |                                                       |                         | WARN          |             |  
-|         |                                                       |                         | ERROR         |             |  
-|         |                                                       |                         | CRITICAL      |             |              
+|         |                                                       |                         | INFO          |             |
+|         |                                                       |                         | WARN          |             |
+|         |                                                       |                         | ERROR         |             |
+|         |                                                       |                         | CRITICAL      |             |
 
 
 7. By default, the db server is started listening on port 2018. We can connect to the server with any websocket client using the URL as below
@@ -95,7 +94,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 |         |                                                       | "add", "delete", "list" or "count" if obj is collection       |
 |         |                                                       | "put", "get", "list", "count" or "query" if obj is vector     |
 | obj     | Database object on which the operation is executed    | "db" or "collection" or "vector"                              |
-| args    | arguments                                             | 
+| args    | arguments                                             |                                                               |
 
 ### Add a database 
 
