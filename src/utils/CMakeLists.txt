@@ -9,5 +9,9 @@ add_library(
     json/json.c
     strings/interface/string_builder.h
     strings/string_builder.c
+    logs/interface/log.h
+    logs/log.c
+    ds/interface/hashmap.h
+    ds/hashmap.c
 )
 

@@ -4,12 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "interface/stack.h"
+#include "../logs/interface/log.h"
 
 JsonNode* createJsonNode(JsonNode* parent, char* type, char* key, char* value) {
     JsonNode* newNode = (JsonNode*) malloc(sizeof(JsonNode));
     if (newNode == NULL) {
-        printf("Memory allocation failed\n");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "json createJsonNode Memory allocation failed");
+        return NULL;
     }
 
     newNode->parent = parent;
@@ -18,14 +19,18 @@ JsonNode* createJsonNode(JsonNode* parent, char* type, char* key, char* value) {
     newNode->value = value;
     newNode->childIndex = 0;
 
-    return newNode;
+        return newNode;
 }
 
 void addJsonChild(JsonNode* parent, JsonNode* child) {
-    int i = parent->childIndex;
-    parent->children[i] = child;
-    parent->children[i+1] = NULL;
-    parent->childIndex = i + 1;
+    if(parent != NULL && child != NULL) {
+        int i = parent->childIndex;
+        parent->children[i] = child;
+        parent->children[i+1] = NULL;
+        parent->childIndex = i + 1;
+    } else {
+        logWriter(LOG_ERROR, "json addJsonChild either parent or child node is empty");
+    }
 }
 
 const char *tokenTypeToString(TokenType type) {
@@ -108,6 +113,8 @@ void freeJson(JsonNode* node) {
 }
 
 JsonNode* loadJson(char* jsonStr) {
+    logWriter(LOG_DEBUG, "json loadJson started");
+
     JsonNode* root = NULL;
     bool isString = false;
     char tokenBuffer[1024];
@@ -160,6 +167,11 @@ JsonNode* loadJson(char* jsonStr) {
                 case '{': 
                     if(isEmptyJNS(&jsonNodeStack) == 1) {
                         JsonNode* thisNode = createJsonNode(NULL, "object", NULL, NULL);
+                        if(thisNode == NULL) {
+                            isError = true;
+                            break;
+                        }
+
                         int response = pushJNS(&jsonNodeStack, thisNode);
                         if(response < 0) {
                             isError = true;
@@ -178,6 +190,10 @@ JsonNode* loadJson(char* jsonStr) {
                             break;                                 
                         }                        
                         JsonNode* thisNode = createJsonNode(topNode, "object", key, NULL);
+                        if(thisNode == NULL) {
+                            isError = true;
+                            break;
+                        }
                         addJsonChild(topNode, thisNode);
                         int response = pushJNS(&jsonNodeStack, thisNode);
                         if(response < 0) {
@@ -201,6 +217,10 @@ JsonNode* loadJson(char* jsonStr) {
                             }
                             char* value = strdup(tokenBuffer);
                             JsonNode* child = createJsonNode(topNode, "primitive", key, value);
+                            if(child == NULL) {
+                                isError = true;
+                                break;
+                            }
                             addJsonChild(topNode, child);
                             token_i=0; 
                             nullifyCharArray(tokenBuffer); 
@@ -215,6 +235,10 @@ JsonNode* loadJson(char* jsonStr) {
                 case '[': 
                     if(isEmptyJNS(&jsonNodeStack) == 1) {
                         JsonNode* thisNode = createJsonNode(NULL, "array", NULL, NULL);
+                        if(thisNode == NULL) {
+                            isError = true;
+                            break; 
+                        }
                         int response = pushJNS(&jsonNodeStack, thisNode);
                         if(response < 0) {
                             isError = true;
@@ -233,6 +257,10 @@ JsonNode* loadJson(char* jsonStr) {
                             break;                                 
                         }       
                         JsonNode* thisNode = createJsonNode(topNode, "array", key, NULL);
+                        if(thisNode == NULL) {
+                            isError = true;
+                            break; 
+                        }
                         addJsonChild(topNode, thisNode);
                         int response = pushJNS(&jsonNodeStack, thisNode);
                         if(response < 0) {
@@ -260,6 +288,10 @@ JsonNode* loadJson(char* jsonStr) {
                             }       
                             char* value = strdup(tokenBuffer);
                             JsonNode* child = createJsonNode(topNode, "primitive", key, value);
+                            if(child == NULL) {
+                                isError = true;
+                                break; 
+                            }
                             addJsonChild(topNode, child);
                             token_i=0; 
                             nullifyCharArray(tokenBuffer); 
@@ -297,6 +329,10 @@ JsonNode* loadJson(char* jsonStr) {
                                 }       
                                 char* value = strdup(tokenBuffer);
                                 JsonNode* child = createJsonNode(topNode, "primitive", key, value);
+                                if(child == NULL) {
+                                    isError = true;
+                                    break; 
+                                }
                                 addJsonChild(topNode, child);
                             }
 
@@ -309,6 +345,10 @@ JsonNode* loadJson(char* jsonStr) {
                                 }   
                                 char* value = strdup(tokenBuffer);
                                 JsonNode* child = createJsonNode(topNode, "primitive", key, value);
+                                if(child == NULL) {
+                                    isError = true;
+                                    break; 
+                                }
                                 addJsonChild(topNode, child);
                                 
                                 char nextKey[4];
@@ -346,5 +386,6 @@ JsonNode* loadJson(char* jsonStr) {
         return NULL;    
     }
 
+    logWriter(LOG_DEBUG, "json loadJson completed");
     return root;
 }

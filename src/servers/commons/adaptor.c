@@ -1,19 +1,27 @@
 #include "interface/adaptor.h"
+#include "interface/globals.h"
 #include "../../utils/json/interface/json.h"
 #include "../../service_locator.h"
 #include "../../utils/strings/interface/string_builder.h"
 #include "../../utils/uuid/interface/uuid.h"
-#include "interface/globals.h"
 #include "../../commons/constants.h"
+#include "../../utils/logs/interface/log.h"
 
 
 char* string_array_to_string(char** array) {
+    logWriter(LOG_DEBUG, "adaptor string_array_to_string started");
+
     size_t totalLength = 0;
     int count = 0;
 
     while(array[count] != NULL) {
         totalLength += strlen(array[count]);
         count++;
+    }
+
+    if(count <= 0) {
+        logWriter(LOG_WARN, "Array is empty");
+        return NULL;
     }
 
     totalLength += ((count*4) - 1);
@@ -32,13 +40,20 @@ char* string_array_to_string(char** array) {
 
     char* resultCopy = strdup(result);
 
+    logWriter(LOG_DEBUG, "adaptor string_array_to_string completed");
     return resultCopy;
 }
 
 char* double_array_to_string(double* array, int size) {
-    size_t totalLength = 0;
-    int count = 0;
+    logWriter(LOG_DEBUG, "adaptor double_array_to_string started");
 
+    if(size <= 0) {
+        logWriter(LOG_WARN, "Array is empty");
+        return NULL;
+    }
+
+    size_t totalLength = 0;
+    
     totalLength = (size * 30) + size;
 
     char result[totalLength];
@@ -57,10 +72,13 @@ char* double_array_to_string(double* array, int size) {
 
     char* resultCopy = strdup(result);
 
+    logWriter(LOG_DEBUG, "adaptor double_array_to_string completed");
     return resultCopy;
 }
 
 char* db_full_path(char* db) {
+    logWriter(LOG_DEBUG, "adaptor db_full_path started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -72,14 +90,15 @@ char* db_full_path(char* db) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor db_full_path completed");
     return result;
 }
 
 char* collection_base_path(char* db) {
+    logWriter(LOG_DEBUG, "adaptor collection_base_path started");
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -93,14 +112,15 @@ char* collection_base_path(char* db) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor collection_base_path completed");
     return result;
 }
 
 char* collection_full_path(char* db, char* collection) {
+    logWriter(LOG_DEBUG, "adaptor collection_full_path started");
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -116,14 +136,16 @@ char* collection_full_path(char* db, char* collection) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor collection_full_path completed");
     return result;
 }
 
 char* vector_base_path(char* db, char* collection) {
+    logWriter(LOG_DEBUG, "adaptor vector_base_path started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -141,14 +163,16 @@ char* vector_base_path(char* db, char* collection) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor vector_base_path completed");
     return result;
 }
 
 char* response_to_string(Response* rs) {
+    logWriter(LOG_DEBUG, "adaptor response_to_string started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -165,14 +189,16 @@ char* response_to_string(Response* rs) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor response_to_string completed");
     return result;
 }
 
 char* count_rs_to_string(CountRS* rs) {
+    logWriter(LOG_DEBUG, "adaptor count_rs_to_string started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -194,14 +220,16 @@ char* count_rs_to_string(CountRS* rs) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor count_rs_to_string completed");
     return result;
 }
 
 char* collection_list_rs_to_string(CollectionListRS* rs) {
+    logWriter(LOG_DEBUG, "adaptor collection_list_rs_to_string started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -227,14 +255,16 @@ char* collection_list_rs_to_string(CollectionListRS* rs) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor collection_list_rs_to_string completed");
     return result;
 }
 
 char* vector_list_rs_to_string(VectorListRS* rs) {
+    logWriter(LOG_DEBUG, "adaptor vector_list_rs_to_string started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -261,14 +291,16 @@ char* vector_list_rs_to_string(VectorListRS* rs) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor vector_list_rs_to_string completed");
     return result;
 }
 
 char* vector_rs_to_string(GetVectorRS* rs) {
+    logWriter(LOG_DEBUG, "adaptor vector_rs_to_string started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -309,14 +341,16 @@ char* vector_rs_to_string(GetVectorRS* rs) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor vector_rs_to_string completed");
     return result;
 }
 
 char* put_vector_rs_to_string(PutVectorRS* rs) {
+    logWriter(LOG_DEBUG, "adaptor put_vector_rs_to_string started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -337,14 +371,16 @@ char* put_vector_rs_to_string(PutVectorRS* rs) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor put_vector_rs_to_string completed");
     return result;
 }
 
 char* query_vector_rs_to_string(QueryVectorRS* rs) {
+    logWriter(LOG_DEBUG, "adaptor query_vector_rs_to_string started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -380,14 +416,16 @@ char* query_vector_rs_to_string(QueryVectorRS* rs) {
     freeStringBuilder(&resultSB);
 
     if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
     }
 
+    logWriter(LOG_DEBUG, "adaptor query_vector_rs_to_string completed");
     return result;
 }
 
 char* query_vector_wrapper_rs_to_string(QueryVectorRSWrapper* rs) {
+    logWriter(LOG_DEBUG, "adaptor query_vector_wrapper_rs_to_string started");
+
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
@@ -441,108 +479,159 @@ char* query_vector_wrapper_rs_to_string(QueryVectorRSWrapper* rs) {
     char* result = strdup(resultSB.data);
     freeStringBuilder(&resultSB);
 
-    /* if (result == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
-    } */
+    if (result == NULL) {
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
+    }
+
+    logWriter(LOG_DEBUG, "adaptor query_vector_wrapper_rs_to_string completed");
     return result;
 }
 
 Response add_db(char* db) {
+    logWriter(LOG_DEBUG, "adaptor add_db started");
+
     char* dbFP = db_full_path(db);
     Response rs = newDBSL(dbFP);
     free(dbFP);
+
+    logWriter(LOG_DEBUG, "adaptor add_db completed");
     return rs;
 }
 
 Response add_collection(char* db, char* collection) {
+    logWriter(LOG_DEBUG, "adaptor add_collection started");
+
     char* collectionFP = collection_full_path(db, collection);
     Response rs = newCollectionSL(collectionFP);
     free(collectionFP);
+
+    logWriter(LOG_DEBUG, "adaptor add_collection completed");
     return rs;
 }
 
 Response delete_collection(char* db, char* collection) {
+    logWriter(LOG_DEBUG, "adaptor delete_collection started");
+
     char* collectionFP = collection_full_path(db, collection);
     Response rs = deleteCollectionSL(collectionFP);
     free(collectionFP);
+
+    logWriter(LOG_DEBUG, "adaptor delete_collection completed");
     return rs;
 }
 
 CountRS count_collection(char* db) {
+    logWriter(LOG_DEBUG, "adaptor count_collection started");
+
     char* collectionsBP = collection_base_path(db);
     CountRS rs = collectionCountSL(collectionsBP);
     free(collectionsBP);
+
+    logWriter(LOG_DEBUG, "adaptor count_collection completed");
     return rs;
 }
 
 CollectionListRS list_collection(char* db) {
+    logWriter(LOG_DEBUG, "adaptor list_collection started");
+
     char* collectionsBP = collection_base_path(db);
     CollectionListRS rs = collectionListSL(collectionsBP);
     free(collectionsBP);
+
+    logWriter(LOG_DEBUG, "adaptor list_collection completed");
     return rs;
 }
 
 Response delete_vector(char* db, char* collection, char* hash) {
+    logWriter(LOG_DEBUG, "adaptor delete_vector started");
+
     char* vectorBP = vector_base_path(db, collection);
     Response rs = deleteVectorSL(vectorBP, hash);
     free(vectorBP);
+
+    logWriter(LOG_DEBUG, "adaptor delete_vector completed");
     return rs;
 }
 
 CountRS count_vector(char* db, char* collection) {
+    logWriter(LOG_DEBUG, "adaptor count_vector started");
+
     char* vectorBP = vector_base_path(db, collection);
     CountRS rs = vectorCountSL(vectorBP);
     free(vectorBP);
+
+    logWriter(LOG_DEBUG, "adaptor count_vector completed");
     return rs;
 }
 
 VectorListRS list_vector(char* db, char* collection) {
+    logWriter(LOG_DEBUG, "adaptor list_vector started");
+
     char* vectorBP = vector_base_path(db, collection);
     VectorListRS rs = vectorListSL(vectorBP);
     free(vectorBP);
+
+    logWriter(LOG_DEBUG, "adaptor list_vector completed");
     return rs;
 }
 
 GetVectorRS get_vector(char* db, char* collection, char* hash) {
+    logWriter(LOG_DEBUG, "adaptor get_vector started");
+
     char* vectorBP = vector_base_path(db, collection);
     GetVectorRS rs = getVectorSL(vectorBP, hash);
     free(vectorBP);
+
+    logWriter(LOG_DEBUG, "adaptor get_vector completed");
     return rs;
 }
 
 PutVectorRS add_vector(char* db, char* collection, char* ai_model, char* hash, int vdim, double* vp, bool is_normal, bool overwrite) {
+    logWriter(LOG_DEBUG, "adaptor add_vector started");
+
     char* vectorBP = vector_base_path(db, collection);
     PutVectorRS rs = putVectorSL(vectorBP, ai_model, hash, vdim, vp, is_normal, overwrite);
     free(vectorBP);
+
+    logWriter(LOG_DEBUG, "adaptor add_vector completed");
     return rs;
 }
 
 QueryVectorRSWrapper query_vector(char* db, char* collection, char* ai_model, int vdim, double* vp, QueryOptions queryOptions) {
+    logWriter(LOG_DEBUG, "adaptor query_vector started");
+
     char* vectorBP = vector_base_path(db, collection);
     QueryVectorRSWrapper rs = queryVectorSL(vectorBP, ai_model, vdim, vp, queryOptions);
     free(vectorBP);
+
+    logWriter(LOG_DEBUG, "adaptor query_vector completed");
     return rs;
 }
 
-char* do_db_ops(char* payload) {
+char* do_db_ops(char* threadUUID, char* payload) {    
+    logWriter(LOG_DEBUG, "adaptor do_db_ops started");
+
     char* result;
 
+    logWriter(LOG_DEBUG, "adaptor metadataSB while db operations");
     StringBuilder metadataSB;
     initStringBuilder(&metadataSB, 10);
 
+    logWriter(LOG_DEBUG, "adaptor errorSB while db operations");
     StringBuilder errorSB;
     initStringBuilder(&errorSB, 10);
 
+    logWriter(LOG_DEBUG, "adaptor resultSB while db operations");
     StringBuilder resultSB;
     initStringBuilder(&resultSB, 10);
 
+    logWriter(LOG_DEBUG, "adaptor clientResponseSB while db operations");
     StringBuilder clientResponseSB;
     initStringBuilder(&clientResponseSB, 10);
 
     appendToStringBuilder(&metadataSB, "\"metadata\": [");
     appendToStringBuilder(&metadataSB, "{\"response_id\": \"");
-    char* responseID = getUUID();
+    char* responseID = strdup(threadUUID);
     appendToStringBuilder(&metadataSB, responseID);
     free(responseID);
     appendToStringBuilder(&metadataSB, "\"}");
@@ -552,12 +641,20 @@ char* do_db_ops(char* payload) {
     appendToStringBuilder(&clientResponseSB, "{");
 
     char* db = getDatabasePath();
+
+    logWriter(LOG_DEBUG, "Payload: ");
+    logWriter(LOG_DEBUG, payload);
     JsonNode* root = loadJson(payload);
+
+    logWriter(LOG_INFO, "Check whether the DB path and Payload is valid");
     if(db == NULL) {
+        logWriter(LOG_ERROR, "The base path provided for DB is NULL");
         appendToStringBuilder(&errorSB, "\"Invalid server state. Please restart the server with valid configuration.\"");     
     } else if(root == NULL) {
+        logWriter(LOG_WARN, "The query provided is not a valid JSON"); 
         appendToStringBuilder(&errorSB, "\"Invalid Query (JSON format)\"");     
     } else {
+            logWriter(LOG_INFO, "The provided DB path and Payload is valid");
             JsonNode* opNode =  searchJson(root, "op");
             JsonNode* objNode = searchJson(root, "obj");
             JsonNode* argsNode = searchJson(root, "args");
@@ -567,10 +664,11 @@ char* do_db_ops(char* payload) {
             
             bool isError;
             if(strcmp(op, "add") == 0 && strcmp(obj, "db") == 0) {
+                logWriter(LOG_INFO, "Begin add db");
                 JsonNode* dbNode = searchJson(argsNode, "db");
-                printf("----- %d ----- \n", !isValidObjName(dbNode->value));
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
@@ -579,20 +677,31 @@ char* do_db_ops(char* payload) {
                     Response rs = add_db(dbNode->value); 
                     char* result = response_to_string(&rs);
                     free(rs.errMsg);
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }
                 }
 
             } else if(strcmp(op, "add") == 0 && strcmp(obj, "collection") == 0) {
+                logWriter(LOG_INFO, "Begin add collection");
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
 
                 JsonNode* collectionNode = searchJson(argsNode, "collection");
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                 } 
@@ -601,14 +710,24 @@ char* do_db_ops(char* payload) {
                     Response rs = add_collection(dbNode->value, collectionNode->value); 
                     char* result = response_to_string(&rs);
                     free(rs.errMsg);
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }
                 }
 
             } else if(strcmp(op, "delete") == 0 && strcmp(obj, "collection") == 0) {
+                logWriter(LOG_INFO, "Begin delete collection");
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
@@ -616,6 +735,7 @@ char* do_db_ops(char* payload) {
                 JsonNode* collectionNode = searchJson(argsNode, "collection");
                 
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                 } 
@@ -624,19 +744,24 @@ char* do_db_ops(char* payload) {
                     Response rs = delete_collection(dbNode->value, collectionNode->value); 
                     char* result = response_to_string(&rs);
                     free(rs.errMsg);
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }
                 }
                 
-                // char* result = strdup("Operation not supported in this version");
-                // return result;
-
-                // appendToStringBuilder(&resultSB, "\"Operation not supported in this version\"");
-
             } else if(strcmp(op, "count") == 0 && strcmp(obj, "collection") == 0) {
+                logWriter(LOG_INFO, "Begin count collection");
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 }
@@ -645,14 +770,24 @@ char* do_db_ops(char* payload) {
                     CountRS rs = count_collection(dbNode->value); 
                     char* result = count_rs_to_string(&rs);
                     free(rs.errMsg);
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }
                 }
 
             } else if(strcmp(op, "list") == 0 && strcmp(obj, "collection") == 0) {
+                logWriter(LOG_INFO, "Begin list collection");
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 }
@@ -669,26 +804,37 @@ char* do_db_ops(char* payload) {
                         free(rs.collections);
                     }
                     
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }
                 }
 
             } else if(strcmp(op, "delete") == 0 && strcmp(obj, "vector") == 0) {
+                logWriter(LOG_INFO, "Begin delete vector");
                 JsonNode* collectionNode = searchJson(argsNode, "collection");
                 JsonNode* hashNode = searchJson(argsNode, "hash");
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
 
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                 } 
 
                 if(hashNode == NULL || hashNode->value == NULL || !isValidObjName(hashNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: vector (hash) or, vector (hash) provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
                 } 
@@ -697,20 +843,31 @@ char* do_db_ops(char* payload) {
                     Response rs = delete_vector(dbNode->value, collectionNode->value, hashNode->value); 
                     char* result = response_to_string(&rs);
                     free(rs.errMsg);
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }
                 }
 
             } else if(strcmp(op, "count") == 0 && strcmp(obj, "vector") == 0) {
+                logWriter(LOG_INFO, "Begin count vector");
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
 
                 JsonNode* collectionNode = searchJson(argsNode, "collection");
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                 } 
@@ -719,20 +876,31 @@ char* do_db_ops(char* payload) {
                     CountRS rs = count_vector(dbNode->value, collectionNode->value); 
                     char* result = count_rs_to_string(&rs);
                     free(rs.errMsg);
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }
                 }
 
             } else if(strcmp(op, "list") == 0 && strcmp(obj, "vector") == 0) {
+                logWriter(LOG_INFO, "Begin list vector");
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
 
                 JsonNode* collectionNode = searchJson(argsNode, "collection");
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                 } 
@@ -747,27 +915,39 @@ char* do_db_ops(char* payload) {
                             i++;
                         }
                         free(rs.vectors);
-                    }   
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);                     
+                    }
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }                
                 }
 
             } else if(strcmp(op, "get") == 0 && strcmp(obj, "vector") == 0) {
+                logWriter(LOG_INFO, "Begin get vector");
                 JsonNode* collectionNode = searchJson(argsNode, "collection");
                 JsonNode* hashNode = searchJson(argsNode, "hash");
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
                 
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                 } 
 
                 if(hashNode == NULL || hashNode->value == NULL || !isValidObjName(hashNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: vector (hash) or, vector (hash) provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
                 } 
@@ -775,11 +955,21 @@ char* do_db_ops(char* payload) {
                     GetVectorRS rs = get_vector(dbNode->value, collectionNode->value, hashNode->value); 
                     char* result = vector_rs_to_string(&rs);
                     free(rs.errMsg);
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);             
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }          
                 }
 
             } else if(strcmp(op, "put") == 0 && strcmp(obj, "vector") == 0) {
+                logWriter(LOG_INFO, "Begin put vector");
+
                 JsonNode* collectionNode = searchJson(argsNode, "collection");
                 JsonNode* aiModelNode = searchJson(argsNode, "ai_model");
                 JsonNode* vdimNode = searchJson(argsNode, "vdim");
@@ -787,16 +977,19 @@ char* do_db_ops(char* payload) {
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
                 
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                 } 
 
                 if(aiModelNode == NULL || aiModelNode->value == NULL) {
+                    logWriter(LOG_WARN, "Missing parameter: ai_model");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
                 } 
@@ -804,6 +997,7 @@ char* do_db_ops(char* payload) {
                 int vdim = 0;
 
                 if(vdimNode == NULL || vdimNode->value == NULL || !isValidInteger(vdimNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: vector dimension (vdim)");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
                 } else {
@@ -812,6 +1006,7 @@ char* do_db_ops(char* payload) {
 
                 double vp[vdim];
                 if(vpNode == NULL) {
+                    logWriter(LOG_WARN, "Missing parameter: vector points (vp)");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector points (vp)\"");
                 } else {
@@ -821,6 +1016,8 @@ char* do_db_ops(char* payload) {
                         vp[i] = strtod(vpNode->children[i]->value, &errptr);
                         
                         if (*errptr != '\0') {
+                            logWriter(LOG_WARN, "Invalid vector points: ");
+                            logWriter(LOG_WARN, errptr);
                             (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                             appendToStringBuilder(&errorSB, "\"Invalid vector points\"");
                             break;
@@ -844,11 +1041,21 @@ char* do_db_ops(char* payload) {
                     char* result = put_vector_rs_to_string(&rs);
                     free(rs.errMsg);
                     free(rs.hash);
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);  
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    }  
                 }
 
             } else if(strcmp(op, "query") == 0 && strcmp(obj, "vector") == 0) {
+                logWriter(LOG_INFO, "Begin query vector");
+
                 JsonNode* collectionNode = searchJson(argsNode, "collection");
                 JsonNode* aiModelNode = searchJson(argsNode, "ai_model");
                 JsonNode* vdimNode = searchJson(argsNode, "vdim");
@@ -856,22 +1063,26 @@ char* do_db_ops(char* payload) {
                 JsonNode* dbNode = searchJson(argsNode, "db");
                 
                 if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                 } 
                 
                 if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                 } 
                 
                 if(aiModelNode == NULL || aiModelNode->value == NULL) {
+                    logWriter(LOG_WARN, "Missing parameter: ai_model");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
                 } 
                 
                 int vdim = 0; 
                 if(vdimNode == NULL || vdimNode->value == NULL || !isValidInteger(vdimNode->value)) {
+                    logWriter(LOG_WARN, "Missing parameter: vector dimension (vdim)");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
                 } else {
@@ -879,6 +1090,7 @@ char* do_db_ops(char* payload) {
                 }
                 
                 if(vpNode == NULL) {
+                    logWriter(LOG_WARN, "Missing parameter: vector points (vp)");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Missing parameter: vector points (vp)\"");
                 } 
@@ -890,6 +1102,8 @@ char* do_db_ops(char* payload) {
                     while(vpNode->children[i] != NULL && i<vdim) {
                         vp[i] = strtod(vpNode->children[i]->value, &errptr);
                         if (*errptr != '\0') {
+                            logWriter(LOG_WARN, "Invalid vector points");
+                            logWriter(LOG_WARN, errptr);
                             (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                             appendToStringBuilder(&errorSB, "\"Invalid vector points\"");
                             break;
@@ -942,18 +1156,29 @@ char* do_db_ops(char* payload) {
                     if(rs.faultCount > 0) {
                         free(rs.faultVectorRS);
                     }
-                    appendToStringBuilder(&resultSB, result);
-                    free(result);  
+
+                    if(result != NULL) {
+                        logWriter(LOG_INFO, "Added result to resultSB");
+                        appendToStringBuilder(&resultSB, result);
+                        free(result);
+                    } else {
+                        isError = true;
+                        logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                        appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                    } 
                 }
 
             } else {
                 if(strcmp(op, "empty") == 0) {
+                    logWriter(LOG_WARN, "Operation was missing in the payload");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Invalid Operation\"");
                 } else  if(strcmp(obj, "empty") == 0) {
+                    logWriter(LOG_WARN, "DB Object provided in the payload is invalid");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Operation on invalid Object\"");
                 } else {
+                    logWriter(LOG_WARN, "Operation and DB object is missing in the payload");
                     (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                     appendToStringBuilder(&errorSB, "\"Invalid query\"");            
                 }
@@ -962,25 +1187,30 @@ char* do_db_ops(char* payload) {
             freeJson(root);
     }
 
+    
     appendToStringBuilder(&metadataSB, "]");
     appendToStringBuilder(&clientResponseSB, metadataSB.data);
     freeStringBuilder(&metadataSB);
+    logWriter(LOG_DEBUG, "Added metadata to client response");
     appendToStringBuilder(&clientResponseSB, ", ");
     
     appendToStringBuilder(&resultSB, "]");
     appendToStringBuilder(&clientResponseSB, resultSB.data);
     freeStringBuilder(&resultSB);
+    logWriter(LOG_DEBUG, "Added db operation result to client response");
     appendToStringBuilder(&clientResponseSB, ", ");
 
     appendToStringBuilder(&errorSB, "]");
     appendToStringBuilder(&clientResponseSB, errorSB.data);
     freeStringBuilder(&errorSB);
-    
+    logWriter(LOG_DEBUG, "Added errors if any to client response");
+
     appendToStringBuilder(&clientResponseSB, "}");
 
     result = strdup(clientResponseSB.data);
     freeStringBuilder(&clientResponseSB);
     
+    logWriter(LOG_DEBUG, "adaptor do_db_ops completed");
     return result;
 }
 

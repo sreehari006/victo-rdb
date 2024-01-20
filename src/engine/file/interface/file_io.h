@@ -2,7 +2,6 @@
 
 bool fileExists(const char* filename);
 bool dirExists(const char* dirPath);
-// void delete_files_and_subdirectories(const char* dirPath);
 int get_directory_count(const char* dirPath);
 char** list_directory(const char* dirPath);
 char** list_files(const char* dirPath, int option, const char* ext);

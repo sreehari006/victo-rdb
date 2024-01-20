@@ -1,6 +1,8 @@
 #include "./interface/server.h"
 #include "../commons/interface/adaptor.h"
 #include "../commons/interface/globals.h"
+#include "../../utils/logs/interface/log.h"
+#include "../../utils/uuid/interface/uuid.h"
 
 struct ClientData {
     int client_socket;
@@ -12,8 +14,6 @@ struct ServerData {
     struct ClientData client_connection[MAX_CLIENTS];
     int isRunning;
 };
-
-struct ServerData serverData;
 
 struct WebSocketFrame {
     uint8_t fin;
@@ -29,7 +29,10 @@ struct ThreadData {
     int client_index;
 };
 
+static struct ServerData serverData;
+
 void stopWebSockServer() {
+    logWriter(LOG_DEBUG, "server stopWebSockServer started");
 
     serverData.isRunning = 0;
     
@@ -42,9 +45,12 @@ void stopWebSockServer() {
     }
 
     close(serverData.server_socket);
+    logWriter(LOG_DEBUG, "server stopWebSockServer completed");
 }
 
 void calculate_websocket_key(const char *client_key, char *response_key) {
+    logWriter(LOG_DEBUG, "server calculate_websocket_key started");
+
     const char websocket_magic[] = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     char concatenated_key[BUFFER_SIZE];
     unsigned char sha1_hash[SHA_DIGEST_LENGTH];
@@ -66,29 +72,33 @@ void calculate_websocket_key(const char *client_key, char *response_key) {
 
     strcpy(response_key, bufferPtr->data);
     BIO_free_all(bio);
+
+    logWriter(LOG_DEBUG, "server calculate_websocket_key completed");
 }
 
 void handle_client_connection(int client_socket, int client_index) {
+    logWriter(LOG_DEBUG, "server handle_client_connection started");
+
     char buffer[BUFFER_SIZE];
     ssize_t bytes_received;
 
     bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
     if (bytes_received < 0) {
-        perror("Error reading from socket");
+        logWriter(LOG_ERROR, "Error reading from socket");
         return;
     }
 
     const char *search_key = "Sec-WebSocket-Key: ";
     char *key_start = strstr(buffer, search_key);
     if (key_start == NULL) {
-        fprintf(stderr, "Invalid WebSocket handshake request\n");
+        logWriter(LOG_ERROR, "Invalid WebSocket handshake request");
         return;
     }
 
     key_start += strlen(search_key);
     char *key_end = strchr(key_start, '\r');
     if (key_end == NULL) {
-        fprintf(stderr, "Invalid WebSocket handshake request\n");
+        logWriter(LOG_ERROR, "Invalid WebSocket handshake request");
         return;
     }
 
@@ -111,12 +121,15 @@ void handle_client_connection(int client_socket, int client_index) {
     char client_name[20];
     sprintf(client_name, "client_%d", client_index);
 
+    logWriter(LOG_INFO, "Client connection request successful");
     serverData.client_connection[client_index].client_name = client_name;
     send(client_socket, handshake_response, strlen(handshake_response),0);
 
+    logWriter(LOG_DEBUG, "server handle_client_connection completed");
 }
 
 void sendWebSocketFrame(int socket, const char *data, unsigned char opcode) {
+    logWriter(LOG_DEBUG, "server sendWebSocketFrame started");
     int data_len = strlen(data);
     unsigned char header[10]; 
 
@@ -136,31 +149,44 @@ void sendWebSocketFrame(int socket, const char *data, unsigned char opcode) {
         }
     }
 
+    logWriter(LOG_INFO, "Sending response to client");
+    logWriter(LOG_DEBUG, data);
     send(socket, header, (data_len <= 125) ? 2 : 4, 0);
     send(socket, data, data_len, 0);
+    
+    logWriter(LOG_DEBUG, "server sendWebSocketFrame completed");
 }
 
 void *threadFunction(void *arg) {
+    logWriter(LOG_INFO, "server threadFunction started");
+
+    char sysThreadID[25]; 
+    snprintf(sysThreadID, sizeof(sysThreadID), "%p", (void *) pthread_self());
+    char* threadUUID = getUUID();
+    setLogThreadRegisterUUID(sysThreadID, threadUUID);
+
+    logWriter(LOG_DEBUG, "Inside threadFunciton for processing the client message");
+    
     char* client_message = NULL;
     int client_message_size=0;
 
     char buffer[1024];
     struct ThreadData *data = (struct ThreadData *) arg;
     
-
+    logWriter(LOG_DEBUG, "Read client messages");
     while (1) {
         int bytes_received = recv(data->sd, buffer, sizeof(buffer), 0);
         
         if (client_message == NULL) {
             client_message = malloc(bytes_received + 1); 
             if (client_message == NULL) {
-                perror("Memory allocation error");
+                logWriter(LOG_CRITICAL, "Memory allocation failed while reading client messages");
                 exit(EXIT_FAILURE);
             }
         } else {
             char *temp = realloc(client_message, client_message_size + bytes_received + 1); 
             if (temp == NULL) {
-                perror("Memory allocation error");
+                logWriter(LOG_CRITICAL, "Memory re-allocation failed while reading client messages");
                 exit(EXIT_FAILURE);
             }
             client_message = temp;
@@ -176,6 +202,7 @@ void *threadFunction(void *arg) {
         }
     }
 
+    logWriter(LOG_DEBUG, "Start extract mesages from websocket frame");
     struct WebSocketFrame frame;
     frame.fin = (client_message[0] & 0x80) >> 7;
     frame.opcode = client_message[0] & 0x0F;
@@ -183,22 +210,28 @@ void *threadFunction(void *arg) {
     frame.payload_length = client_message[1] & 0x7F;
 
     if (frame.opcode == 0x0) {
+        logWriter(LOG_DEBUG, "OP Code - continuation frame");
         // Implement continuation frame
     } else if (frame.opcode == 0x1) {
+        logWriter(LOG_DEBUG, "OP Code - text frame");
         int payload_index = 2;
         
+        logWriter(LOG_DEBUG, "Payload is masked");
         if(frame.mask) {
             payload_index += 4;
         }
 
         if(frame.payload_length < 126) {
+            logWriter(LOG_DEBUG, "Payload length is less than 126 bytes");
             memcpy(&frame.masking_key,client_message + 2, 4);
         } else if (frame.payload_length == 126) {
+            logWriter(LOG_DEBUG, "Payload length field is 126 bytes");
             memcpy(&frame.payload_length, client_message + 2, 2);
             memcpy(&frame.masking_key,client_message + 4, 4);
             frame.payload_length = ntohs(frame.payload_length);
             payload_index += 2;
         } else if (frame.payload_length == 127) {
+            logWriter(LOG_DEBUG, "Payload length field is 127 bytes");
             memcpy(&frame.payload_length, client_message + 2, 8);
             memcpy(&frame.masking_key,client_message + 10, 4);
             frame.payload_length = ntohll(frame.payload_length);
@@ -208,11 +241,11 @@ void *threadFunction(void *arg) {
         frame.payload = (char *)malloc(frame.payload_length);
 
         if (frame.payload == NULL) {
-            // Check if memory allocation is successful
-            fprintf(stderr, "Memory allocation failed\n");
-            exit(1);
+            logWriter(LOG_CRITICAL, "Memory allocation failed while reading payload from websocket frames");
+            exit(EXIT_FAILURE);
         }
 
+        logWriter(LOG_DEBUG, "Extract payload");
         for(int j=0; j<frame.payload_length; j++) {
             if(frame.mask) {
                 frame.payload[j] = client_message[j+payload_index] ^ frame.masking_key[j%4];
@@ -220,14 +253,21 @@ void *threadFunction(void *arg) {
                 frame.payload[j] = client_message[j+payload_index];
             }
         }    
+
         frame.payload[frame.payload_length] = '\0';
 
-        char* result = do_db_ops(frame.payload);
+        logWriter(LOG_INFO, "Start DB Operations");
+        char* result = do_db_ops(threadUUID, frame.payload);
         if(result != NULL) {
+            logWriter(LOG_INFO, "Send query result back to client");
             sendWebSocketFrame(data->sd, result, 0x01);
             free(result);
         } else {
-            sendWebSocketFrame(data->sd, "{\"Error\":\"Unknown Error\"}", 0x01);
+            logWriter(LOG_WARN, "Query result is empty");
+            char null_result[100] = "{\"response_id\": \"";
+            strcat(null_result, threadUUID);
+            strcat(null_result, "\", \"Error\":\"Unknown Error\"}");
+            sendWebSocketFrame(data->sd, null_result, 0x01);
         }
 
         free(frame.payload);
@@ -251,10 +291,15 @@ void *threadFunction(void *arg) {
 
     free(client_message);
 
+    free(threadUUID);
+    removeLogThreadRegisterUUID(sysThreadID);
+
+    logWriter(LOG_INFO, "server threadFunction completed");
     pthread_exit(NULL);
 }
 
 void startWebSockServer() {
+    logWriter(LOG_DEBUG, "server startWebSockServer started");
     int max_socket, activity, sd;
     struct sockaddr_in server_addr;
     fd_set master_set, readfds;
@@ -262,32 +307,31 @@ void startWebSockServer() {
 
     serverData.server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverData.server_socket < 0) {
-        perror("Socket creation failed");
-        exit(1);
+        logWriter(LOG_CRITICAL, "Socket creation failed");
+        exit(EXIT_FAILURE);
     }
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(getWebsockInitPort());
     server_addr.sin_addr.s_addr = inet_addr(getWebsockInitIP());
     
-    if(bind(serverData.server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr))<0){
-        printf("Couldn't bind to the port\n");
-        exit(1);
+    if(bind(serverData.server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr))<0) {
+        logWriter(LOG_CRITICAL, "Couldn't bind to the port");
+        exit(EXIT_FAILURE);
     }
     
     if(listen(serverData.server_socket, 1) < 0){
-        printf("Error while listening\n");
-        exit(1);
+        logWriter(LOG_CRITICAL, "Error while listening");
+        exit(EXIT_FAILURE);
     }
 
-    printf("\nListening for incoming connections.....\n");
-
-
+    logWriter(LOG_DEBUG, "Initiatize serverData with client sockets and client name");
     for (i = 0; i < max_clients; i++) {
         serverData.client_connection[i].client_socket = 0;
         serverData.client_connection[i].client_name = NULL;
     }
 
+    logWriter(LOG_DEBUG, "Listening for incoming connections and message");
     serverData.isRunning = 1;
     while (serverData.isRunning) {    
         FD_ZERO(&readfds);
@@ -302,6 +346,7 @@ void startWebSockServer() {
                 max_socket = sd;
         } 
 
+        logWriter(LOG_DEBUG, "Look for activity on sockets");
         activity = select(max_socket + 1, &readfds, NULL, NULL, NULL);
 
         if (activity == -1) {
@@ -314,12 +359,13 @@ void startWebSockServer() {
         }
 
         if (FD_ISSET(serverData.server_socket, &readfds)) {
+            logWriter(LOG_DEBUG, "Accept client connection");
             int new_socket = accept(serverData.server_socket, NULL, NULL);
             if (new_socket == -1) {
                 if (errno == EINTR) {
                     continue;  
                 } else {
-                    perror("Accept failed");
+                    logWriter(LOG_CRITICAL, "Connection accept failed on server socket");
                     exit(EXIT_FAILURE);
                 }
             }
@@ -328,8 +374,19 @@ void startWebSockServer() {
                 if (serverData.client_connection[i].client_socket == 0) {
                     serverData.client_connection[i].client_socket = new_socket;
                     handle_client_connection(serverData.client_connection[i].client_socket, i);
-                    printf("\nNew connection, socket fd is %d, ip is: %s, port: %d client: %s \n",
-                           new_socket, inet_ntoa(server_addr.sin_addr), ntohs(server_addr.sin_port), serverData.client_connection[i].client_name);
+                    logWriter(LOG_INFO, "New connection set");
+                    logWriter(LOG_INFO, "Socket file descriptor: ");
+                    char new_socket_str[20];
+                    sprintf(new_socket_str, "%d", new_socket);
+                    logWriter(LOG_INFO, new_socket_str);
+                    logWriter(LOG_INFO, "Server IP: ");
+                    logWriter(LOG_INFO, inet_ntoa(server_addr.sin_addr));
+                    // logWriter(LOG_INFO, "Server Port: ");
+                    // logWriter(LOG_INFO, ntohs(server_addr.sin_port));
+                    logWriter(LOG_INFO, "Client connection details:");
+                    logWriter(LOG_INFO, serverData.client_connection[i].client_name);
+                    
+                    
                     break;
                 }
             }
@@ -345,18 +402,22 @@ void startWebSockServer() {
                 pthread_t thread;
                 
                 if (pthread_create(&thread, NULL, threadFunction, (void *) &data) != 0) {
-                    fprintf(stderr, "Error creating thread\n");
-                    exit(1);
+                    logWriter(LOG_CRITICAL, "Error creating a new thread");
+                    exit(EXIT_FAILURE);
                 } else {
-                    printf("New Thread created for client of index: %d\n", i);
+                    logWriter(LOG_INFO, "New thread created for handling messages from Client: ");
+                    logWriter(LOG_INFO, "Client connection details:");
+                    char client_index_str[20];
+                    sprintf(client_index_str, "%d", i);
+                    logWriter(LOG_INFO, client_index_str);
                 }
 
                 pthread_join(thread, NULL);
-                printf("Back to Main Thread While Loop \n");
+                logWriter(LOG_INFO, "Back to Main Thread While Loop for checking new incoming messages");
             }
         } 
     }
 
-    printf("## Shutting down the server ## \n");
+    printf("## Shutting down the server ##\n");
 
 }

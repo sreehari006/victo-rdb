@@ -1,12 +1,14 @@
 typedef struct {
+    char* dbServerPath;
     char* dbBasePath;
+    char* dbLogPath;
     char* ipAddress;
     int port;
     int maxStackSize;
 } WebsocketParams;
 
-void setWebSocketParams(WebsocketParams websocketParams);
+void setWebSocketParams(WebsocketParams params);
 char* getDatabasePath();
 char* getWebsockInitIP();
 int getWebsockInitPort();
-void cleanupDatabasePath();
+void cleanupWebSocketParams();

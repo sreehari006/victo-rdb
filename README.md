@@ -33,9 +33,23 @@ make -C ./build/
 5. Once the step 4 is successful, "victo-exe" would have been created in "path/to/cloned/repo/<b>build</b>" directory
 6. Navigate to "build" directory and start Victo database using below command
 ```
-./build/victo-exe /preferred/path/for/victo/data/files
+./build/victo-exe -d /preferred/path/for/victo/data/files
 ```
-It is in this path the actual victo database objects and files are stored in the disk.
+It is in this path the actual victo database objects and files are stored in the disk. Other supported flags including -d are:
+
+| Flag     | Description                                          | Mandatory?        | Default Value                                      | Valid values  |
+|----------|------------------------------------------------------|-------------------|----------------------------------------------------|---------------|
+|   -d    | Preferred path to victo database                      | Yes               |                                                    | File Path     |
+|   -i    | overwrite ip (useful while starting in container)     | No                | 127.0.0.1 or 0.0.0.0                               | IP Address    |
+|         |                                                       |                   | 127.0.0.1 - localhost                              |               |
+|         |                                                       |                   | 0.0.0.0   - for routing request outside container.|               | 
+|   -p    | overwrite port                                        | No                | 2018                                               | Port Number   |
+|   -l    | Logger Level                                          | No                | INFO                                               | DEBUG         |
+|         |                                                       |                   |                                                    | INFO          |
+|         |                                                       |                   |                                                    | WARN          |
+|         |                                                       |                   |                                                    | ERROR         |
+|         |                                                       |                   |                                                    | CRITICAL      |
+
 
 7. By default, the db server is started listening on port 2018. We can connect to the server with any websocket client using the URL as below
 ```
@@ -82,7 +96,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 |         |                                                       | "add", "delete", "list" or "count" if obj is collection       |
 |         |                                                       | "put", "get", "list", "count" or "query" if obj is vector     |
 | obj     | Database object on which the operation is executed    | "db" or "collection" or "vector"                              |
-| args    | arguments                                             | 
+| args    | arguments                                             |                                                               |
 
 ### Add a database 
 
@@ -608,7 +622,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 * Social Networks
 
 ## Roadmap
-- [ ] Enhance logging mechanism and Error Handling
+- [x] Enhance logging mechanism and Error Handling
 - [ ] Build scheduler for threads handling db operations
 - [ ] Enable support for secure websockets (wss)
 - [ ] Enhance DB features
@@ -616,7 +630,10 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
     - [ ] Subscribe on collections
 
 ## Version
-[12 Jan 2024] - 1.1.0 (Latest stable version)
+[20 Jan 2024] - 1.2.0 (Latest stable version)
+Enhanced logging mechanism and error handling
+
+[12 Jan 2024] - 1.1.0
 Added support for Docker and containerization
 
 [6th Jan 2024] - 1.0.0 
