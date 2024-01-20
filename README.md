@@ -42,7 +42,7 @@ It is in this path the actual victo database objects and files are stored in the
 |   -d    | Preferred path to victo database                      | Yes               |                                                    | File Path     |
 |   -i    | overwrite ip (useful while starting in container)     | No                | 127.0.0.1 or 0.0.0.0                               | IP Address    |
 |         |                                                       |                   | 127.0.0.1 - localhost                              |               |
-|         |                                                       |                   | 0.0.0.0   - for routing request outside container  |               | 
+|         |                                                       |                   | 0.0.0.0   - for routing request outside container.|               | 
 |   -p    | overwrite port                                        | No                | 2018                                               | Port Number   |
 |   -l    | Logger Level                                          | No                | INFO                                               | DEBUG         |
 |         |                                                       |                   |                                                    | INFO          |
