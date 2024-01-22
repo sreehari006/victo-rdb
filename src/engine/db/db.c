@@ -65,19 +65,24 @@ Response initDBConfig(const char* location) {
             rs.errMsg = SCHEMA_FAILED_ERROR_MSG;
         }
     #else
-        char dbPath[strlen(location) + strlen(DB) + 1];
-        strcpy(dbPath, location);
-        strcat(dbPath, "/");
-        strcat(dbPath, DB);
-
-        char logPath[strlen(location) + strlen(LOGS) + 1];
-        strcpy(logPath, location);
-        strcat(logPath, "/");
-        strcat(logPath, LOGS);
-
         rs.errCode = SUCCESS_CODE;
         rs.errMsg = strdup(SUCESS_MSG);        
         if(dirExists(location)) {
+            char dbPath[strlen(location) + strlen(DB) + 1];
+            strcpy(dbPath, location);
+            strcat(dbPath, "/");
+            strcat(dbPath, DB);
+
+            char logPath[strlen(location) + strlen(LOGS) + 1];
+            strcpy(logPath, location);
+            strcat(logPath, "/");
+            strcat(logPath, LOGS);
+
+            char usersPath[strlen(location) + strlen(USERS) + 1];
+            strcpy(usersPath, location);
+            strcat(usersPath, "/");
+            strcat(usersPath, USERS);
+
             if(!dirExists(dbPath)) {
                 if(mkdir(dbPath, 0777) != 0) {
                     rs.errCode = FAILED_CODE;
@@ -91,6 +96,15 @@ Response initDBConfig(const char* location) {
                     rs.errMsg = strdup(FAILED_MSG);
                 }
             }
+
+            if(!dirExists(usersPath)) {
+                if(mkdir(usersPath, 0777) != 0) {
+                    rs.errCode = FAILED_CODE;
+                    rs.errMsg = strdup(FAILED_MSG);
+                }
+            }
+
+
         } else {
             rs.errCode = FAILED_CODE;
             rs.errMsg = strdup(FAILED_MSG);

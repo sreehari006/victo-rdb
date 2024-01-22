@@ -243,10 +243,12 @@ char* collection_list_rs_to_string(CollectionListRS* rs) {
     appendToStringBuilder(&resultSB, "\"");
 
     if(rs->errCode == 0) {
-        char* collections = string_array_to_string(rs->collections);
         appendToStringBuilder(&resultSB, ", \"collections\": [");
-        appendToStringBuilder(&resultSB, collections);
-        free(collections);
+        if(rs->collections != NULL) {
+            char* collections = string_array_to_string(rs->collections);
+            appendToStringBuilder(&resultSB, collections);
+            free(collections);
+        }
         appendToStringBuilder(&resultSB, "]");
     }
 
@@ -278,10 +280,12 @@ char* vector_list_rs_to_string(VectorListRS* rs) {
     appendToStringBuilder(&resultSB, "\"");
 
     if(rs->errCode == 0) {
-        char* vectors = string_array_to_string(rs->vectors);
         appendToStringBuilder(&resultSB, ", \"vectors\": [");
-        appendToStringBuilder(&resultSB, vectors);
-        free(vectors);
+        if(rs->vectors != NULL) {
+            char* vectors = string_array_to_string(rs->vectors);
+            appendToStringBuilder(&resultSB, vectors);
+            free(vectors);
+        } 
         appendToStringBuilder(&resultSB, "]");
     }
 

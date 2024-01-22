@@ -16,31 +16,35 @@ unsigned int hash(const char *key) {
     return hashval % HASHMAP_SIZE;
 }
 
-void insert(HashMap *map, const char *key, char* value) {
-        unsigned int index = hash(key);
-
+void insertHashMap(HashMap *map, const char *key, void* value, size_t valueSize) {
+    unsigned int index = hash(key);
     pthread_mutex_lock(&map->locks[index]);
 
     HashMapNode *newNode = malloc(sizeof(HashMapNode));
     newNode->pair.key = strdup(key);
-    newNode->pair.value = strdup(value);
-    newNode->next = map->buckets[index];
 
-    map->buckets[index] = newNode;
+    newNode->pair.value = malloc(valueSize);
+    if (newNode->pair.value == NULL) {
+        printf("Error: HashMap InsertHashMap Memory allocation failed ");
+    } else {
+        memcpy(newNode->pair.value, value, valueSize);
+        newNode->next = map->buckets[index];
+        map->buckets[index] = newNode;        
+    }
 
     pthread_mutex_unlock(&map->locks[index]);
 }
 
-char* get(HashMap *map, const char *key) {
+void* getHashMap(HashMap *map, const char *key) {
     unsigned int index = hash(key);
-    char* value = NULL;
+    void* value = NULL;
 
     pthread_mutex_lock(&map->locks[index]);
 
     HashMapNode *current = map->buckets[index];
     while (current != NULL) {
         if (strcmp(current->pair.key, key) == 0) {
-            value = strdup(current->pair.value);
+            value = current->pair.value;
             break;
         }
         current = current->next;
@@ -51,7 +55,7 @@ char* get(HashMap *map, const char *key) {
     return value;
 }
 
-void delete(HashMap *map, const char *key) {
+void deleteHashMap(HashMap *map, const char *key, cleanupValueFunc func) {
     unsigned int index = hash(key);
 
     pthread_mutex_lock(&map->locks[index]);
@@ -72,20 +76,20 @@ void delete(HashMap *map, const char *key) {
         }
 
         free(current->pair.key);
-        free(current->pair.value);
+        func(current->pair.value);
         free(current);
     }
 
     pthread_mutex_unlock(&map->locks[index]);
 }
 
-void cleanupHashMap(HashMap *map) {
+void cleanupHashMap(HashMap *map, cleanupValueFunc func) {
     for (int i = 0; i < HASHMAP_SIZE; i++) {
         HashMapNode *current = map->buckets[i];
         while (current != NULL) {
             HashMapNode *next = current->next;
             free(current->pair.key);
-            free(current->pair.value);
+            func(current->pair.value);
             free(current);
             current = next;
         }

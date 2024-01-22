@@ -169,8 +169,12 @@ char** list_directory(const char* dirPath) {
             } 
         }
         closedir(dir);
-        directories = (char**) realloc(directories, (count+1) * sizeof(char*));
-        directories[count] = NULL;
+
+        if(count > 0) {
+            directories = (char**) realloc(directories, (count+1) * sizeof(char*));
+            directories[count] = NULL;
+        }
+        
 
     #endif
     return directories;
@@ -274,8 +278,12 @@ char** list_files(const char* dirPath, int option, const char* ext) {
             } 
         }
         closedir(dir);
-        files = (char**) realloc(files, (count+1) * sizeof(char*));
-        files[count] = NULL;
+
+        if(count > 0) {
+            files = (char**) realloc(files, (count+1) * sizeof(char*));
+            files[count] = NULL;
+        }
+        
 
     #endif
     return files;

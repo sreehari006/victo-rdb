@@ -7,7 +7,7 @@
 
 typedef struct {
     char* key;
-    char* value;
+    void* value;
 } KeyValuePair;
 
 typedef struct HashMapNode {
@@ -20,8 +20,10 @@ typedef struct {
     pthread_mutex_t locks[HASHMAP_SIZE];
 } HashMap;
 
+typedef void (*cleanupValueFunc)(void*);
+
 void initializeHashMap(HashMap* map);
-void insert(HashMap* map, const char* key, char* value);
-char* get(HashMap* map, const char* key);
-void delete(HashMap* map, const char* key);
-void cleanupHashMap(HashMap* map);
+void insertHashMap(HashMap* map, const char* key, void* value, size_t valueSize);
+void* getHashMap(HashMap* map, const char* key);
+void deleteHashMap(HashMap* map, const char* key, cleanupValueFunc func);
+void cleanupHashMap(HashMap* map, cleanupValueFunc func);

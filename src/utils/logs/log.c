@@ -45,6 +45,10 @@ void freeLogMessageNode(LogMessageNode* node) {
     free(node);
 }
 
+void freeLogThreadRegisterNode(void* value) {
+    free(value);
+}
+
 void enqueueLogMessage(const int log_level, const char* threadUUID, const char* message) {
     LogMessageNode* newNode = (LogMessageNode*)malloc(sizeof(LogMessageNode));
     if (newNode == NULL) {
@@ -162,7 +166,7 @@ void logWriter(const int log_level, const char* message) {
     char buffer[25]; 
     snprintf(buffer, sizeof(buffer), "%p", (void *) thread);
 
-    char* threadUUID = get(&threadRegister, buffer);
+    char* threadUUID = (char*) getHashMap(&threadRegister, buffer);
     if(threadUUID == NULL) {
         threadUUID = buffer;
     }
@@ -170,8 +174,11 @@ void logWriter(const int log_level, const char* message) {
     enqueueLogMessage(log_level, threadUUID, message);
 }
 
+
+
 void freeLogUtil() {
-    cleanupHashMap(&threadRegister);
+    cleanupValueFunc cleanupValueFuncPtr = (cleanupValueFunc) freeLogThreadRegisterNode;
+    cleanupHashMap(&threadRegister, cleanupValueFuncPtr);
 
     LogMessageNode* current = messageQueue.head;
     while (current != NULL) {
@@ -194,9 +201,11 @@ void freeLogUtil() {
 }
 
 void setLogThreadRegisterUUID(char* threadID, char* UUID) {
-    insert(&threadRegister, threadID, UUID);
+    char* uuidCopy = strdup(UUID);
+    insertHashMap(&threadRegister, threadID, uuidCopy, strlen(uuidCopy) + 1);
 }
 
 void removeLogThreadRegisterUUID(char* threadID) {
-    delete(&threadRegister, threadID);
+    cleanupValueFunc cleanupValueFuncPtr = (cleanupValueFunc) freeLogThreadRegisterNode;
+    deleteHashMap(&threadRegister, threadID, cleanupValueFuncPtr);
 }
