@@ -5,14 +5,18 @@
 #include "src/service_locator.h"
 #include "src/servers/websock/interface/server.h"
 #include "src/servers/commons/interface/globals.h"
+#include "src/servers/auth/interface/auth.h"
 #include "src/utils/strings/interface/string_builder.h"
 #include "src/utils/logs/interface/log.h"
+
 
 void sigint_handler(int sig) {
     printf("## Server resource cleanup ##\n");
     stopWebSockServer();
     cleanupWebSocketParams();
+    freeAuthUtil();
     freeLogUtil();
+    
 }
 
 int main(int argc, char *argv[]) {
@@ -50,18 +54,20 @@ int main(int argc, char *argv[]) {
 
     if(params.dbServerPath && initDBConfigSL(params.dbServerPath)) {
         params.dbBasePath = getDBBasePathSL(params.dbServerPath);
-        params.dbLogPath = getDBLogPathSL(params.dbServerPath);
+        const char* dbLogPath = getDBLogPathSL(params.dbServerPath);
+        const char* authPath = getDBAuthPathSL(params.dbServerPath);
         
         printf("Starting server\n");
-        initLogUtil(log_level, params.dbLogPath);
+        initLogUtil(log_level, dbLogPath);
         logWriter(LOG_INFO, "Staring Victo server instance");
         logWriter(LOG_INFO, "DB Server Path: ");
         logWriter(LOG_INFO, params.dbServerPath);
         logWriter(LOG_INFO, "DB Base Path: ");
         logWriter(LOG_INFO, params.dbBasePath);
         logWriter(LOG_INFO, "DB Log Path: ");
-        logWriter(LOG_INFO, params.dbLogPath);
+        logWriter(LOG_INFO, dbLogPath);
 
+        initAuthUtil(authPath);
         setWebSocketParams(params);
         startWebSockServer();
     } else {

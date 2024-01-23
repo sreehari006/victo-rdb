@@ -1,7 +1,7 @@
 #define VICTO_FILE_EXT                          ".victo"
 #define DB                                      "db"
 #define LOGS                                    "logs"
-#define USERS                                   "users"
+#define AUTH                                    "auth"
 #define COLLECTIONS                             "collections"
 #define VECTORS                                 "vectors"
 #define SUBSCRIPTIONS                           "subscriptions"

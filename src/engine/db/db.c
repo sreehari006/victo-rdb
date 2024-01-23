@@ -78,10 +78,10 @@ Response initDBConfig(const char* location) {
             strcat(logPath, "/");
             strcat(logPath, LOGS);
 
-            char usersPath[strlen(location) + strlen(USERS) + 1];
-            strcpy(usersPath, location);
-            strcat(usersPath, "/");
-            strcat(usersPath, USERS);
+            char authPath[strlen(location) + strlen(AUTH) + 1];
+            strcpy(authPath, location);
+            strcat(authPath, "/");
+            strcat(authPath, AUTH);
 
             if(!dirExists(dbPath)) {
                 if(mkdir(dbPath, 0777) != 0) {
@@ -97,8 +97,8 @@ Response initDBConfig(const char* location) {
                 }
             }
 
-            if(!dirExists(usersPath)) {
-                if(mkdir(usersPath, 0777) != 0) {
+            if(!dirExists(authPath)) {
+                if(mkdir(authPath, 0777) != 0) {
                     rs.errCode = FAILED_CODE;
                     rs.errMsg = strdup(FAILED_MSG);
                 }
@@ -132,4 +132,14 @@ char* getDBLogPath(const char* location) {
     strcat(logPath, LOGS);
 
     return strdup(logPath);
+}
+
+__attribute__((visibility("hidden"))) 
+char* getDBAuthPath(const char* location) {
+    char authPath[strlen(location) + strlen(AUTH) + 1];
+    strcpy(authPath, location);
+    strcat(authPath, "/");
+    strcat(authPath, AUTH);
+
+    return strdup(authPath);
 }

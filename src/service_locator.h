@@ -15,3 +15,4 @@ VectorListRS vectorListSL(const char* location);
 Response deleteVectorSL(char* location, char* hash);
 char* getDBBasePathSL(const char* location);
 char* getDBLogPathSL(const char* location);
+char* getDBAuthPathSL(const char* location);

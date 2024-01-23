@@ -8,5 +8,7 @@ add_library(
     commons/adaptor.c
     commons/interface/globals.h
     commons/globals.c
+    auth/interface/auth.h
+    auth/auth.c
 )
 

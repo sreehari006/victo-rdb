@@ -130,6 +130,7 @@ void initLogUtil(char* log_level, const char* path) {
     char logFilePath[strlen(path) + strlen("/log.txt") + 1];
     strcpy(logFilePath, path);
     strcat(logFilePath, "/log.txt");
+    free((void *) path);
 
     messageQueue.head = NULL;
     pthread_mutex_init(&messageQueue.mutex, NULL);

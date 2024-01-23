@@ -118,3 +118,7 @@ char* getDBBasePathSL(const char* location) {
 char* getDBLogPathSL(const char* location) {
     return getDBLogPath(location);
 }
+
+char* getDBAuthPathSL(const char* location) {
+    return getDBAuthPath(location);
+}
