@@ -10,5 +10,7 @@ add_library(
     commons/globals.c
     auth/interface/auth.h
     auth/auth.c
+    auth/interface/crypto.h
+    auth/crypto.c
 )
 

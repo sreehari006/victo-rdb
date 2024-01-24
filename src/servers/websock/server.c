@@ -290,7 +290,6 @@ void *threadFunction(void *arg) {
     } 
 
     free(client_message);
-
     free(threadUUID);
     removeLogThreadRegisterUUID(sysThreadID);
 
