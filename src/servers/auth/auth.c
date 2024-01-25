@@ -1,12 +1,13 @@
 
 #include <stdio.h>
-#include "interface/auth.h"
+#include "interface/user_ops.h"
 #include "interface/crypto.h"
 #include "../commons/interface/globals.h"
 #include "../../utils/logs/interface/log.h"
 #include "../../utils/uuid/interface/uuid.h"
 
 static char* authFile;
+static pthread_mutex_t fileMutex = PTHREAD_MUTEX_INITIALIZER;
 
 void loadAuthData() {
     FILE *file = fopen(authFile, "rb");
@@ -111,4 +112,98 @@ void freeAuthUtil() {
         free(authFile);
     }
     printf("Auth Util resource cleanup successful.\n");
+}
+
+
+void addUser(User* user) {
+    logWriter(LOG_DEBUG, "auth addUser started");
+
+    pthread_mutex_lock(&fileMutex);
+
+    FILE* file = fopen(authFile, "ab");
+    if (file == NULL) {
+        logWriter(LOG_ERROR, "Error adding new user. Can't open auth data.");
+    }
+
+    fwrite(user, sizeof(User), 1, file);
+    fclose(file);
+
+    pthread_mutex_unlock(&fileMutex);
+
+    logWriter(LOG_DEBUG, "auth addUser completed");
+}
+
+
+void updateUser(char* userName, User* user) {
+    pthread_mutex_lock(&fileMutex);
+
+    FILE* file = fopen(authFile, "r+b");
+    if (file == NULL) {
+        logWriter(LOG_ERROR, "Error updating user. Can't open auth data.");
+    }
+
+    User currentUser;
+
+    while (fread(&currentUser, sizeof(User), 1, file) == 1) {
+        if (strcmp(currentUser.name, userName) == 0) {
+            fseek(file, -sizeof(User), SEEK_CUR);
+            fwrite(user, sizeof(User), 1, file);
+            break;
+        }
+    }
+
+    fclose(file);
+
+    pthread_mutex_unlock(&fileMutex);
+}
+
+User findUser(char* userName) {
+    pthread_mutex_lock(&fileMutex);
+
+    FILE* file = fopen(authFile, "rb");
+    if (file == NULL) {
+        logWriter(LOG_ERROR, "Error find user. Can't open auth data.");
+    }
+
+    User currentUser;
+    memset(&currentUser, 0, sizeof(User));
+
+    while (fread(&currentUser, sizeof(User), 1, file) == 1) {
+        if (strcmp(currentUser.name, userName) == 0) {
+            break;
+        }
+    }
+
+    fclose(file);
+
+    pthread_mutex_unlock(&fileMutex);
+
+    return currentUser;
+}
+
+bool authenticate(User* user) {
+    pthread_mutex_lock(&fileMutex);
+
+    bool isValid = false;
+
+    FILE* file = fopen(authFile, "rb");
+    if (file == NULL) {
+        logWriter(LOG_ERROR, "Error authenticate user. Can't open auth data.");
+    }
+
+    User currentUser;
+    memset(&currentUser, 0, sizeof(User));
+
+    while (fread(&currentUser, sizeof(User), 1, file) == 1) {
+        if (strcmp(currentUser.name, user->name) == 0 && strcmp(currentUser.name, user->name) == 0) {
+            isValid = true;
+            break;
+        }
+    }
+
+    fclose(file);
+
+    pthread_mutex_unlock(&fileMutex);
+
+    return isValid;
 }
