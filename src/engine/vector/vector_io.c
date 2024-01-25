@@ -137,6 +137,7 @@ VectorListRS vectorList(const char* location) {
     } else {
         rs.errCode = DIR_NOT_EXIST_ERROR_CODE;
         rs.errMsg = strdup(DIR_NOT_EXIST_ERROR_MSG);
+        rs.vectors = NULL;
     }
     return rs;
 }

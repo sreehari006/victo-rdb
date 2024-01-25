@@ -1,7 +1,7 @@
 #include "interface/adaptor.h"
 #include "interface/globals.h"
 #include "../../utils/json/interface/json.h"
-#include "../../service_locator.h"
+#include "../../sl/db/interface/service_locator.h"
 #include "../../utils/strings/interface/string_builder.h"
 #include "../../utils/uuid/interface/uuid.h"
 #include "../../commons/constants.h"
