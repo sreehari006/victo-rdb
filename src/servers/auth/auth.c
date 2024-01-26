@@ -5,8 +5,10 @@
 #include "../commons/interface/globals.h"
 #include "../../utils/logs/interface/log.h"
 #include "../../utils/uuid/interface/uuid.h"
+#include "../../commons/constants.h"
 
 static char* authFile;
+static char* authBasePath;
 static pthread_mutex_t fileMutex = PTHREAD_MUTEX_INITIALIZER;
 
 void loadAuthData() {
@@ -32,7 +34,7 @@ void loadAuthData() {
             }
         }
 
-        printf(" %s %s %s %d %d %d %d \n", user.name, user.password, user.uuid, user.userAccess, user.dbAccess, user.collectionAccess, user.vectorAccess);
+        // printf(" %s %s %s %d %d %d %d \n", user.name, user.password, user.uuid, user.userAccess, user.dbAccess, user.collectionAccess, user.vectorAccess);
     }
 
     fclose(file);
@@ -40,6 +42,8 @@ void loadAuthData() {
 
 void initAuthUtil(const char* path) {
     logWriter(LOG_DEBUG, "auth auth started");
+
+    authBasePath = strdup(path);
 
     int len = strlen(path) + strlen("/users.bin") + 1;
     authFile = (char *)malloc(len);
@@ -108,77 +112,124 @@ void initAuthUtil(const char* path) {
 }
 
 void freeAuthUtil() {
+    if(authBasePath != NULL) {
+        free(authBasePath);
+    }
+
     if(authFile != NULL) {
         free(authFile);
     }
+
     printf("Auth Util resource cleanup successful.\n");
 }
 
-
-void addUser(User* user) {
-    logWriter(LOG_DEBUG, "auth addUser started");
-
-    pthread_mutex_lock(&fileMutex);
-
-    FILE* file = fopen(authFile, "ab");
-    if (file == NULL) {
-        logWriter(LOG_ERROR, "Error adding new user. Can't open auth data.");
-    }
-
-    fwrite(user, sizeof(User), 1, file);
-    fclose(file);
-
-    pthread_mutex_unlock(&fileMutex);
-
-    logWriter(LOG_DEBUG, "auth addUser completed");
-}
-
-
-void updateUser(char* userName, User* user) {
-    pthread_mutex_lock(&fileMutex);
-
-    FILE* file = fopen(authFile, "r+b");
-    if (file == NULL) {
-        logWriter(LOG_ERROR, "Error updating user. Can't open auth data.");
-    }
-
-    User currentUser;
-
-    while (fread(&currentUser, sizeof(User), 1, file) == 1) {
-        if (strcmp(currentUser.name, userName) == 0) {
-            fseek(file, -sizeof(User), SEEK_CUR);
-            fwrite(user, sizeof(User), 1, file);
-            break;
-        }
-    }
-
-    fclose(file);
-
-    pthread_mutex_unlock(&fileMutex);
-}
-
-User findUser(char* userName) {
+bool findUser(char* userName) {
+    bool userExist = false;
     pthread_mutex_lock(&fileMutex);
 
     FILE* file = fopen(authFile, "rb");
     if (file == NULL) {
+        pthread_mutex_unlock(&fileMutex);
         logWriter(LOG_ERROR, "Error find user. Can't open auth data.");
+        return false;
     }
 
     User currentUser;
-    memset(&currentUser, 0, sizeof(User));
-
     while (fread(&currentUser, sizeof(User), 1, file) == 1) {
         if (strcmp(currentUser.name, userName) == 0) {
+            userExist = true;
             break;
         }
     }
 
     fclose(file);
-
     pthread_mutex_unlock(&fileMutex);
 
-    return currentUser;
+    return userExist;
+}
+
+Response addUser(User* user) {
+    logWriter(LOG_DEBUG, "auth addUser started");
+
+    Response rs;
+    pthread_mutex_lock(&fileMutex);
+
+    FILE* file = fopen(authFile, "ab");
+    if (file == NULL) {
+        pthread_mutex_unlock(&fileMutex);
+        rs.errCode = FAILED_CODE;
+        rs.errMsg = strdup(FAILED_MSG);
+        logWriter(LOG_ERROR, "Error adding new user. Can't open auth data.");
+        return rs;
+    }
+
+    bool userExist = findUser(strdup(user->name));
+    if(userExist) {
+        fclose(file);
+        pthread_mutex_unlock(&fileMutex);
+        rs.errCode = USER_ALREADY_EXIST_CODE;
+        rs.errMsg = strdup(USER_ALREADY_EXIST_MSG);
+        logWriter(LOG_ERROR, "Error adding new user. User already exist.");
+        return rs;        
+    }
+
+    if(fwrite(user, sizeof(User), 1, file) != 1) {
+        rs.errCode = FAILED_CODE;
+        rs.errMsg = strdup(FAILED_MSG);
+        logWriter(LOG_ERROR, "Error adding new user. File open error.");
+    } else {
+        rs.errCode = SUCCESS_CODE;
+        rs.errMsg = strdup(SUCESS_MSG);
+    }
+    
+    fclose(file);
+    pthread_mutex_unlock(&fileMutex);
+
+
+    logWriter(LOG_DEBUG, "auth addUser completed");
+
+    return rs;
+}
+
+
+Response updateUser(char* userName, User* user) {
+    logWriter(LOG_DEBUG, "auth updateUser started");
+    
+    Response rs;
+    pthread_mutex_lock(&fileMutex);
+
+    FILE* file = fopen(authFile, "r+b");
+    if (file == NULL) {
+        pthread_mutex_unlock(&fileMutex);
+        rs.errCode = FAILED_CODE;
+        rs.errMsg = strdup(FAILED_MSG);
+        logWriter(LOG_ERROR, "Error updating user. Can't open auth data.");
+        return rs;
+    }
+
+    User currentUser;
+    while (fread(&currentUser, sizeof(User), 1, file) == 1) {
+        if (strcmp(currentUser.name, userName) == 0) {
+            fseek(file, -sizeof(User), SEEK_CUR);
+            if(fwrite(user, sizeof(User), 1, file) != 1) {
+                rs.errCode = FAILED_CODE;
+                rs.errMsg = strdup(FAILED_MSG);
+                logWriter(LOG_ERROR, "Error updating user. File open error.");
+            } else {
+                rs.errCode = SUCCESS_CODE;
+                rs.errMsg = strdup(SUCESS_MSG);
+            }
+
+            break;
+        }
+    }
+
+    fclose(file);
+    pthread_mutex_unlock(&fileMutex);
+    
+    logWriter(LOG_DEBUG, "auth updateUser completed");
+
+    return rs;
 }
 
 bool authenticate(User* user) {
@@ -189,6 +240,8 @@ bool authenticate(User* user) {
     FILE* file = fopen(authFile, "rb");
     if (file == NULL) {
         logWriter(LOG_ERROR, "Error authenticate user. Can't open auth data.");
+        pthread_mutex_unlock(&fileMutex);
+        return false;
     }
 
     User currentUser;
@@ -202,8 +255,74 @@ bool authenticate(User* user) {
     }
 
     fclose(file);
-
     pthread_mutex_unlock(&fileMutex);
 
     return isValid;
+}
+
+Response deleteUser(char* userName) {
+    logWriter(LOG_DEBUG, "delete deleteUser started");
+    
+    Response rs;
+    pthread_mutex_lock(&fileMutex);
+
+    FILE *file = fopen(authFile, "rb+");
+    if (file == NULL) {
+        pthread_mutex_unlock(&fileMutex);
+        rs.errCode = FAILED_CODE;
+        rs.errMsg = strdup(FAILED_MSG);
+        logWriter(LOG_ERROR, "Error deleting user. Can't open auth data.");
+        return rs;
+    }
+
+    int len = strlen(authBasePath) + strlen("/tempfile.tmp") + 1;
+    char* tempFilePath = (char *)malloc(len);
+    strcpy(tempFilePath, authBasePath);
+    strcat(tempFilePath, "/tempfile.tmp");
+    
+    FILE *tempFile = fopen(tempFilePath, "wb");
+    if (tempFile == NULL) {
+        fclose(file);
+        pthread_mutex_unlock(&fileMutex);
+        rs.errCode = FAILED_CODE;
+        rs.errMsg = strdup(FAILED_MSG);
+        logWriter(LOG_ERROR, "Error deleting user. Can't open temporary file.");
+        return rs;
+    }
+
+    User currentUser;
+
+    while (fread(&currentUser, sizeof(User), 1, file) == 1) {
+        if (strcmp(currentUser.name, userName) == 0) {
+            continue;
+        }
+
+        if(fwrite(&currentUser, sizeof(User), 1, tempFile) != 1) {
+            fclose(file);
+            fclose(tempFile);
+            remove(tempFilePath);
+
+            pthread_mutex_unlock(&fileMutex);
+            
+            rs.errCode = FAILED_CODE;
+            rs.errMsg = strdup(FAILED_MSG);
+
+            logWriter(LOG_ERROR, "Error deleting user. Error writing to a temporary file.");
+            return rs;
+        }
+    }
+
+    fclose(file);
+    fclose(tempFile);
+
+    remove(authFile);
+    rename(tempFilePath, authFile);
+
+    pthread_mutex_unlock(&fileMutex);
+
+    logWriter(LOG_DEBUG, "delete deleteUser completed");
+
+    rs.errCode = SUCCESS_CODE;
+    rs.errMsg = strdup(SUCESS_MSG);    
+    return rs;
 }

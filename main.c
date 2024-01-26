@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "src/servers/commons/interface/globals.h"
 #include "src/servers/websock/interface/server.h"
@@ -26,6 +27,8 @@ int main(int argc, char *argv[]) {
     params.dbBasePath = NULL;
     params.ipAddress = strdup("127.0.0.1");
     params.port = 2018;
+    params.enableAuth = true;
+    
     
     while(i<argc) {
         if(strncmp(argv[i], "-", 1) == 0) {
@@ -42,6 +45,9 @@ int main(int argc, char *argv[]) {
                 i++;
             } else if(strcmp(argv[i], "-l") == 0) {
                 log_level = strdup(argv[i+1]);
+                i++;
+            } else if(strcmp(argv[i], "-a") == 0) {
+                params.enableAuth = (argv[i+1] != NULL && strcasecmp(argv[i+1], "true") == 0) ? true : false;
                 i++;
             }
         }

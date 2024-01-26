@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include "../../../ds/datastructures.h"
 
 typedef struct User {
     char name[16];
@@ -10,7 +11,7 @@ typedef struct User {
     int vectorAccess;
 } User;
 
-void addUser(User* user);
-void updateUser(char* userName, User* user);
-User findUser(char* userName);
+Response addUser(User* user);
+Response updateUser(char* userName, User* user);
 bool authenticate(User* user);
+Response deleteUser(char* userName);
