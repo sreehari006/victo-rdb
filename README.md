@@ -630,7 +630,10 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
     - [ ] Subscribe on collections
 
 ## Version
-[20 Jan 2024] - 1.2.0 (Latest stable version)
+[20 Jan 2024] - 1.2.1 (Latest stable version)
+Enhanced logging mechanism performance improved
+
+[20 Jan 2024] - 1.2.0
 Enhanced logging mechanism and error handling
 
 [12 Jan 2024] - 1.1.0
