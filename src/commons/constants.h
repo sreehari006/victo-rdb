@@ -1,6 +1,7 @@
 #define VICTO_FILE_EXT                          ".victo"
 #define DB                                      "db"
 #define LOGS                                    "logs"
+#define AUTH                                    "auth"
 #define COLLECTIONS                             "collections"
 #define VECTORS                                 "vectors"
 #define SUBSCRIPTIONS                           "subscriptions"
@@ -65,7 +66,8 @@
 #define MINKOWSKI_DISTANCE                      3
 #define DOT_PRODUCT                             4
 
-
+#define USER_ALREADY_EXIST_CODE                 1
+#define USER_ALREADY_EXIST_MSG                  "User already exist"
 
 
 

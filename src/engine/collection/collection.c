@@ -119,6 +119,7 @@ CollectionListRS collectionList(const char* location) {
     } else {
         rs.errCode = DB_NOT_EXIST_ERROR_CODE;
         rs.errMsg = strdup(DB_NOT_EXIST_ERROR_MSG);
+        rs.collections = NULL;
     }
     return rs;
 }

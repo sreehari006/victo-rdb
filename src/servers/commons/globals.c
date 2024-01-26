@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include "interface/globals.h"
@@ -16,6 +15,7 @@ void setWebSocketParams(WebsocketParams params) {
         websocketParams.ipAddress = strdup(params.ipAddress);
         websocketParams.port = params.port;
         websocketParams.maxStackSize = params.maxStackSize;
+        websocketParams.enableAuth = params.enableAuth;
         isInitialized = true;
     }
     logWriter(LOG_DEBUG, "globals setWebSocketParams completed");  
@@ -25,6 +25,12 @@ char* getDatabasePath() {
     logWriter(LOG_DEBUG, "globals getDatabasePath started");
     logWriter(LOG_DEBUG, "globals getDatabasePath completed");
     return websocketParams.dbBasePath;
+}
+
+bool getEnableAuth() {
+    logWriter(LOG_DEBUG, "globals getEnableAuth started");
+    logWriter(LOG_DEBUG, "globals getEnableAuth completed");
+    return websocketParams.enableAuth;
 }
 
 char* getWebsockInitIP() {

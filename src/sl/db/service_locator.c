@@ -2,12 +2,12 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include "commons/constants.h"
-#include "engine/file/interface/file_io.h"
-#include "engine/vector/interface/vector_io.h"
-#include "engine/collection/interface/collection.h"
-#include "engine/db/interface/db.h"
-#include "engine/vector/interface/vector_math_private.h"
+#include "../../commons/constants.h"
+#include "../../engine/file/interface/file_io.h"
+#include "../../engine/vector/interface/vector_io.h"
+#include "../../engine/collection/interface/collection.h"
+#include "../../engine/db/interface/db.h"
+#include "../../engine/vector/interface/vector_math_private.h"
 
 PutVectorRS putVectorSL(char* location, char* ai_model, char* hash, int vdim, double* vp, bool is_normal, bool overwrite) {
     PutVectorRS rs;
@@ -117,4 +117,8 @@ char* getDBBasePathSL(const char* location) {
 
 char* getDBLogPathSL(const char* location) {
     return getDBLogPath(location);
+}
+
+char* getDBAuthPathSL(const char* location) {
+    return getDBAuthPath(location);
 }

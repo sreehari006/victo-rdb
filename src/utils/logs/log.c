@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include "interface/log.h"
 #include "../ds/interface/hashmap.h"
 
@@ -5,6 +6,12 @@ static FILE* logfile;
 static int serverLogLevel;
 static LogMessageQueue messageQueue;
 static HashMap threadRegister;
+
+typedef struct LogInfoParams {
+    pthread_t parentId;
+    int log_level;
+    char* message;
+} LogInfoParams;
 
 char* getLogLevelString(int code) {
     switch (code) {
@@ -45,6 +52,10 @@ void freeLogMessageNode(LogMessageNode* node) {
     free(node);
 }
 
+void freeLogThreadRegisterNode(void* value) {
+    free(value);
+}
+
 void enqueueLogMessage(const int log_level, const char* threadUUID, const char* message) {
     LogMessageNode* newNode = (LogMessageNode*)malloc(sizeof(LogMessageNode));
     if (newNode == NULL) {
@@ -56,7 +67,7 @@ void enqueueLogMessage(const int log_level, const char* threadUUID, const char* 
     newNode->threadUUID = strdup(threadUUID);
     newNode->message = strdup(message);
     newNode->next = NULL;
-    
+
     pthread_mutex_lock(&messageQueue.mutex);
 
     if (messageQueue.head == NULL) {
@@ -126,7 +137,8 @@ void initLogUtil(char* log_level, const char* path) {
     char logFilePath[strlen(path) + strlen("/log.txt") + 1];
     strcpy(logFilePath, path);
     strcat(logFilePath, "/log.txt");
-
+    free((void *) path);
+    
     messageQueue.head = NULL;
     pthread_mutex_init(&messageQueue.mutex, NULL);
     pthread_cond_init(&messageQueue.cond, NULL);
@@ -152,26 +164,47 @@ void initLogUtil(char* log_level, const char* path) {
     printf("log initLogUtil completed.\n");
 }
 
-void logWriter(const int log_level, const char* message) {
+void* logWriterThreadFunction(void* arg) {
+    LogInfoParams* params = (LogInfoParams*) arg;
 
+    char buffer[25]; 
+    snprintf(buffer, sizeof(buffer), "%p", (void *) params->parentId);
+
+    char* threadUUID = (char*) getHashMap(&threadRegister, buffer);
+    if(threadUUID == NULL) {
+        threadUUID = buffer;
+    }
+
+    enqueueLogMessage(params->log_level, threadUUID, params->message);
+
+    free(params->message);
+    free(params);
+
+    return NULL;
+}
+
+void logWriter(const int log_level, const char* message) {
     if(log_level < serverLogLevel) {
         return;
     }
 
-    pthread_t thread = pthread_self();
-    char buffer[25]; 
-    snprintf(buffer, sizeof(buffer), "%p", (void *) thread);
+    pthread_t parentId, writer;
+    parentId = pthread_self();
 
-    char* threadUUID = get(&threadRegister, buffer);
-    if(threadUUID == NULL) {
-        threadUUID = buffer;
+    LogInfoParams* params = malloc(sizeof(LogInfoParams));
+    params->parentId = parentId;
+    params->log_level = log_level; 
+    params->message = strdup(message);
+
+    if (pthread_create(&writer, NULL, logWriterThreadFunction, (void*) params) != 0) {
+        printf("Error creating child thread during log writer\n");
     }
-    
-    enqueueLogMessage(log_level, threadUUID, message);
 }
 
+
 void freeLogUtil() {
-    cleanupHashMap(&threadRegister);
+    cleanupValueFunc cleanupValueFuncPtr = (cleanupValueFunc) freeLogThreadRegisterNode;
+    cleanupHashMap(&threadRegister, cleanupValueFuncPtr);
 
     LogMessageNode* current = messageQueue.head;
     while (current != NULL) {
@@ -194,9 +227,11 @@ void freeLogUtil() {
 }
 
 void setLogThreadRegisterUUID(char* threadID, char* UUID) {
-    insert(&threadRegister, threadID, UUID);
+    char* uuidCopy = strdup(UUID);
+    insertHashMap(&threadRegister, threadID, uuidCopy, strlen(uuidCopy) + 1);
 }
 
 void removeLogThreadRegisterUUID(char* threadID) {
-    delete(&threadRegister, threadID);
+    cleanupValueFunc cleanupValueFuncPtr = (cleanupValueFunc) freeLogThreadRegisterNode;
+    deleteHashMap(&threadRegister, threadID, cleanupValueFuncPtr);
 }

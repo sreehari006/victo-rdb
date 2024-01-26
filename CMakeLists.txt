@@ -17,12 +17,10 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 add_executable(${PROJECT_NAME}-exe main.c)
 
 add_subdirectory(src)
-add_subdirectory(src/engine)
-add_subdirectory(src/servers)
-add_subdirectory(src/utils)
+
 
 # target_link_libraries(${PROJECT_NAME} src engine servers utils m ${OPENSSL_LIBRARIES} ${OPENSSL_SSL_LIBRARIES})
-target_link_libraries(${PROJECT_NAME}-exe src engine servers utils m ${OPENSSL_LIBRARIES} ${OPENSSL_SSL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}-exe src m ${OPENSSL_LIBRARIES} ${OPENSSL_SSL_LIBRARIES})
 
 
 

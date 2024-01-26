@@ -1,7 +1,6 @@
 #include <stdbool.h>
-#include "ds/datastructures.h"
+#include "../../../ds/datastructures.h"
 
-bool initDBConfigSL(const char* location);
 Response newDBSL(const char* location);
 Response newCollectionSL(const char* location);
 Response deleteCollectionSL(const char* location);
@@ -13,5 +12,4 @@ QueryVectorRSWrapper queryVectorSL(char* location, char* ai_model, int vdim, dou
 CountRS vectorCountSL(char* location);
 VectorListRS vectorListSL(const char* location);
 Response deleteVectorSL(char* location, char* hash);
-char* getDBBasePathSL(const char* location);
-char* getDBLogPathSL(const char* location);
+

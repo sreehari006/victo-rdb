@@ -1,6 +1,4 @@
-add_library(
-    src
-    service_locator.h
-    service_locator.c
-)
+file(GLOB_RECURSE SOURCES "*.c")
+file(GLOB HEADERS "*.h")
 
+add_library(src ${SOURCES})
