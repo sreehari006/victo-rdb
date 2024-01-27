@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     params.dbBasePath = NULL;
     params.ipAddress = strdup("127.0.0.1");
     params.port = 2018;
-    params.enableAuth = true;
+    params.enableAuth = false;
     
     
     while(i<argc) {
