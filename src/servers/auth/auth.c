@@ -91,6 +91,7 @@ void initAuthUtil(const char* path) {
 
         logWriter(LOG_INFO, "Admin Password: ");
         logWriter(LOG_INFO, password);
+        logWriter(LOG_INFO, passwordHash);
 
         free(password);
         free(passwordHash);
@@ -232,32 +233,41 @@ Response updateUser(char* userName, User* user) {
     return rs;
 }
 
-bool authenticate(User* user) {
-    pthread_mutex_lock(&fileMutex);
+User* authenticate(char* userName, char* password) {
 
-    bool isValid = false;
+    if(userName == NULL) {
+        logWriter(LOG_ERROR, "Error authenticate user. Invalid userName.");
+        return NULL;
+    }
+
+    if(password == NULL) {
+        logWriter(LOG_ERROR, "Error authenticate user. Invalid password.");
+        return NULL;
+    }
+
+    pthread_mutex_lock(&fileMutex);
 
     FILE* file = fopen(authFile, "rb");
     if (file == NULL) {
         logWriter(LOG_ERROR, "Error authenticate user. Can't open auth data.");
         pthread_mutex_unlock(&fileMutex);
-        return false;
+        return NULL;
     }
 
-    User currentUser;
-    memset(&currentUser, 0, sizeof(User));
-
-    while (fread(&currentUser, sizeof(User), 1, file) == 1) {
-        if (strcmp(currentUser.name, user->name) == 0 && strcmp(currentUser.name, user->name) == 0) {
-            isValid = true;
-            break;
+    User* currentUser = (User*)malloc(sizeof(User));
+    
+    while (fread(currentUser, sizeof(User), 1, file) == 1) {
+        if (strcmp(currentUser->name, userName) == 0 && strcmp(currentUser->password, password) == 0) {
+            fclose(file);
+            pthread_mutex_unlock(&fileMutex);
+            return currentUser;
         }
     }
 
     fclose(file);
     pthread_mutex_unlock(&fileMutex);
 
-    return isValid;
+    return NULL;
 }
 
 Response deleteUser(char* userName) {
@@ -325,4 +335,13 @@ Response deleteUser(char* userName) {
     rs.errCode = SUCCESS_CODE;
     rs.errMsg = strdup(SUCESS_MSG);    
     return rs;
+}
+
+void freeUser(User* user) {
+    if(user != NULL) {
+        free(user->name);
+        free(user->password);
+        free(user->uuid);
+        free(user);
+    }
 }

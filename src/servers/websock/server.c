@@ -1,4 +1,6 @@
 #include "./interface/server.h"
+#include "../auth/interface/crypto.h"
+#include "../auth/interface/user_ops.h"
 #include "../commons/interface/adaptor.h"
 #include "../commons/interface/globals.h"
 #include "../../utils/logs/interface/log.h"
@@ -6,7 +8,11 @@
 
 struct ClientData {
     int client_socket;
-    char* client_name;
+    char* client_id;
+    int userAccess;
+    int dbAccess;
+    int collectionAccess;
+    int vectorAccess;
 };
 
 struct ServerData {
@@ -31,6 +37,14 @@ struct ThreadData {
 
 static struct ServerData serverData;
 
+void nullifyClientConnection(int i) {
+    serverData.client_connection[i].client_socket = 0;
+    serverData.client_connection[i].client_id = NULL;
+    serverData.client_connection[i].userAccess = 0;
+    serverData.client_connection[i].dbAccess = 0;
+    serverData.client_connection[i].collectionAccess = 0;
+    serverData.client_connection[i].vectorAccess = 0;
+}
 void stopWebSockServer() {
     logWriter(LOG_DEBUG, "server stopWebSockServer started");
 
@@ -39,8 +53,7 @@ void stopWebSockServer() {
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (serverData.client_connection[i].client_socket != 0) {
             close(serverData.client_connection[i].client_socket);
-            serverData.client_connection[i].client_socket = 0;
-            serverData.client_connection[i].client_name = NULL;
+            nullifyClientConnection(i);
         }
     }
 
@@ -83,13 +96,17 @@ bool handle_client_connection(int client_socket, int client_index) {
     ssize_t bytes_received;
 
     bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
-    char* sec_websocket_key_copy = strdup(buffer);
-
-    if (bytes_received < 0) {
-        logWriter(LOG_ERROR, "Error reading from socket");
+    if (bytes_received == 0) {
+        logWriter(LOG_ERROR, "Error reading from socket during client handshake. Client Might have closed the connection");
         return false;
     }
 
+    if (bytes_received < 0) {
+        logWriter(LOG_ERROR, "Error reading from socket during client handshake. Unable to read data.");
+        return false;
+    }
+
+    char* sec_websocket_key_copy = strdup(buffer);
     const char *search_key = "Sec-WebSocket-Key: ";
     char *key_start = strstr(sec_websocket_key_copy, search_key);
     if (key_start == NULL) {
@@ -111,55 +128,60 @@ bool handle_client_connection(int client_socket, int client_index) {
     free(sec_websocket_key_copy);
 
     if(getEnableAuth()) {
-        char* user_name_copy = strdup(buffer);
-        const char *userNameHeader = "user-name: ";
-        const char *userNameTokenStart = strstr(user_name_copy, userNameHeader);
-
-        if (userNameTokenStart == NULL) {
-            logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Missing User Name.");
+        char* auth_key_copy = strdup(buffer);
+        const char *auth_search_key = "Authorization: ";
+        char *auth_key_start = strstr(auth_key_copy, auth_search_key);
+        if (auth_key_start == NULL) {
+            logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Missing auth token.");
             return false;
         }
 
-        userNameTokenStart += strlen(userNameHeader);
-        const char *userNameTokenEnd = strchr(userNameTokenStart, '\r');
-
-        if (userNameTokenEnd == NULL) {
-            logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Missing User Name.");
+        auth_key_start += strlen(auth_search_key);
+        char *auth_key_end = strchr(auth_key_start, '\r');
+        if (auth_key_end == NULL) {
+            logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Missing auth token.");
             return false;
         }
 
-        char userName[16];
-        strncpy(userName, userNameTokenStart, userNameTokenEnd - userNameTokenStart);
-        userName[userNameTokenEnd - userNameTokenStart] = '\0';
+        *auth_key_end = '\0';
 
-        printf("User Name: %s\n", userName);
+        char auth_token[BUFFER_SIZE];
+        strncpy(auth_token, auth_key_start, BUFFER_SIZE);
+        free(auth_key_copy);
 
-        free(user_name_copy);
-
-        char* user_sec_code_copy = strdup(buffer);
-        const char *userSecCodeHeader = "user-sec-code: ";
-        const char *userSecCodeTokenStart = strstr(user_sec_code_copy, userSecCodeHeader);
-
-        if (userSecCodeTokenStart == NULL) {
-            logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Missing User Sec Code.");
-            return false;
+        const char* authTokenStripped = auth_token + strlen("Basic ");
+        if(authTokenStripped == NULL) {
+            logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Invalid auth token.");
+            return false;            
         }
 
-        userSecCodeTokenStart += strlen(userSecCodeHeader);
-        const char *userSecCodeTokenEnd = strchr(userSecCodeTokenStart, '\r');
+        char *decoded;
+        size_t decoded_len;
 
-        if (userSecCodeTokenEnd == NULL) {
-            logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Missing User Sec Code.");
-            return false;
+        base64_decode(authTokenStripped, &decoded, &decoded_len);
+        if (decoded) {
+            char* user_name = strtok(decoded, ":");
+            char* password = strtok(NULL, ":");
+            char* passwordHash = sha256(password);
+            User* user = authenticate(user_name, passwordHash);
+            free(decoded);
+            if(user == NULL) {
+                logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Authentication failed.");
+                return false;
+            }
+
+            serverData.client_connection[client_index].client_socket = client_socket;
+            serverData.client_connection[client_index].client_id = strdup(user->uuid);
+            serverData.client_connection[client_index].userAccess = user->userAccess;
+            serverData.client_connection[client_index].dbAccess = user->dbAccess;
+            serverData.client_connection[client_index].collectionAccess = user->collectionAccess;
+            serverData.client_connection[client_index].vectorAccess = user->vectorAccess;
+            free(user);
+        } else {
+            logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Decoding auth token failed.");
+            return false;               
         }
 
-        char userSecCode[64];
-        strncpy(userSecCode, userSecCodeTokenStart, userSecCodeTokenEnd - userSecCodeTokenStart);
-        userSecCode[userSecCodeTokenEnd - userSecCodeTokenStart] = '\0';
-
-        printf("User Sec Code: %s\n", userSecCode);
-
-        free(user_sec_code_copy);
     }
 
 
@@ -177,10 +199,6 @@ bool handle_client_connection(int client_socket, int client_index) {
 
     logWriter(LOG_INFO, "Client connection request successful");
     send(client_socket, handshake_response, strlen(handshake_response),0);
-
-    char client_name[20];
-    sprintf(client_name, "client_%d", client_index);
-    serverData.client_connection[client_index].client_name = client_name;
 
     logWriter(LOG_DEBUG, "server handle_client_connection completed");
 
@@ -235,7 +253,19 @@ void *threadFunction(void *arg) {
     logWriter(LOG_DEBUG, "Read client messages");
     while (1) {
         int bytes_received = recv(data->sd, buffer, sizeof(buffer), 0);
-        
+        if (bytes_received == 0) {
+            nullifyClientConnection(data->client_index);
+            logWriter(LOG_WARN, "Inside thread function. Socket might be closed for reading messages.");
+            return NULL;
+        }
+
+        if (bytes_received < 0) {
+            nullifyClientConnection(data->client_index);
+            close(data->sd);
+            logWriter(LOG_WARN, "Inside thread function. Error reading data.");
+            return NULL;
+        }
+
         if (client_message == NULL) {
             client_message = malloc(bytes_received + 1); 
             if (client_message == NULL) {
@@ -338,18 +368,16 @@ void *threadFunction(void *arg) {
     } else if (frame.opcode == 0x2) {
         // Implement binary frame
     } else if (frame.opcode == 0x8) {
-        unsigned char closeFrame[4];
+        nullifyClientConnection(data->client_index);
         
+        unsigned char closeFrame[4];
         closeFrame[0] = 0x88;
         closeFrame[1] = 0x02;
         closeFrame[2] = (unsigned char)((1000 >> 8) & 0xFF);
         closeFrame[3] = (unsigned char)(1000 & 0xFF);
 
         send(data->sd, closeFrame, sizeof(closeFrame), 0);
-        
         close(data->sd);
-        serverData.client_connection[data->client_index].client_socket = 0;
-        serverData.client_connection[data->client_index].client_socket = '\0';
     } else if (frame.opcode == 0x9) {
         char pongMessage[] = {0x00};  
         send(data->sd, pongMessage, sizeof(pongMessage), 0);
@@ -398,8 +426,7 @@ void startWebSockServer() {
 
     logWriter(LOG_DEBUG, "Initiatize serverData with client sockets and client name");
     for (i = 0; i < max_clients; i++) {
-        serverData.client_connection[i].client_socket = 0;
-        serverData.client_connection[i].client_name = NULL;
+        nullifyClientConnection(i);
     }
 
     logWriter(LOG_DEBUG, "Listening for incoming connections and message");
@@ -411,20 +438,23 @@ void startWebSockServer() {
 
         for (i = 0; i < max_clients; i++) {
             sd = serverData.client_connection[i].client_socket;
-            if (sd > 0)
+            if (sd > 0) {
                 FD_SET(sd, &readfds);
+            }
+                
             if (sd > max_socket)
                 max_socket = sd;
         } 
 
         logWriter(LOG_DEBUG, "Look for activity on sockets");
         activity = select(max_socket + 1, &readfds, NULL, NULL, NULL);
-
+        
         if (activity == -1) {
             if (errno == EINTR) {
                 continue;
             } else {
                 perror("Select error");
+                logWriter(LOG_DEBUG, "Select error while looking for activity on sockets");
                 exit(EXIT_FAILURE);
             }
         }
@@ -444,7 +474,7 @@ void startWebSockServer() {
             for (i = 0; i < max_clients; i++) {
                 if (serverData.client_connection[i].client_socket == 0) {
                     if(handle_client_connection(new_socket, i)) {
-                        serverData.client_connection[i].client_socket = new_socket;
+                        // serverData.client_connection[i].client_socket = new_socket;
                         logWriter(LOG_INFO, "New connection set");
                         logWriter(LOG_INFO, "Socket file descriptor: ");
                         char new_socket_str[20];
@@ -454,8 +484,9 @@ void startWebSockServer() {
                         logWriter(LOG_INFO, inet_ntoa(server_addr.sin_addr));
                         // logWriter(LOG_INFO, "Server Port: ");
                         // logWriter(LOG_INFO, ntohs(server_addr.sin_port));
-                        logWriter(LOG_INFO, "Client connection details:");
-                        logWriter(LOG_INFO, serverData.client_connection[i].client_name);
+                        logWriter(LOG_INFO, "Connected client id:");
+                        logWriter(LOG_INFO, serverData.client_connection[i].client_id);
+
                     } else {
                         close(new_socket);
                     } 

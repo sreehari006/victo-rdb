@@ -2,7 +2,7 @@
 #include "../../../ds/datastructures.h"
 
 typedef struct User {
-    char name[16];
+    char name[17];
     char password[65];
     char uuid[37];
     int userAccess;
@@ -13,5 +13,6 @@ typedef struct User {
 
 Response addUser(User* user);
 Response updateUser(char* userName, User* user);
-bool authenticate(User* user);
+User* authenticate(char* userName, char* password);
 Response deleteUser(char* userName);
+void freeUser(User* user);
