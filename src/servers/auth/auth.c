@@ -34,7 +34,6 @@ void loadAuthData() {
             }
         }
 
-        // printf(" %s %s %s %d %d %d %d \n", user.name, user.password, user.uuid, user.userAccess, user.dbAccess, user.collectionAccess, user.vectorAccess);
     }
 
     fclose(file);
@@ -84,10 +83,10 @@ void initAuthUtil(const char* path) {
         strcpy(user.name, "admin");
         strcpy(user.password, passwordHash);
         strcpy(user.uuid, uuid);
-        user.userAccess = 32767;
-        user.dbAccess = 32767;
-        user.collectionAccess = 32767;
-        user.vectorAccess = 32767;
+        user.userAccess = USER_ACCESS_FULL_ACCESS;
+        user.dbAccess = USER_ACCESS_FULL_ACCESS;
+        user.collectionAccess = USER_ACCESS_FULL_ACCESS;
+        user.vectorAccess = USER_ACCESS_FULL_ACCESS;
 
         logWriter(LOG_INFO, "Admin Password: ");
         logWriter(LOG_INFO, password);
@@ -153,8 +152,15 @@ Response addUser(User* user) {
     logWriter(LOG_DEBUG, "auth addUser started");
 
     Response rs;
-    pthread_mutex_lock(&fileMutex);
+    bool userExist = findUser(strdup(user->name));
+    if(userExist) {
+        rs.errCode = USER_ALREADY_EXIST_CODE;
+        rs.errMsg = strdup(USER_ALREADY_EXIST_MSG);
+        logWriter(LOG_ERROR, "Error adding new user. User already exist.");
+        return rs;        
+    }
 
+    pthread_mutex_lock(&fileMutex);
     FILE* file = fopen(authFile, "ab");
     if (file == NULL) {
         pthread_mutex_unlock(&fileMutex);
@@ -162,16 +168,6 @@ Response addUser(User* user) {
         rs.errMsg = strdup(FAILED_MSG);
         logWriter(LOG_ERROR, "Error adding new user. Can't open auth data.");
         return rs;
-    }
-
-    bool userExist = findUser(strdup(user->name));
-    if(userExist) {
-        fclose(file);
-        pthread_mutex_unlock(&fileMutex);
-        rs.errCode = USER_ALREADY_EXIST_CODE;
-        rs.errMsg = strdup(USER_ALREADY_EXIST_MSG);
-        logWriter(LOG_ERROR, "Error adding new user. User already exist.");
-        return rs;        
     }
 
     if(fwrite(user, sizeof(User), 1, file) != 1) {
@@ -184,10 +180,10 @@ Response addUser(User* user) {
     }
     
     fclose(file);
-    pthread_mutex_unlock(&fileMutex);
+    pthread_mutex_unlock(&fileMutex); 
 
 
-    logWriter(LOG_DEBUG, "auth addUser completed");
+    logWriter(LOG_DEBUG, "auth addUser completed"); 
 
     return rs;
 }

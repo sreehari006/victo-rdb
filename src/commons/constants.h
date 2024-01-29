@@ -66,8 +66,6 @@
 #define MINKOWSKI_DISTANCE                      3
 #define DOT_PRODUCT                             4
 
-#define USER_ALREADY_EXIST_CODE                 1
-#define USER_ALREADY_EXIST_MSG                  "User already exist"
 
 
 

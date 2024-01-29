@@ -182,6 +182,13 @@ bool handle_client_connection(int client_socket, int client_index) {
             return false;               
         }
 
+    } else {
+            serverData.client_connection[client_index].client_socket = client_socket;
+            serverData.client_connection[client_index].client_id = strdup(USER_GUEST);
+            serverData.client_connection[client_index].userAccess = USER_ACCESS_FULL_ACCESS;
+            serverData.client_connection[client_index].dbAccess = USER_ACCESS_FULL_ACCESS;
+            serverData.client_connection[client_index].collectionAccess = USER_ACCESS_FULL_ACCESS;
+            serverData.client_connection[client_index].vectorAccess = USER_ACCESS_FULL_ACCESS;      
     }
 
 
@@ -348,7 +355,14 @@ void *threadFunction(void *arg) {
         frame.payload[frame.payload_length] = '\0';
 
         logWriter(LOG_INFO, "Start DB Operations");
-        char* result = do_db_ops(threadUUID, frame.payload);
+        ClientInfo clientInfo;
+        clientInfo.client_id = strdup(serverData.client_connection[data->client_index].client_id);
+        clientInfo.userAccess = serverData.client_connection[data->client_index].userAccess;
+        clientInfo.dbAccess = serverData.client_connection[data->client_index].dbAccess;
+        clientInfo.collectionAccess = serverData.client_connection[data->client_index].collectionAccess;
+        clientInfo.vectorAccess = serverData.client_connection[data->client_index].vectorAccess;
+
+        char* result = do_db_ops(threadUUID, frame.payload, clientInfo);
         if(result != NULL) {
             logWriter(LOG_INFO, "Send query result back to client");
             sendWebSocketFrame(data->sd, result, 0x01);
