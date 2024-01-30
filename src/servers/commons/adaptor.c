@@ -9,6 +9,114 @@
 #include "../auth/interface/user_ops.h"
 #include "../auth/interface/crypto.h"
 
+typedef struct SubscribeTrigMsgNode {
+    char* vectorHash;
+    char* clientID;
+    struct SubscribeTrigMsgNode* next;
+} SubscribeTrigMsgNode;
+
+typedef struct {
+    SubscribeTrigMsgNode* head;
+    pthread_mutex_t mutex;
+    pthread_cond_t  cond;
+} SubscribeTrigMsgQueue;
+
+static SubscribeTrigMsgQueue subscribeTrigMsgQueue;
+
+void initSubscribeTrigQueue() {
+    logWriter(LOG_DEBUG, "adaptor initSubscribeTrigQueue started");
+
+    subscribeTrigMsgQueue.head = NULL;
+    pthread_mutex_init(&subscribeTrigMsgQueue.mutex, NULL);
+    pthread_cond_init(&subscribeTrigMsgQueue.cond, NULL);    
+
+    logWriter(LOG_DEBUG, "adaptor initSubscribeTrigQueue completed");
+}
+
+void enqueueSubscribeTrigMessage(const char* vectorHash, const char* clientID) {
+    logWriter(LOG_DEBUG, "adaptor enqueueSubscribeTrigMessage started");
+
+    SubscribeTrigMsgNode* newNode = (SubscribeTrigMsgNode*)malloc(sizeof(SubscribeTrigMsgNode));
+    if (newNode == NULL) {
+        logWriter(LOG_ERROR, "Error while creating node for new subscribe trigger message");
+        return;
+    }
+
+    newNode->vectorHash = strdup(vectorHash);
+    newNode->clientID = strdup(clientID);
+    newNode->next = NULL;
+    
+    pthread_mutex_lock(&subscribeTrigMsgQueue.mutex);
+
+    if (subscribeTrigMsgQueue.head == NULL) {
+        subscribeTrigMsgQueue.head = newNode;
+    } else {
+        SubscribeTrigMsgNode* current = subscribeTrigMsgQueue.head;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = newNode;
+    }
+
+    pthread_cond_signal(&subscribeTrigMsgQueue.cond);
+    pthread_mutex_unlock(&subscribeTrigMsgQueue.mutex);
+
+    logWriter(LOG_DEBUG, "adaptor enqueueSubscribeTrigMessage completed");
+}
+
+SubscribeTrigMsgNode dequeueSubscribeTrigMessage() {
+    logWriter(LOG_DEBUG, "adaptor dequeueSubscribeTrigMessage started");
+
+    SubscribeReplyInfo SubscribeReplyInfo;
+    SubscribeTrigMsgNode messageNode;
+    pthread_mutex_lock(&subscribeTrigMsgQueue.mutex);
+
+    while (subscribeTrigMsgQueue.head == NULL) {
+        pthread_cond_wait(&subscribeTrigMsgQueue.cond, &subscribeTrigMsgQueue.mutex);
+    }
+
+    SubscribeTrigMsgNode* head = subscribeTrigMsgQueue.head;
+    messageNode.vectorHash = strdup(head->vectorHash);
+    messageNode.clientID = strdup(head->clientID);
+    
+    subscribeTrigMsgQueue.head = head->next;
+
+    pthread_mutex_unlock(&subscribeTrigMsgQueue.mutex);
+    free(head->vectorHash);
+    free(head->clientID);
+    free(head);
+
+    logWriter(LOG_DEBUG, "adaptor dequeueSubscribeTrigMessage completed");
+    return messageNode;
+}
+
+SubscribeReplyInfo querySubscription() {
+    SubscribeReplyInfo subscribeReplyInfo;
+
+    SubscribeTrigMsgNode node = dequeueSubscribeTrigMessage();
+    subscribeReplyInfo.client_id = node.clientID;
+    subscribeReplyInfo.vector_hash = node.vectorHash;
+
+    return subscribeReplyInfo;
+}
+
+void freeSubscribeTrigMessagQueue() {
+    logWriter(LOG_DEBUG, "adaptor freeSubscribeTrigMessagQueue started");
+
+    SubscribeTrigMsgNode* current = subscribeTrigMsgQueue.head;
+    while (current != NULL) {
+        SubscribeTrigMsgNode* nextNode = current->next;
+        free(current->vectorHash);
+        free(current);
+        current = nextNode;
+    }
+    subscribeTrigMsgQueue.head = NULL; 
+
+    pthread_mutex_destroy(&subscribeTrigMsgQueue.mutex);
+    pthread_cond_destroy(&subscribeTrigMsgQueue.cond);
+
+    logWriter(LOG_DEBUG, "adaptor freeSubscribeTrigMessagQueue completed");
+}
 
 char* string_array_to_string(char** array) {
     logWriter(LOG_DEBUG, "adaptor string_array_to_string started");
@@ -1137,10 +1245,10 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         free(hash);
 
                         char* result = put_vector_rs_to_string(&rs);
-                        free(rs.errMsg);
-                        free(rs.hash);
 
                         if(result != NULL) {
+                            logWriter(LOG_INFO, "Added new node to subscribe queue");
+                            enqueueSubscribeTrigMessage(rs.hash, clientInfo.client_id);
                             logWriter(LOG_INFO, "Added result to resultSB");
                             appendToStringBuilder(&resultSB, result);
                             free(result);
@@ -1149,6 +1257,8 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                             logWriter(LOG_ERROR, "DB Operation is unsuccessful");
                             appendToStringBuilder(&errorSB, "\"Internal server error\"");
                         }  
+                        free(rs.errMsg);
+                        free(rs.hash);
                     }
 
                 } else if(strcmp(op, "query") == 0 && strcmp(obj, "vector") == 0) {

@@ -10,4 +10,12 @@ typedef struct ClientInfo {
     int vectorAccess;
 } ClientInfo;
 
+typedef struct SubscribeReplyInfo {
+    char* client_id;
+    char* vector_hash;
+} SubscribeReplyInfo;
+
 char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo);
+void initSubscribeTrigQueue();
+SubscribeReplyInfo querySubscription();
+void freeSubscribeTrigMessagQueue();
