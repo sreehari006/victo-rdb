@@ -87,4 +87,39 @@ typedef struct queryOptions {
     bool order;
 } QueryOptions;
 
+typedef struct SubscriptionQueryOptions {
+    int vector_distance_method;
+    int query_logical_op;
+    double query_value;
+    double p_value;
+} SubscriptionQueryOptions;
+
+typedef struct SubscriptionNode {
+    char client_id[37];
+    char ai_model[64];
+    char hash[64];
+    char normal[2];
+    int vdim;
+    double vp[2048];
+    SubscriptionQueryOptions queryOptions;
+} SubscriptionNode;
+
+typedef struct SubscriptionListRS {
+    int errCode;
+    char* errMsg;
+    char** subscriptions;
+} SubscriptionListRS;
+
+typedef struct PutSubscriptionRS {
+    int errCode;
+    char* errMsg;
+    char* hash;
+} PutSubscriptionRS;
+
+typedef struct GetSubscriptionRS {
+    int errCode;
+    char* errMsg;
+    SubscriptionNode node;
+} GetSubscriptionRS;
+
 #endif

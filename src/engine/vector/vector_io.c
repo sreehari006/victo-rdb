@@ -117,7 +117,7 @@ CountRS vectorCount(char* location) {
     if(dirExists(location)) {
         rs.errCode = SUCCESS_CODE;
         rs.errMsg = strdup(SUCESS_MSG);
-        rs.count = get_victo_files_count(location);
+        rs.count = get_victo_files_count(location, VICTO_FILE_EXT);
     } else {
         rs.errCode = DIR_NOT_EXIST_ERROR_CODE;
         rs.errMsg = strdup(DIR_NOT_EXIST_ERROR_MSG);

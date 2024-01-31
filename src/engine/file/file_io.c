@@ -308,7 +308,7 @@ char* remove_file_extension(const char* fileName) {
 }
 
 __attribute__((visibility("hidden"))) 
-int get_victo_files_count(const char* dirPath) {
+int get_victo_files_count(const char* dirPath, const char* ext) {
     int count=0;
     #if defined(_WIN32) || defined(_WIN64)
         WIN32_FIND_DATA findFileData;
@@ -378,7 +378,7 @@ int get_victo_files_count(const char* dirPath) {
             #endif
 
             if(isRegularFile) {
-                if(strstr(entry->d_name, VICTO_FILE_EXT) != NULL) {
+                if(strstr(entry->d_name, ext) != NULL) {
                     count++; 
                 }
                 
@@ -400,6 +400,28 @@ int deleteVictoFile(const char* filePath) {
         }
     #else
         if(strstr(filePath, VICTO_FILE_EXT) != NULL) {
+            if(remove(filePath) !=  0) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            return -1;
+        }
+        
+    #endif
+}
+
+__attribute__((visibility("hidden"))) 
+int deleteSubscriptionFile(const char* filePath) {
+    #if defined(_WIN32) || defined(_WIN64)
+        if(DeleteFile(filePath) == 0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    #else
+        if(strstr(filePath, SUSCRIP_FILE_EXT) != NULL) {
             if(remove(filePath) !=  0) {
                 return 1;
             } else {

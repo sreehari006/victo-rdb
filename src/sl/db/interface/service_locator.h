@@ -12,4 +12,9 @@ QueryVectorRSWrapper queryVectorSL(char* location, char* ai_model, int vdim, dou
 CountRS vectorCountSL(char* location);
 VectorListRS vectorListSL(const char* location);
 Response deleteVectorSL(char* location, char* hash);
+PutSubscriptionRS subscribeSL(char* client_id, char* location, char* ai_model, char* hash, int vdim, double* vp, bool is_normal, bool overwrite, SubscriptionQueryOptions queryOptions); 
+GetSubscriptionRS getSubscriptionSL(char* filename, char* hash);
+CountRS subscriptionCountSL(char* location);
+SubscriptionListRS subscriptionListSL(const char* location);
+Response unsubscribeSL(char* filename);
 

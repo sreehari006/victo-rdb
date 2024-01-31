@@ -6,6 +6,7 @@
 #include "../../engine/file/interface/file_io.h"
 #include "../../engine/vector/interface/vector_io.h"
 #include "../../engine/collection/interface/collection.h"
+#include "../../engine/subscription/interface/subscription.h"
 #include "../../engine/db/interface/db.h"
 #include "../../engine/vector/interface/vector_math_private.h"
 
@@ -122,3 +123,61 @@ char* getDBLogPathSL(const char* location) {
 char* getDBAuthPathSL(const char* location) {
     return getDBAuthPath(location);
 }
+
+
+PutSubscriptionRS subscribeSL(char* client_id, char* location, char* ai_model, char* hash, int vdim, double* vp, bool is_normal, bool overwrite, SubscriptionQueryOptions queryOptions) {
+    PutSubscriptionRS rs;
+
+    char filename[strlen(location) + strlen(hash) + strlen(SUSCRIP_FILE_EXT) + 2];
+    strcpy(filename, location);
+    strcat(filename, "/");
+    strcat(filename, hash);
+    strcat(filename, SUSCRIP_FILE_EXT);
+
+    if(!overwrite) {
+        if(fileExists(filename)) {
+            rs.errCode = RECORD_EXIST_ERROR_CODE;
+            rs.errMsg = RECORD_EXIST_ERROR_MSG;
+            return rs;
+        }
+    }
+    rs = subscribe(client_id, filename, ai_model, hash, vdim, vp, is_normal, queryOptions);
+    return rs;
+}
+
+GetSubscriptionRS getSubscriptionSL(char* location, char* hash) {
+    char filename[strlen(location) + strlen(hash) + strlen(SUSCRIP_FILE_EXT) + 2];
+    strcpy(filename, location);
+    strcat(filename, "/");
+    strcat(filename, hash);
+    strcat(filename, SUSCRIP_FILE_EXT);
+
+    return getSubscription(filename);
+}
+
+CountRS subscriptionCountSL(char* location) {
+    return subscriptionCount(location);
+}
+
+SubscriptionListRS subscriptionListSL(const char* location) {
+    return subscriptionList(location);
+}
+
+Response unsubscribeSL(char* location, char* hash) {
+    Response rs;
+    char filename[strlen(location) + strlen(hash) + strlen(SUSCRIP_FILE_EXT) + 2];
+    strcpy(filename, location);
+    strcat(filename, "/");
+    strcat(filename, hash);
+    strcat(filename, VICTO_FILE_EXT);
+    if(fileExists(filename)) {
+        rs = unsubscribe(filename);
+    } else {
+       rs.errCode = FILE_OPEN_ERROR_CODE;
+       rs.errMsg = FILE_OPEN_ERROR_MSG;
+    }
+
+    return rs;
+}
+
+

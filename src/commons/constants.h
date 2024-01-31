@@ -1,4 +1,5 @@
 #define VICTO_FILE_EXT                          ".victo"
+#define SUSCRIP_FILE_EXT                        ".vsub"
 #define DB                                      "db"
 #define LOGS                                    "logs"
 #define AUTH                                    "auth"

@@ -280,6 +280,33 @@ char* vector_base_path(char* db, char* collection) {
     return result;
 }
 
+char* subscription_base_path(char* db, char* collection) {
+    logWriter(LOG_DEBUG, "adaptor subscription_base_path started");
+
+    StringBuilder resultSB;
+    initStringBuilder(&resultSB, 10);
+
+    appendToStringBuilder(&resultSB, getDatabasePath());
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, db);
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, COLLECTIONS);
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, collection);
+    appendToStringBuilder(&resultSB, "/");
+    appendToStringBuilder(&resultSB, SUBSCRIPTIONS);
+
+    char* result = strdup(resultSB.data);
+    freeStringBuilder(&resultSB);
+
+    if (result == NULL) {
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
+    }
+
+    logWriter(LOG_DEBUG, "adaptor subscription_base_path completed");
+    return result;
+}
+
 char* response_to_string(Response* rs) {
     logWriter(LOG_DEBUG, "adaptor response_to_string started");
 
@@ -412,6 +439,44 @@ char* vector_list_rs_to_string(VectorListRS* rs) {
     return result;
 }
 
+char* subscription_list_rs_to_string(SubscriptionListRS* rs) {
+    logWriter(LOG_DEBUG, "adaptor subscription_list_rs_to_string started");
+
+    StringBuilder resultSB;
+    initStringBuilder(&resultSB, 10);
+
+    char errCode[5];
+    snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
+
+    appendToStringBuilder(&resultSB, "{\"code\": ");
+    appendToStringBuilder(&resultSB, errCode);
+    appendToStringBuilder(&resultSB, ", \"message\": \"");
+    appendToStringBuilder(&resultSB, rs->errMsg);
+    appendToStringBuilder(&resultSB, "\"");
+
+    if(rs->errCode == 0) {
+        appendToStringBuilder(&resultSB, ", \"subscriptions\": [");
+        if(rs->subscriptions != NULL) {
+            char* subscriptions = string_array_to_string(rs->subscriptions);
+            appendToStringBuilder(&resultSB, subscriptions);
+            free(subscriptions);
+        } 
+        appendToStringBuilder(&resultSB, "]");
+    }
+
+    appendToStringBuilder(&resultSB, "}");
+
+    char* result = strdup(resultSB.data);
+    freeStringBuilder(&resultSB);
+
+    if (result == NULL) {
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
+    }
+
+    logWriter(LOG_DEBUG, "adaptor subscription_list_rs_to_string completed");
+    return result;
+}
+
 char* vector_rs_to_string(GetVectorRS* rs) {
     logWriter(LOG_DEBUG, "adaptor vector_rs_to_string started");
 
@@ -462,6 +527,60 @@ char* vector_rs_to_string(GetVectorRS* rs) {
     return result;
 }
 
+char* subscription_rs_to_string(GetSubscriptionRS* rs) {
+    logWriter(LOG_DEBUG, "adaptor subscription_rs_to_string started");
+
+    StringBuilder resultSB;
+    initStringBuilder(&resultSB, 10);
+
+    char errCode[5];
+    snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
+
+    appendToStringBuilder(&resultSB, "{\"code\": ");
+    appendToStringBuilder(&resultSB, errCode);
+    appendToStringBuilder(&resultSB, ", \"message\": \"");
+    appendToStringBuilder(&resultSB, rs->errMsg);
+    appendToStringBuilder(&resultSB, "\"");
+
+    if(rs->errCode == 0) {
+        SubscriptionNode node = rs->node;
+        char* vp = double_array_to_string(node.vp, node.vdim);
+
+        char dimension[20];
+        snprintf(dimension, sizeof(dimension), "%d", node.vdim);
+
+        appendToStringBuilder(&resultSB, ", \"client_id\": \"");
+        appendToStringBuilder(&resultSB, node.client_id);
+        appendToStringBuilder(&resultSB, "\", \"ai_model\": \"");
+        appendToStringBuilder(&resultSB, node.ai_model);
+        appendToStringBuilder(&resultSB, "\", \"hash\": \"");
+        appendToStringBuilder(&resultSB, node.hash);
+        appendToStringBuilder(&resultSB, "\", \"is_normal\": \"");
+        appendToStringBuilder(&resultSB, node.normal);
+        appendToStringBuilder(&resultSB, "\", \"dimension\": ");
+        appendToStringBuilder(&resultSB, dimension);
+        appendToStringBuilder(&resultSB, ", \"vp\": [");
+        appendToStringBuilder(&resultSB, vp);
+        free(vp);
+        appendToStringBuilder(&resultSB, "]");
+        appendToStringBuilder(&resultSB, ", \"query_options\": [");
+        appendToStringBuilder(&resultSB, "]");
+    }
+
+    appendToStringBuilder(&resultSB, "}");
+
+    
+    char* result = strdup(resultSB.data);
+    freeStringBuilder(&resultSB);
+
+    if (result == NULL) {
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
+    }
+
+    logWriter(LOG_DEBUG, "adaptor subscription_rs_to_string completed");
+    return result;
+}
+
 char* put_vector_rs_to_string(PutVectorRS* rs) {
     logWriter(LOG_DEBUG, "adaptor put_vector_rs_to_string started");
 
@@ -489,6 +608,36 @@ char* put_vector_rs_to_string(PutVectorRS* rs) {
     }
 
     logWriter(LOG_DEBUG, "adaptor put_vector_rs_to_string completed");
+    return result;
+}
+
+char* put_subscription_rs_to_string(PutSubscriptionRS* rs) {
+    logWriter(LOG_DEBUG, "adaptor put_subscription_rs_to_string started");
+
+    StringBuilder resultSB;
+    initStringBuilder(&resultSB, 10);
+
+    char errCode[5];
+    snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
+
+    appendToStringBuilder(&resultSB, "{\"code\": ");
+    appendToStringBuilder(&resultSB, errCode);
+    appendToStringBuilder(&resultSB, ", \"message\": \"");
+    appendToStringBuilder(&resultSB, rs->errMsg);
+    if(rs->errCode == 0) {
+        appendToStringBuilder(&resultSB, "\", \"hash\": \"");
+        appendToStringBuilder(&resultSB, rs->hash);
+    }
+    appendToStringBuilder(&resultSB, "\"}");
+    
+    char* result = strdup(resultSB.data);
+    freeStringBuilder(&resultSB);
+
+    if (result == NULL) {
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
+    }
+
+    logWriter(LOG_DEBUG, "adaptor put_subscription_rs_to_string completed");
     return result;
 }
 
@@ -645,6 +794,8 @@ CountRS count_collection(char* db) {
     return rs;
 }
 
+
+
 CollectionListRS list_collection(char* db) {
     logWriter(LOG_DEBUG, "adaptor list_collection started");
 
@@ -678,6 +829,17 @@ CountRS count_vector(char* db, char* collection) {
     return rs;
 }
 
+CountRS count_subscription(char* db, char* collection) {
+    logWriter(LOG_DEBUG, "adaptor count_subscription started");
+
+    char* subscriptionBP = subscription_base_path(db, collection);
+    CountRS rs = subscriptionCountSL(subscriptionBP);
+    free(subscriptionBP);
+
+    logWriter(LOG_DEBUG, "adaptor count_subscription completed");
+    return rs;
+}
+
 VectorListRS list_vector(char* db, char* collection) {
     logWriter(LOG_DEBUG, "adaptor list_vector started");
 
@@ -686,6 +848,17 @@ VectorListRS list_vector(char* db, char* collection) {
     free(vectorBP);
 
     logWriter(LOG_DEBUG, "adaptor list_vector completed");
+    return rs;
+}
+
+SubscriptionListRS list_subscription(char* db, char* collection) {
+    logWriter(LOG_DEBUG, "adaptor list_subscription started");
+
+    char* subscriptionBP = subscription_base_path(db, collection);
+    SubscriptionListRS rs = subscriptionListSL(subscriptionBP);
+    free(subscriptionBP);
+
+    logWriter(LOG_DEBUG, "adaptor list_subscription completed");
     return rs;
 }
 
@@ -700,6 +873,17 @@ GetVectorRS get_vector(char* db, char* collection, char* hash) {
     return rs;
 }
 
+GetSubscriptionRS get_subscription(char* db, char* collection, char* hash) {
+    logWriter(LOG_DEBUG, "adaptor get_subscription started");
+
+    char* subscriptionBP = subscription_base_path(db, collection);
+    GetSubscriptionRS rs = getSubscriptionSL(subscriptionBP, hash);
+    free(subscriptionBP);
+
+    logWriter(LOG_DEBUG, "adaptor get_subscription completed");
+    return rs;
+}
+
 PutVectorRS add_vector(char* db, char* collection, char* ai_model, char* hash, int vdim, double* vp, bool is_normal, bool overwrite) {
     logWriter(LOG_DEBUG, "adaptor add_vector started");
 
@@ -708,6 +892,17 @@ PutVectorRS add_vector(char* db, char* collection, char* ai_model, char* hash, i
     free(vectorBP);
 
     logWriter(LOG_DEBUG, "adaptor add_vector completed");
+    return rs;
+}
+
+PutSubscriptionRS add_subscription(char* client_id, char* db, char* collection, char* ai_model, char* hash, int vdim, double* vp, bool is_normal, bool overwrite, SubscriptionQueryOptions queryOptions) {
+    logWriter(LOG_DEBUG, "adaptor add_subscription started");
+
+    char* subscriptionBP = subscription_base_path(db, collection);
+    PutSubscriptionRS rs = subscribeSL(client_id, subscriptionBP, ai_model, hash, vdim, vp, is_normal, overwrite, queryOptions);
+    free(subscriptionBP);
+
+    logWriter(LOG_DEBUG, "adaptor add_subscription completed");
     return rs;
 }
 
@@ -773,6 +968,16 @@ bool verifyAccess(char* op, char* obj, ClientInfo ClientInfo) {
         access = ClientInfo.vectorAccess & USER_ACCESS_READ_MULTIPLE_ACCESS;
     } else if(strcmp(op,"add") == 0 && strcmp(obj, "user") == 0) {
         access = ClientInfo.userAccess & USER_ACCESS_WRITE_ACCESS;
+    } else if(strcmp(op,"add") == 0 && strcmp(obj, "subscription") == 0) {
+        access = true;
+    } else if(strcmp(op,"get") == 0 && strcmp(obj, "subscription") == 0) {
+        access = true;
+    } else if(strcmp(op,"list") == 0 && strcmp(obj, "subscription") == 0) {
+        access = true;
+    } else if(strcmp(op,"count") == 0 && strcmp(obj, "subscription") == 0) {
+        access = true;
+    } else if(strcmp(op,"delete") == 0 && strcmp(obj, "subscription") == 0) {
+        access = true;
     }
 
     free(op);
@@ -1374,6 +1579,226 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                             logWriter(LOG_ERROR, "DB Operation is unsuccessful");
                             appendToStringBuilder(&errorSB, "\"Internal server error\"");
                         } 
+                    }
+
+                } else if(strcmp(op, "add") == 0 && strcmp(obj, "subscription") == 0) {
+                    logWriter(LOG_INFO, "Begin add subscription");
+
+                    JsonNode* collectionNode = searchJson(argsNode, "collection");
+                    JsonNode* aiModelNode = searchJson(argsNode, "ai_model");
+                    JsonNode* vdimNode = searchJson(argsNode, "vdim");
+                    JsonNode* vpNode = searchJson(argsNode, "vp");
+                    JsonNode* dbNode = searchJson(argsNode, "db");
+                    
+                    if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                    } 
+                    
+                    if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                    } 
+
+                    if(aiModelNode == NULL || aiModelNode->value == NULL) {
+                        logWriter(LOG_WARN, "Missing parameter: ai_model");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
+                    } 
+
+                    int vdim = 0;
+
+                    if(vdimNode == NULL || vdimNode->value == NULL || !isValidInteger(vdimNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: vector dimension (vdim)");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
+                    } else {
+                        vdim = atoi(vdimNode->value);
+                    }
+
+                    double vp[vdim];
+                    if(vpNode == NULL) {
+                        logWriter(LOG_WARN, "Missing parameter: vector points (vp)");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: vector points (vp)\"");
+                    } else {
+                        int i=0;
+                        while(i<vdim && vpNode->children[i] != NULL) {
+                            char* errptr;
+                            vp[i] = strtod(vpNode->children[i]->value, &errptr);
+                            
+                            if (*errptr != '\0') {
+                                logWriter(LOG_WARN, "Invalid vector points: ");
+                                logWriter(LOG_WARN, errptr);
+                                (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                                appendToStringBuilder(&errorSB, "\"Invalid vector points\"");
+                                break;
+                            }
+                            i++;
+                        }
+                    }
+
+                    char* errptr;
+                    if(!isError) {
+                        JsonNode* isNormalNode = searchJson(argsNode, "is_normal");
+                        JsonNode* overwriteNode = searchJson(argsNode, "overwrite");
+
+                        bool isNormal = (isNormalNode != NULL && strcasecmp(isNormalNode->value, "true") == 0) ? true : false;
+                        bool overwrite = (overwriteNode != NULL && strcasecmp(overwriteNode->value, "true") == 0) ? true : false;
+
+                        char* hash = getUUID();
+
+                        SubscriptionQueryOptions queryOptions;
+                        JsonNode* queryOptionsNode = searchJson(argsNode, "qOps");
+                        
+                        JsonNode* vdMethodNode = searchJson(queryOptionsNode, "vd_method");
+                        queryOptions.vector_distance_method = (vdMethodNode != NULL && !isValidInteger(vdMethodNode->value)) ? atoi(vdMethodNode->value): 0;
+                                               
+                        JsonNode* logicalOpNode = searchJson(queryOptionsNode, "logical_op");
+                        queryOptions.query_logical_op = (logicalOpNode != NULL && !isValidInteger(vdMethodNode->value))? atoi(logicalOpNode->value): 0;
+                        
+                        JsonNode* queryValueNode = searchJson(queryOptionsNode, "k_value");
+                        double query_value = (queryValueNode != NULL && !isValidInteger(vdMethodNode->value)) ? strtod(queryValueNode->value, &errptr): 0;
+                        if (*errptr != '\0') {
+                            query_value = 0;
+                        }   
+                        queryOptions.query_value = query_value;
+                      
+                        JsonNode* pValueNode = searchJson(queryOptionsNode, "p_value");
+                        double p_value = pValueNode != NULL ? strtod(pValueNode->value, &errptr) : 0;
+                        if (*errptr != '\0') {
+                            p_value = 0;
+                        }
+                        queryOptions.p_value = p_value;
+
+                        PutSubscriptionRS rs = add_subscription(clientInfo.client_id, dbNode->value, collectionNode->value, aiModelNode->value, hash, vdim, vp, isNormal, overwrite, queryOptions); 
+                        free(hash);
+
+                        char* result = put_subscription_rs_to_string(&rs);
+
+                        if(result != NULL) {
+                            appendToStringBuilder(&resultSB, result);
+                            free(result);
+                        } else {
+                            isError = true;
+                            logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                            appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                        }  
+                        free(rs.errMsg);
+                    }
+
+                } else if(strcmp(op, "get") == 0 && strcmp(obj, "subscription") == 0) {
+                    logWriter(LOG_INFO, "Begin get subscription");
+                    JsonNode* collectionNode = searchJson(argsNode, "collection");
+                    JsonNode* hashNode = searchJson(argsNode, "hash");
+                    JsonNode* dbNode = searchJson(argsNode, "db");
+                    
+                    if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                    } 
+                    
+                    if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                    } 
+
+                    if(hashNode == NULL || hashNode->value == NULL || !isValidObjName(hashNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: vector (hash) or, vector (hash) provided is invalid");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
+                    } 
+                    if(!isError) {
+                        GetSubscriptionRS rs = get_subscription(dbNode->value, collectionNode->value, hashNode->value); 
+                        char* result = subscription_rs_to_string(&rs);
+                        free(rs.errMsg);
+
+                        if(result != NULL) {
+                            logWriter(LOG_INFO, "Added result to resultSB");
+                            appendToStringBuilder(&resultSB, result);
+                            free(result);
+                        } else {
+                            isError = true;
+                            logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                            appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                        }          
+                    }
+
+                } else if(strcmp(op, "list") == 0 && strcmp(obj, "subscription") == 0) {
+                    logWriter(LOG_INFO, "Begin list subscription");
+                    JsonNode* dbNode = searchJson(argsNode, "db");
+                    
+                    if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                    } 
+
+                    JsonNode* collectionNode = searchJson(argsNode, "collection");
+                    if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                    } 
+
+                    if(!isError) {
+                        SubscriptionListRS rs = list_subscription(dbNode->value, collectionNode->value); 
+                        char* result = subscription_list_rs_to_string(&rs);
+                        int i=0;
+                        if(rs.subscriptions != NULL) {
+                            while(rs.subscriptions[i] != NULL) {
+                                free(rs.subscriptions[i]);
+                                i++;
+                            }
+                            free(rs.subscriptions);
+                        }
+
+                        if(result != NULL) {
+                            logWriter(LOG_INFO, "Added result to resultSB");
+                            appendToStringBuilder(&resultSB, result);
+                            free(result);
+                        } else {
+                            isError = true;
+                            logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                            appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                        }                
+                    }
+
+                } else if(strcmp(op, "count") == 0 && strcmp(obj, "subscription") == 0) {
+                    logWriter(LOG_INFO, "Begin count subscription");
+                    JsonNode* dbNode = searchJson(argsNode, "db");
+                    
+                    if(dbNode == NULL || dbNode->value == NULL || !isValidObjName(dbNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                    } 
+
+                    JsonNode* collectionNode = searchJson(argsNode, "collection");
+                    if(collectionNode == NULL || collectionNode->value == NULL || !isValidObjName(collectionNode->value)) {
+                        logWriter(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
+                        (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
+                        appendToStringBuilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                    } 
+
+                    if(!isError) {
+                        CountRS rs = count_subscription(dbNode->value, collectionNode->value); 
+                        char* result = count_rs_to_string(&rs);
+                        free(rs.errMsg);
+
+                        if(result != NULL) {
+                            logWriter(LOG_INFO, "Added result to resultSB");
+                            appendToStringBuilder(&resultSB, result);
+                            free(result);
+                        } else {
+                            isError = true;
+                            logWriter(LOG_ERROR, "DB Operation is unsuccessful");
+                            appendToStringBuilder(&errorSB, "\"Internal server error\"");
+                        }
                     }
 
                 } else {
