@@ -49,8 +49,7 @@ void initAuthUtil(const char* path) {
 
     strcpy(authFile, path);
     strcat(authFile, "/users.bin");
-    free((void *) path);
-
+    
     logWriter(LOG_INFO, "Auth Location: ");
     logWriter(LOG_INFO, authFile);
 
@@ -83,15 +82,15 @@ void initAuthUtil(const char* path) {
         strcpy(user.name, "admin");
         strcpy(user.password, passwordHash);
         strcpy(user.uuid, uuid);
-        user.userAccess = USER_ACCESS_FULL_ACCESS;
-        user.dbAccess = USER_ACCESS_FULL_ACCESS;
-        user.collectionAccess = USER_ACCESS_FULL_ACCESS;
-        user.vectorAccess = USER_ACCESS_FULL_ACCESS;
+        user.user_access[USER_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
+        user.user_access[DB_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
+        user.user_access[COLLECTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
+        user.user_access[VECTOR_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
+        user.user_access[SUBSCRIPTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
 
         logWriter(LOG_INFO, "Admin Password: ");
         logWriter(LOG_INFO, password);
-        logWriter(LOG_INFO, passwordHash);
-
+        
         free(password);
         free(passwordHash);
         free(uuid);
@@ -112,6 +111,8 @@ void initAuthUtil(const char* path) {
 }
 
 void freeAuthUtil() {
+    logWriter(LOG_DEBUG, "auth freeAuthUtil started");
+    
     if(authBasePath != NULL) {
         free(authBasePath);
     }
@@ -120,7 +121,7 @@ void freeAuthUtil() {
         free(authFile);
     }
 
-    printf("Auth Util resource cleanup successful.\n");
+    logWriter(LOG_DEBUG, "auth freeAuthUtil completed");
 }
 
 bool findUser(char* userName) {
@@ -331,13 +332,4 @@ Response deleteUser(char* userName) {
     rs.errCode = SUCCESS_CODE;
     rs.errMsg = strdup(SUCESS_MSG);    
     return rs;
-}
-
-void freeUser(User* user) {
-    if(user != NULL) {
-        free(user->name);
-        free(user->password);
-        free(user->uuid);
-        free(user);
-    }
 }

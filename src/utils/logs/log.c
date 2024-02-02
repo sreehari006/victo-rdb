@@ -1,11 +1,14 @@
+#include<stdbool.h>
 #include <pthread.h>
 #include "interface/log.h"
 #include "../ds/interface/hashmap.h"
+#include "../time/interface/timestamp.h"
 
 static FILE* logfile;
 static int serverLogLevel;
 static LogMessageQueue messageQueue;
 static HashMap threadRegister;
+static bool terminateThreads = false;
 
 typedef struct LogInfoParams {
     pthread_t parentId;
@@ -49,6 +52,7 @@ void freeLogMessageNode(LogMessageNode* node) {
     node->message = NULL;
     free(node->threadUUID);
     free(node->message);
+    free(node->timeStamp);
     free(node);
 }
 
@@ -56,16 +60,17 @@ void freeLogThreadRegisterNode(void* value) {
     free(value);
 }
 
-void enqueueLogMessage(const int log_level, const char* threadUUID, const char* message) {
+void enqueueLogMessage(const int log_level, char* threadUUID, char* message, char* timeStamp) {
     LogMessageNode* newNode = (LogMessageNode*)malloc(sizeof(LogMessageNode));
     if (newNode == NULL) {
-        printf("Failed to allocate memory for a new message node \n");
+        printf("XX Failed to allocate memory for a new message node XX \n");
         return;
     }
 
     newNode->log_level = log_level;
     newNode->threadUUID = strdup(threadUUID);
     newNode->message = strdup(message);
+    newNode->timeStamp = strdup(timeStamp);
     newNode->next = NULL;
 
     pthread_mutex_lock(&messageQueue.mutex);
@@ -96,6 +101,7 @@ LogMessageNode dequeueLogMessage() {
     messageNode.log_level = head->log_level;
     messageNode.message = strdup(head->message);
     messageNode.threadUUID = strdup(head->threadUUID);
+    messageNode.timeStamp = strdup(head->timeStamp);
 
     messageQueue.head = head->next;
     freeLogMessageNode(head);
@@ -107,61 +113,54 @@ LogMessageNode dequeueLogMessage() {
 
 void* logReaderThreadFunction(void* arg) {
     while (1) {
-        time_t currentTime;
         LogMessageNode messageNode = dequeueLogMessage();
-        time(&currentTime);
-
-
+    
         char* log_level_str = getLogLevelString(messageNode.log_level);
         if(log_level_str && messageNode.log_level >= serverLogLevel) {
-            char timestamp[25];
-            struct tm *timeInfo = localtime(&currentTime);
-            strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", timeInfo);
-
-            if(logfile != NULL && fprintf(logfile, "%s %s %s %s\n", timestamp, log_level_str, messageNode.threadUUID, messageNode.message) >= 0) {
+            
+            if(logfile != NULL && fprintf(logfile, "%s %s %s %s\n", messageNode.timeStamp, log_level_str, messageNode.threadUUID, messageNode.message) >= 0) {
                 fflush(logfile);
             } else {
-                printf("%s %s %s %s\n", timestamp, log_level_str, messageNode.threadUUID, messageNode.message);
+                printf("%s %s %s %s\n", messageNode.timeStamp, log_level_str, messageNode.threadUUID, messageNode.message);
             }
 
         }
 
+        if (terminateThreads && messageQueue.head == NULL) {
+            pthread_exit(NULL);
+        }
     }
 
     return NULL;
 }
 
 void initLogUtil(char* log_level, const char* path) {
-    printf("log initLogUtil started\n");
-
     char logFilePath[strlen(path) + strlen("/log.txt") + 1];
     strcpy(logFilePath, path);
     strcat(logFilePath, "/log.txt");
-    free((void *) path);
     
     messageQueue.head = NULL;
     pthread_mutex_init(&messageQueue.mutex, NULL);
     pthread_cond_init(&messageQueue.cond, NULL);
 
-    printf("Writing logs to: %s\n", logFilePath);
+    initializeHashMap(&threadRegister);
+
     logfile = fopen(logFilePath, "a");
     if (logfile == NULL) {
-        printf("Error opening log file for writing.\n");
+        printf("XX Error opening log file for writing. XX \n");
     }
 
     serverLogLevel = getLogLevelCode(log_level);
-    printf("Server Log Level: %d\n", serverLogLevel);
-    
-    initializeHashMap(&threadRegister);
-    printf("Map for Thead ID Register created.\n");
+
     pthread_t reader;
     if (pthread_create(&reader, NULL, logReaderThreadFunction, NULL) != 0) {
-        printf("Error creating thread for async log.\n");
+        pthread_join(reader, NULL);
+        logWriter(LOG_INFO, "Error creating thread for async log.\n");
     } else {
-        printf("Log message reader Thread Started.\n");
+        logWriter(LOG_INFO, "Log message reader Thread Started.\n");
     }
 
-    printf("log initLogUtil completed.\n");
+    logWriter(LOG_INFO, "log initLogUtil completed.\n");
 }
 
 void* logWriterThreadFunction(void* arg) {
@@ -175,7 +174,10 @@ void* logWriterThreadFunction(void* arg) {
         threadUUID = buffer;
     }
 
-    enqueueLogMessage(params->log_level, threadUUID, params->message);
+    char timestampString[30];  
+    timestampToString(timestampString, sizeof(timestampString));
+
+    enqueueLogMessage(params->log_level, threadUUID, params->message, timestampString);
 
     free(params->message);
     free(params);
@@ -203,6 +205,8 @@ void logWriter(const int log_level, const char* message) {
 
 
 void freeLogUtil() {
+    terminateThreads = true;
+
     cleanupValueFunc cleanupValueFuncPtr = (cleanupValueFunc) freeLogThreadRegisterNode;
     cleanupHashMap(&threadRegister, cleanupValueFuncPtr);
 
@@ -219,10 +223,10 @@ void freeLogUtil() {
     pthread_mutex_destroy(&messageQueue.mutex);
     pthread_cond_destroy(&messageQueue.cond);
 
-    printf("Log util resources cleanup successfull.\n");
+    printf("** Log util resources cleanup successfull. **\n");
 
     if(fclose(logfile) != 0) {
-        printf("Error closing Log File.\n");
+        printf("XX Error closing Log File. XX\n");
     }
 }
 

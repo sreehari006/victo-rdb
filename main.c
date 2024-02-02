@@ -12,10 +12,12 @@
 #include "src/utils/strings/interface/string_builder.h"
 
 void sigint_handler(int sig) {
-    printf("## Server resource cleanup ##\n");
+    logWriter(LOG_INFO, "Server resource cleanup");
     stopWebSockServer();
+    sleep(3);
     cleanupWebSocketParams();
     freeAuthUtil();
+    sleep(2);
     freeLogUtil();
 }
 
@@ -59,10 +61,18 @@ int main(int argc, char *argv[]) {
 
     if(params.dbServerPath && initDBConfigSL(params.dbServerPath)) {
         params.dbBasePath = getDBBasePathSL(params.dbServerPath);
-        const char* dbLogPath = getDBLogPathSL(params.dbServerPath);
-        const char* authPath = getDBAuthPathSL(params.dbServerPath);
+        char* dbLogPath = getDBLogPathSL(params.dbServerPath);
+        char* authPath = getDBAuthPathSL(params.dbServerPath);
         
-        printf("Starting server\n");
+        initLogUtil(log_level, dbLogPath);
+        free(dbLogPath);
+
+        sleep(2);
+        char sysThreadID[25]; 
+        snprintf(sysThreadID, sizeof(sysThreadID), "%p", (void *) pthread_self());
+        setLogThreadRegisterUUID(sysThreadID, "base");
+
+        printf("** Starting server running..... **\n");
         logWriter(LOG_INFO, "Staring Victo server instance");
         logWriter(LOG_INFO, "DB Server Path: ");
         logWriter(LOG_INFO, params.dbServerPath);
@@ -71,8 +81,8 @@ int main(int argc, char *argv[]) {
         logWriter(LOG_INFO, "DB Log Path: ");
         logWriter(LOG_INFO, dbLogPath);
 
-        initLogUtil(log_level, dbLogPath);
         initAuthUtil(authPath);
+        free(authPath);
 
         setWebSocketParams(params);
         startWebSockServer();

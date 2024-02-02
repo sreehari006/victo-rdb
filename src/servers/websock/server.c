@@ -9,10 +9,7 @@
 struct ClientData {
     int client_socket;
     char* client_id;
-    int userAccess;
-    int dbAccess;
-    int collectionAccess;
-    int vectorAccess;
+    int user_access[MAX_ACCESS_INDEX_TYPES];
 };
 
 struct ServerData {
@@ -40,16 +37,12 @@ static struct ServerData serverData;
 void nullifyClientConnection(int i) {
     serverData.client_connection[i].client_socket = 0;
     serverData.client_connection[i].client_id = NULL;
-    serverData.client_connection[i].userAccess = 0;
-    serverData.client_connection[i].dbAccess = 0;
-    serverData.client_connection[i].collectionAccess = 0;
-    serverData.client_connection[i].vectorAccess = 0;
+    for(int j=0; j<25; j++) {
+        serverData.client_connection[i].user_access[j] = USER_ACCESS_NO_ACCESS;
+    }
 }
 void stopWebSockServer() {
     logWriter(LOG_DEBUG, "server stopWebSockServer started");
-
-    freeSubscribeTrigMessagQueue();
-
     serverData.isRunning = 0;
     
     for (int i = 0; i < MAX_CLIENTS; i++) {
@@ -59,6 +52,7 @@ void stopWebSockServer() {
         }
     }
 
+    freeSubscribeTrigMessagQueue();
     close(serverData.server_socket);
     logWriter(LOG_DEBUG, "server stopWebSockServer completed");
 }
@@ -174,10 +168,11 @@ bool handle_client_connection(int client_socket, int client_index) {
 
             serverData.client_connection[client_index].client_socket = client_socket;
             serverData.client_connection[client_index].client_id = strdup(user->uuid);
-            serverData.client_connection[client_index].userAccess = user->userAccess;
-            serverData.client_connection[client_index].dbAccess = user->dbAccess;
-            serverData.client_connection[client_index].collectionAccess = user->collectionAccess;
-            serverData.client_connection[client_index].vectorAccess = user->vectorAccess;
+
+            for(int i=0; i<25; i++) {
+                serverData.client_connection[client_index].user_access[i] = user->user_access[i];
+            }
+
             free(user);
         } else {
             logWriter(LOG_ERROR, "Invalid WebSocket handshake request. Decoding auth token failed.");
@@ -187,10 +182,9 @@ bool handle_client_connection(int client_socket, int client_index) {
     } else {
             serverData.client_connection[client_index].client_socket = client_socket;
             serverData.client_connection[client_index].client_id = strdup(USER_GUEST);
-            serverData.client_connection[client_index].userAccess = USER_ACCESS_FULL_ACCESS;
-            serverData.client_connection[client_index].dbAccess = USER_ACCESS_FULL_ACCESS;
-            serverData.client_connection[client_index].collectionAccess = USER_ACCESS_FULL_ACCESS;
-            serverData.client_connection[client_index].vectorAccess = USER_ACCESS_FULL_ACCESS;      
+            for(int i=0; i<25; i++) {
+                serverData.client_connection[client_index].user_access[i] = USER_ACCESS_FULL_ACCESS;
+            }  
     }
 
 
@@ -359,10 +353,9 @@ void *threadFunction(void *arg) {
         logWriter(LOG_INFO, "Start DB Operations");
         ClientInfo clientInfo;
         clientInfo.client_id = strdup(serverData.client_connection[data->client_index].client_id);
-        clientInfo.userAccess = serverData.client_connection[data->client_index].userAccess;
-        clientInfo.dbAccess = serverData.client_connection[data->client_index].dbAccess;
-        clientInfo.collectionAccess = serverData.client_connection[data->client_index].collectionAccess;
-        clientInfo.vectorAccess = serverData.client_connection[data->client_index].vectorAccess;
+        for(int i=0; i<25; i++) {
+            clientInfo.user_access[i] = serverData.client_connection[data->client_index].user_access[i];
+        }
 
         char* result = do_db_ops(threadUUID, frame.payload, clientInfo);
         if(result != NULL) {
@@ -404,11 +397,11 @@ void *threadFunction(void *arg) {
     } 
 
     free(client_message);
-    free(threadUUID);
-    removeLogThreadRegisterUUID(sysThreadID);
-
     free(data);
     logWriter(LOG_INFO, "server threadFunction completed");
+    free(threadUUID);
+    sleep(1);
+    removeLogThreadRegisterUUID(sysThreadID);
 
     pthread_exit(NULL);
 }
@@ -422,12 +415,20 @@ void *subscribeThreadFunction(void *arg) {
                 printf("Queued Hash: %s %d %s %s\n", serverData.client_connection[i].client_id, serverData.client_connection[i].client_socket, subscribeReplyInfo.vector_hash, subscribeReplyInfo.client_id);
             } 
         }
+
+        if(!serverData.isRunning) {
+            break;
+        }
     }
 
     pthread_exit(NULL);
 }
 
 void startWebSockServer() {
+    char sysThreadID[25]; 
+    snprintf(sysThreadID, sizeof(sysThreadID), "%p", (void *) pthread_self());
+    setLogThreadRegisterUUID(sysThreadID, "main");
+
     logWriter(LOG_DEBUG, "server startWebSockServer started");
     int max_socket, activity, sd;
     struct sockaddr_in server_addr;
@@ -465,6 +466,9 @@ void startWebSockServer() {
         logWriter(LOG_CRITICAL, "Error creating a thread for subscription");
         exit(EXIT_FAILURE);
     } else {
+        char sysThreadID[25]; 
+        snprintf(sysThreadID, sizeof(sysThreadID), "%p", subscriptionThread);
+        setLogThreadRegisterUUID(sysThreadID, "subscriber");
         logWriter(LOG_INFO, "New thread created for handling subscription: ");
     }
 
@@ -560,6 +564,6 @@ void startWebSockServer() {
         } 
     }
 
-    printf("## Shutting down the server ##\n");
+    printf("** Server stopped **\n");
 
 }

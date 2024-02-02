@@ -15,6 +15,7 @@ typedef struct LogMessageNode {
     int log_level;
     char* threadUUID;
     char* message;
+    char* timeStamp;
     struct LogMessageNode* next;
 } LogMessageNode;
 

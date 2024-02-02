@@ -2,12 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX_ACCESS_INDEX_TYPES  25
+
 typedef struct ClientInfo {
     char* client_id;
-    int userAccess;
-    int dbAccess;
-    int collectionAccess;
-    int vectorAccess;
+    int user_access[MAX_ACCESS_INDEX_TYPES];
 } ClientInfo;
 
 typedef struct SubscribeReplyInfo {

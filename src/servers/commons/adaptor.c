@@ -925,16 +925,19 @@ Response add_user(char* userName, char* password) {
     strcpy(user->name, userName);
     strcpy(user->password, sha256(password));
     strcpy(user->uuid, uuid);
-    user->userAccess = USER_ACCESS_NO_ACCESS;
-    user->dbAccess = USER_ACCESS_FULL_ACCESS;
-    user->collectionAccess = USER_ACCESS_FULL_ACCESS;
-    user->vectorAccess = USER_ACCESS_FULL_ACCESS;
+    user->user_access[USER_ACCESS_INDEX] = USER_ACCESS_NO_ACCESS;
+    user->user_access[DB_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
+    user->user_access[COLLECTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
+    user->user_access[VECTOR_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
+    user->user_access[SUBSCRIPTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
     
     Response rs = addUser(user);
     
     free(userName);
     free(password);
     free(uuid);
+
+    free(user);
     logWriter(LOG_DEBUG, "adaptor add_user completed");
 
     return rs;
@@ -944,40 +947,39 @@ bool verifyAccess(char* op, char* obj, ClientInfo ClientInfo) {
     int access = true;
 
     if(strcmp(op,"add") == 0 && strcmp(obj, "db") == 0) {
-        access = ClientInfo.dbAccess & USER_ACCESS_WRITE_ACCESS;
+        access = ClientInfo.user_access[DB_ACCESS_INDEX] & USER_ACCESS_WRITE_ACCESS;
     } else if(strcmp(op,"add") == 0 && strcmp(obj, "collection") == 0) {
-        access = ClientInfo.collectionAccess & USER_ACCESS_WRITE_ACCESS;
+        access = ClientInfo.user_access[COLLECTION_ACCESS_INDEX] & USER_ACCESS_WRITE_ACCESS;
     } else if(strcmp(op,"count") == 0 && strcmp(obj, "collection") == 0) {
-        access = ClientInfo.collectionAccess & USER_ACCESS_COUNT_ACCESS;
+        access = ClientInfo.user_access[COLLECTION_ACCESS_INDEX] & USER_ACCESS_COUNT_ACCESS;
     } else if(strcmp(op,"list") == 0 && strcmp(obj, "collection") == 0) {
-        access = ClientInfo.collectionAccess & USER_ACCESS_LIST_ACCESS;
+        access = ClientInfo.user_access[COLLECTION_ACCESS_INDEX] & USER_ACCESS_LIST_ACCESS;
     } else if(strcmp(op,"delete") == 0 && strcmp(obj, "collection") == 0) {
-        access = ClientInfo.collectionAccess & USER_ACCESS_DELETE_ACCESS;
+        access = ClientInfo.user_access[COLLECTION_ACCESS_INDEX] & USER_ACCESS_DELETE_ACCESS;
     } else if(strcmp(op,"put") == 0 && strcmp(obj, "vector") == 0) {
-        access = ClientInfo.vectorAccess & USER_ACCESS_WRITE_ACCESS;
+        access = ClientInfo.user_access[VECTOR_ACCESS_INDEX] & USER_ACCESS_WRITE_ACCESS;
     } else if(strcmp(op,"get") == 0 && strcmp(obj, "vector") == 0) {
-        access = ClientInfo.vectorAccess & USER_ACCESS_READ_ACCESS;
+        access = ClientInfo.user_access[VECTOR_ACCESS_INDEX] & USER_ACCESS_READ_ACCESS;
     } else if(strcmp(op,"delete") == 0 && strcmp(obj, "vector") == 0) {
-        access = ClientInfo.vectorAccess & USER_ACCESS_DELETE_ACCESS;
+        access = ClientInfo.user_access[VECTOR_ACCESS_INDEX] & USER_ACCESS_DELETE_ACCESS;
     } else if(strcmp(op,"count") == 0 && strcmp(obj, "vector") == 0) {
-        access = ClientInfo.vectorAccess & USER_ACCESS_COUNT_ACCESS;
+        access = ClientInfo.user_access[VECTOR_ACCESS_INDEX] & USER_ACCESS_COUNT_ACCESS;
     } else if(strcmp(op,"list") == 0 && strcmp(obj, "vector") == 0) {
-        access = ClientInfo.vectorAccess & USER_ACCESS_LIST_ACCESS;
+        access = ClientInfo.user_access[VECTOR_ACCESS_INDEX] & USER_ACCESS_LIST_ACCESS;
     } else if(strcmp(op,"query") == 0 && strcmp(obj, "vector") == 0) {
-        printf("Inside Query");
-        access = ClientInfo.vectorAccess & USER_ACCESS_READ_MULTIPLE_ACCESS;
+        access = ClientInfo.user_access[VECTOR_ACCESS_INDEX] & USER_ACCESS_READ_MULTIPLE_ACCESS;
     } else if(strcmp(op,"add") == 0 && strcmp(obj, "user") == 0) {
-        access = ClientInfo.userAccess & USER_ACCESS_WRITE_ACCESS;
+        access = ClientInfo.user_access[USER_ACCESS_INDEX] & USER_ACCESS_WRITE_ACCESS;
     } else if(strcmp(op,"add") == 0 && strcmp(obj, "subscription") == 0) {
-        access = true;
+        access = ClientInfo.user_access[SUBSCRIPTION_ACCESS_INDEX] & USER_ACCESS_WRITE_ACCESS;
     } else if(strcmp(op,"get") == 0 && strcmp(obj, "subscription") == 0) {
-        access = true;
+        access = ClientInfo.user_access[SUBSCRIPTION_ACCESS_INDEX] & USER_ACCESS_READ_ACCESS;
     } else if(strcmp(op,"list") == 0 && strcmp(obj, "subscription") == 0) {
-        access = true;
+        access = ClientInfo.user_access[SUBSCRIPTION_ACCESS_INDEX] & USER_ACCESS_LIST_ACCESS;
     } else if(strcmp(op,"count") == 0 && strcmp(obj, "subscription") == 0) {
-        access = true;
+        access = ClientInfo.user_access[SUBSCRIPTION_ACCESS_INDEX] & USER_ACCESS_COUNT_ACCESS;
     } else if(strcmp(op,"delete") == 0 && strcmp(obj, "subscription") == 0) {
-        access = true;
+        access = ClientInfo.user_access[SUBSCRIPTION_ACCESS_INDEX] & USER_ACCESS_DELETE_ACCESS;
     }
 
     free(op);

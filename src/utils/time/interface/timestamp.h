@@ -1,0 +1,1 @@
+void timestampToString(char *buffer, int bufferSize);
