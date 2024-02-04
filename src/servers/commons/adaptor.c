@@ -9,12 +9,6 @@
 #include "../auth/interface/user_ops.h"
 #include "../auth/interface/crypto.h"
 
-typedef struct SubscribeTrigMsgNode {
-    char* vectorHash;
-    char* clientID;
-    struct SubscribeTrigMsgNode* next;
-} SubscribeTrigMsgNode;
-
 typedef struct {
     SubscribeTrigMsgNode* head;
     pthread_mutex_t mutex;
@@ -22,101 +16,6 @@ typedef struct {
 } SubscribeTrigMsgQueue;
 
 static SubscribeTrigMsgQueue subscribeTrigMsgQueue;
-
-void initSubscribeTrigQueue() {
-    logWriter(LOG_DEBUG, "adaptor initSubscribeTrigQueue started");
-
-    subscribeTrigMsgQueue.head = NULL;
-    pthread_mutex_init(&subscribeTrigMsgQueue.mutex, NULL);
-    pthread_cond_init(&subscribeTrigMsgQueue.cond, NULL);    
-
-    logWriter(LOG_DEBUG, "adaptor initSubscribeTrigQueue completed");
-}
-
-void enqueueSubscribeTrigMessage(const char* vectorHash, const char* clientID) {
-    logWriter(LOG_DEBUG, "adaptor enqueueSubscribeTrigMessage started");
-
-    SubscribeTrigMsgNode* newNode = (SubscribeTrigMsgNode*)malloc(sizeof(SubscribeTrigMsgNode));
-    if (newNode == NULL) {
-        logWriter(LOG_ERROR, "Error while creating node for new subscribe trigger message");
-        return;
-    }
-
-    newNode->vectorHash = strdup(vectorHash);
-    newNode->clientID = strdup(clientID);
-    newNode->next = NULL;
-    
-    pthread_mutex_lock(&subscribeTrigMsgQueue.mutex);
-
-    if (subscribeTrigMsgQueue.head == NULL) {
-        subscribeTrigMsgQueue.head = newNode;
-    } else {
-        SubscribeTrigMsgNode* current = subscribeTrigMsgQueue.head;
-        while (current->next != NULL) {
-            current = current->next;
-        }
-        current->next = newNode;
-    }
-
-    pthread_cond_signal(&subscribeTrigMsgQueue.cond);
-    pthread_mutex_unlock(&subscribeTrigMsgQueue.mutex);
-
-    logWriter(LOG_DEBUG, "adaptor enqueueSubscribeTrigMessage completed");
-}
-
-SubscribeTrigMsgNode dequeueSubscribeTrigMessage() {
-    logWriter(LOG_DEBUG, "adaptor dequeueSubscribeTrigMessage started");
-
-    SubscribeReplyInfo SubscribeReplyInfo;
-    SubscribeTrigMsgNode messageNode;
-    pthread_mutex_lock(&subscribeTrigMsgQueue.mutex);
-
-    while (subscribeTrigMsgQueue.head == NULL) {
-        pthread_cond_wait(&subscribeTrigMsgQueue.cond, &subscribeTrigMsgQueue.mutex);
-    }
-
-    SubscribeTrigMsgNode* head = subscribeTrigMsgQueue.head;
-    messageNode.vectorHash = strdup(head->vectorHash);
-    messageNode.clientID = strdup(head->clientID);
-    
-    subscribeTrigMsgQueue.head = head->next;
-
-    pthread_mutex_unlock(&subscribeTrigMsgQueue.mutex);
-    free(head->vectorHash);
-    free(head->clientID);
-    free(head);
-
-    logWriter(LOG_DEBUG, "adaptor dequeueSubscribeTrigMessage completed");
-    return messageNode;
-}
-
-SubscribeReplyInfo querySubscription() {
-    SubscribeReplyInfo subscribeReplyInfo;
-
-    SubscribeTrigMsgNode node = dequeueSubscribeTrigMessage();
-    subscribeReplyInfo.client_id = node.clientID;
-    subscribeReplyInfo.vector_hash = node.vectorHash;
-
-    return subscribeReplyInfo;
-}
-
-void freeSubscribeTrigMessagQueue() {
-    logWriter(LOG_DEBUG, "adaptor freeSubscribeTrigMessagQueue started");
-
-    SubscribeTrigMsgNode* current = subscribeTrigMsgQueue.head;
-    while (current != NULL) {
-        SubscribeTrigMsgNode* nextNode = current->next;
-        free(current->vectorHash);
-        free(current);
-        current = nextNode;
-    }
-    subscribeTrigMsgQueue.head = NULL; 
-
-    pthread_mutex_destroy(&subscribeTrigMsgQueue.mutex);
-    pthread_cond_destroy(&subscribeTrigMsgQueue.cond);
-
-    logWriter(LOG_DEBUG, "adaptor freeSubscribeTrigMessagQueue completed");
-}
 
 char* string_array_to_string(char** array) {
     logWriter(LOG_DEBUG, "adaptor string_array_to_string started");
@@ -362,6 +261,113 @@ char* count_rs_to_string(CountRS* rs) {
 
     logWriter(LOG_DEBUG, "adaptor count_rs_to_string completed");
     return result;
+}
+
+void init_subscribe_trig_queue() {
+    logWriter(LOG_DEBUG, "adaptor initSubscribeTrigQueue started");
+
+    subscribeTrigMsgQueue.head = NULL;
+    pthread_mutex_init(&subscribeTrigMsgQueue.mutex, NULL);
+    pthread_cond_init(&subscribeTrigMsgQueue.cond, NULL);    
+
+    logWriter(LOG_DEBUG, "adaptor initSubscribeTrigQueue completed");
+}
+
+void enqueue_subscribe_trig_message(const char* db, const char* collection, const char* vectorHash, char* clientID) {
+    logWriter(LOG_DEBUG, "adaptor enqueueSubscribeTrigMessage started");
+
+    SubscribeTrigMsgNode* newNode = (SubscribeTrigMsgNode*)malloc(sizeof(SubscribeTrigMsgNode));
+    if (newNode == NULL) {
+        logWriter(LOG_ERROR, "Error while creating node for new subscribe trigger message");
+        return;
+    }
+
+    newNode->db = strdup(db);
+    newNode->collection = strdup(collection);
+    newNode->vectorHash = strdup(vectorHash);
+    newNode->clientID = strdup(clientID);
+    newNode->next = NULL;
+    
+    pthread_mutex_lock(&subscribeTrigMsgQueue.mutex);
+
+    if (subscribeTrigMsgQueue.head == NULL) {
+        subscribeTrigMsgQueue.head = newNode;
+    } else {
+        SubscribeTrigMsgNode* current = subscribeTrigMsgQueue.head;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = newNode;
+    }
+
+    pthread_cond_signal(&subscribeTrigMsgQueue.cond);
+    pthread_mutex_unlock(&subscribeTrigMsgQueue.mutex);
+
+    logWriter(LOG_DEBUG, "adaptor enqueueSubscribeTrigMessage completed");
+}
+
+SubscribeTrigMsgNode* dequeue_subscribe_trig_message() {
+    logWriter(LOG_DEBUG, "adaptor dequeueSubscribeTrigMessage started");
+
+    SubscribeTrigMsgNode* messageNode = (SubscribeTrigMsgNode *)malloc(sizeof(SubscribeTrigMsgNode));
+    pthread_mutex_lock(&subscribeTrigMsgQueue.mutex);
+
+    while (subscribeTrigMsgQueue.head == NULL) {
+        pthread_cond_wait(&subscribeTrigMsgQueue.cond, &subscribeTrigMsgQueue.mutex);
+    }
+
+    SubscribeTrigMsgNode* head = subscribeTrigMsgQueue.head;
+
+    messageNode->db = strdup(head->db);
+    messageNode->collection = strdup(head->collection);
+    messageNode->vectorHash = strdup(head->vectorHash);
+    messageNode->clientID = strdup(head->clientID);
+    
+    subscribeTrigMsgQueue.head = head->next;
+
+    pthread_mutex_unlock(&subscribeTrigMsgQueue.mutex);
+    free(head->db);
+    free(head->collection);
+    free(head->vectorHash);
+    free(head->clientID);
+    free(head);
+
+    logWriter(LOG_DEBUG, "adaptor dequeueSubscribeTrigMessage completed");
+    return messageNode;
+}
+
+SubscribeReplyInfo query_subscription(SubscribeTrigMsgNode* subscribeTrigMsgNode) {
+    SubscribeReplyInfo subscribeReplyInfo;
+
+    char* vectorBP = vector_base_path(subscribeTrigMsgNode->db, subscribeTrigMsgNode->collection);
+    char* subscriptionBP = subscription_base_path(subscribeTrigMsgNode->db, subscribeTrigMsgNode->collection);
+    querySubscriptionSL(subscriptionBP, vectorBP, subscribeTrigMsgNode->vectorHash);
+    free(vectorBP);
+    free(subscriptionBP);
+
+
+    // subscribeReplyInfo.client_id = node.clientID;
+    // subscribeReplyInfo.vector_hash = node.vectorHash;
+
+    return subscribeReplyInfo;
+}
+
+void free_subscribe_trig_messag_queue() {
+    logWriter(LOG_DEBUG, "adaptor freeSubscribeTrigMessagQueue started");
+
+    SubscribeTrigMsgNode* current = subscribeTrigMsgQueue.head;
+    while (current != NULL) {
+        SubscribeTrigMsgNode* nextNode = current->next;
+        free(current->vectorHash);
+        free(current);
+        current = nextNode;
+    }
+    subscribeTrigMsgQueue.head = NULL; 
+
+    pthread_mutex_destroy(&subscribeTrigMsgQueue.mutex);
+    pthread_cond_destroy(&subscribeTrigMsgQueue.cond);
+
+    logWriter(LOG_DEBUG, "adaptor freeSubscribeTrigMessagQueue completed");
 }
 
 char* collection_list_rs_to_string(CollectionListRS* rs) {
@@ -1455,7 +1461,7 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             logWriter(LOG_INFO, "Added new node to subscribe queue");
-                            enqueueSubscribeTrigMessage(rs.hash, clientInfo.client_id);
+                            enqueue_subscribe_trig_message(dbNode->value, collectionNode->value, rs.hash, clientInfo.client_id);
                             logWriter(LOG_INFO, "Added result to resultSB");
                             appendToStringBuilder(&resultSB, result);
                             free(result);
@@ -1611,7 +1617,6 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     } 
 
                     int vdim = 0;
-
                     if(vdimNode == NULL || vdimNode->value == NULL || !isValidInteger(vdimNode->value)) {
                         logWriter(LOG_WARN, "Missing parameter: vector dimension (vdim)");
                         (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
@@ -1620,15 +1625,17 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         vdim = atoi(vdimNode->value);
                     }
 
-                    double vp[vdim];
                     if(vpNode == NULL) {
                         logWriter(LOG_WARN, "Missing parameter: vector points (vp)");
                         (isError) ? appendToStringBuilder(&errorSB, ", ") : (isError = true);
                         appendToStringBuilder(&errorSB, "\"Missing parameter: vector points (vp)\"");
-                    } else {
+                    } 
+
+                    double vp[vdim];
+                    char* errptr;
+                    if(!isError) {
                         int i=0;
                         while(i<vdim && vpNode->children[i] != NULL) {
-                            char* errptr;
                             vp[i] = strtod(vpNode->children[i]->value, &errptr);
                             
                             if (*errptr != '\0') {
@@ -1642,15 +1649,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         }
                     }
 
-                    char* errptr;
                     if(!isError) {
                         JsonNode* isNormalNode = searchJson(argsNode, "is_normal");
                         JsonNode* overwriteNode = searchJson(argsNode, "overwrite");
 
                         bool isNormal = (isNormalNode != NULL && strcasecmp(isNormalNode->value, "true") == 0) ? true : false;
                         bool overwrite = (overwriteNode != NULL && strcasecmp(overwriteNode->value, "true") == 0) ? true : false;
-
-                        char* hash = getUUID();
 
                         SubscriptionQueryOptions queryOptions;
                         JsonNode* queryOptionsNode = searchJson(argsNode, "qOps");
@@ -1675,6 +1679,7 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         }
                         queryOptions.p_value = p_value;
 
+                        char* hash = getUUID();
                         PutSubscriptionRS rs = add_subscription(clientInfo.client_id, dbNode->value, collectionNode->value, aiModelNode->value, hash, vdim, vp, isNormal, overwrite, queryOptions); 
                         free(hash);
 

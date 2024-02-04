@@ -52,7 +52,7 @@ void stopWebSockServer() {
         }
     }
 
-    freeSubscribeTrigMessagQueue();
+    free_subscribe_trig_messag_queue();
     close(serverData.server_socket);
     logWriter(LOG_DEBUG, "server stopWebSockServer completed");
 }
@@ -406,19 +406,39 @@ void *threadFunction(void *arg) {
     pthread_exit(NULL);
 }
 
+void *processSubscribeThreadFucntion(void *arg) {
+    SubscribeTrigMsgNode* subscribeTrigMsgNode = (SubscribeTrigMsgNode*) arg;
+    query_subscription(subscribeTrigMsgNode);
+    pthread_exit(NULL);
+}
+
 void *subscribeThreadFunction(void *arg) {
     while (1) {
-        SubscribeReplyInfo subscribeReplyInfo = querySubscription();
+
+        SubscribeTrigMsgNode* subscribeTrigMsgNode = dequeue_subscribe_trig_message();
+        pthread_t processSubscriptionThread;
+        if (pthread_create(&processSubscriptionThread, NULL, processSubscribeThreadFucntion, subscribeTrigMsgNode) != 0) {
+            logWriter(LOG_CRITICAL, "Error creating a thread for processing subscription");
+            exit(EXIT_FAILURE);
+        } else {
+            // char sysThreadID[25]; 
+            // snprintf(sysThreadID, sizeof(sysThreadID), "%p", subscriptionThread);
+            // setLogThreadRegisterUUID(sysThreadID, "subscriber");
+            logWriter(LOG_INFO, "New thread created for processing subscription: ");
+        }
+
+        /* SubscribeReplyInfo subscribeReplyInfo = querySubscription();
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (serverData.client_connection[i].client_socket > 0 && strcmp(serverData.client_connection[i].client_id, subscribeReplyInfo.client_id) == 0) {
                 sendWebSocketFrame(serverData.client_connection[i].client_socket, subscribeReplyInfo.vector_hash, 0x01);
                 printf("Queued Hash: %s %d %s %s\n", serverData.client_connection[i].client_id, serverData.client_connection[i].client_socket, subscribeReplyInfo.vector_hash, subscribeReplyInfo.client_id);
             } 
-        }
+        } */
 
         if(!serverData.isRunning) {
             break;
         }
+
     }
 
     pthread_exit(NULL);
@@ -460,7 +480,7 @@ void startWebSockServer() {
         nullifyClientConnection(i);
     }
 
-    initSubscribeTrigQueue();
+    init_subscribe_trig_queue();
     pthread_t subscriptionThread;
     if (pthread_create(&subscriptionThread, NULL, subscribeThreadFunction, NULL) != 0) {
         logWriter(LOG_CRITICAL, "Error creating a thread for subscription");

@@ -180,4 +180,12 @@ Response unsubscribeSL(char* location, char* hash) {
     return rs;
 }
 
+void querySubscriptionSL(char* s_base_location, char* v_base_location, char* v_hash) {
+    char filename[strlen(v_base_location) + strlen(v_hash) + strlen(VICTO_FILE_EXT) + 2];
+    strcpy(filename, v_base_location);
+    strcat(filename, "/");
+    strcat(filename, v_hash);
+    strcat(filename, VICTO_FILE_EXT);
+    querySubscription(s_base_location, filename);
+}
 

@@ -9,12 +9,21 @@ typedef struct ClientInfo {
     int user_access[MAX_ACCESS_INDEX_TYPES];
 } ClientInfo;
 
+typedef struct SubscribeTrigMsgNode {
+    char* db;
+    char* collection;
+    char* vectorHash;
+    char* clientID;
+    struct SubscribeTrigMsgNode* next;
+} SubscribeTrigMsgNode;
+
 typedef struct SubscribeReplyInfo {
     char* client_id;
     char* vector_hash;
 } SubscribeReplyInfo;
 
 char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo);
-void initSubscribeTrigQueue();
-SubscribeReplyInfo querySubscription();
-void freeSubscribeTrigMessagQueue();
+void init_subscribe_trig_queue();
+SubscribeTrigMsgNode* dequeue_subscribe_trig_message();
+SubscribeReplyInfo query_subscription(SubscribeTrigMsgNode* subscribeTrigMsgNode);
+void free_subscribe_trig_messag_queue();
