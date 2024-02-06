@@ -9,4 +9,4 @@ GetSubscriptionRS getSubscription(char* filename);
 CountRS subscriptionCount(char* location);
 SubscriptionListRS subscriptionList(const char* location);
 Response unsubscribe(char* filename);
-void querySubscription(char* s_base_location, char* filename);
+SubscriptionListNode* querySubscription(char* s_base_location, char* filename);

@@ -408,7 +408,25 @@ void *threadFunction(void *arg) {
 
 void *processSubscribeThreadFucntion(void *arg) {
     SubscribeTrigMsgNode* subscribeTrigMsgNode = (SubscribeTrigMsgNode*) arg;
-    query_subscription(subscribeTrigMsgNode);
+    SubscriptionListNode* subscriptionMessageList = query_subscription(subscribeTrigMsgNode);
+
+    while (subscriptionMessageList != NULL) {
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            if (serverData.client_connection[i].client_socket > 0 && strcmp(serverData.client_connection[i].client_id, subscriptionMessageList->client_id) == 0) {
+                while(subscriptionMessageList->message != NULL) {
+                    char* result = subscription_message(strdup(subscriptionMessageList->message->vector_hash), strdup(subscriptionMessageList->message->query_hash));
+                    if(result) {
+                        sendWebSocketFrame(serverData.client_connection[i].client_socket, result, 0x01);
+                        free(result);
+                    }    
+                }
+                break;
+            }    
+        } 
+        subscriptionMessageList = subscriptionMessageList->next;
+    }
+
+
     pthread_exit(NULL);
 }
 

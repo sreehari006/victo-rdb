@@ -122,4 +122,19 @@ typedef struct GetSubscriptionRS {
     SubscriptionNode node;
 } GetSubscriptionRS;
 
+typedef struct SubscriptionMessageNode {
+    char* vector_hash;
+    char* query_hash;
+    struct SubscriptionMessageNode *next;
+} SubscriptionMessageNode;
+
+typedef struct SubscriptionListNode {
+    char* client_id;
+    struct SubscriptionMessageNode *message;
+    struct SubscriptionListNode *next;
+} SubscriptionListNode;
+
+
+
+
 #endif

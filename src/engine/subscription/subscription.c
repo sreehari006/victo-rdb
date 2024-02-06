@@ -148,7 +148,8 @@ SubscriptionListRS subscriptionList(const char* location) {
     return rs;
 }
 
-void querySubscription(char* s_base_location, char* filename) {
+SubscriptionListNode* querySubscription(char* s_base_location, char* filename) {
+    SubscriptionListNode* subscriptionMessageList;
     GetVectorRS vectorRS = getVector(filename);
     if(vectorRS.errCode == 0) {
         SubscriptionListRS listRs = subscriptionList(s_base_location);
@@ -175,7 +176,42 @@ void querySubscription(char* s_base_location, char* filename) {
 
                     QueryVectorRS qvRS = convert_to_query_vector_from_query(vectorRS.node, subscriptionRS.node.ai_model, subscriptionRS.node.vdim, subscriptionRS.node.vp, queryOptions);
                     if(qvRS.errCode == 0) {
-                        printf("%s %f %d %f\n", qvRS.hash, qvRS.distance, queryOptions.query_logical_op, queryOptions.query_value);
+                        if(compare(queryOptions.query_logical_op, qvRS.distance, queryOptions.query_value)) {
+                            SubscriptionMessageNode* message = (SubscriptionMessageNode *)malloc(sizeof(SubscriptionMessageNode));
+                            message->vector_hash = strdup(vectorRS.node.hash);
+                            message->query_hash = strdup(subscriptionRS.node.hash);
+                            message->next = NULL;
+
+                            if(subscriptionMessageList == NULL) {
+                                subscriptionMessageList = (SubscriptionListNode *)malloc(sizeof(SubscriptionListNode));
+                                subscriptionMessageList->client_id = strdup(subscriptionRS.node.client_id);
+                                subscriptionMessageList->message = message;
+                                subscriptionMessageList->next = NULL;
+                            } else {
+                                SubscriptionListNode* currentSubscriptionListNode = subscriptionMessageList;
+                                bool existingClient = false;
+                                while(currentSubscriptionListNode != NULL) {
+                                    if(strcmp(currentSubscriptionListNode->client_id, subscriptionRS.node.client_id) == 0) {
+                                        message->next = currentSubscriptionListNode->message;
+                                        currentSubscriptionListNode->message = message;
+                                        existingClient = true;
+                                        break;
+                                    }                                    
+                                    currentSubscriptionListNode = currentSubscriptionListNode->next;
+                                }
+
+                                if(!existingClient) {
+                                    SubscriptionListNode* newNode = (SubscriptionListNode *)malloc(sizeof(SubscriptionListNode));
+                                    newNode->client_id = strdup(subscriptionRS.node.client_id);
+                                    newNode->message = message;
+                                    newNode->next = subscriptionMessageList;  
+                                    subscriptionMessageList = newNode;                       
+                                }
+
+                            }
+
+                            // printf("%s %s %s\n", vectorRS.node.hash, subscriptionRS.node.hash, subscriptionRS.node.client_id);
+                        }
                     }
                 }
 
@@ -184,4 +220,8 @@ void querySubscription(char* s_base_location, char* filename) {
         }
 
     }
+
+    return subscriptionMessageList;
+
+    
 }

@@ -1,7 +1,6 @@
 #include "interface/adaptor.h"
 #include "interface/globals.h"
 #include "../../utils/json/interface/json.h"
-#include "../../sl/db/interface/service_locator.h"
 #include "../../utils/strings/interface/string_builder.h"
 #include "../../utils/uuid/interface/uuid.h"
 #include "../../commons/constants.h"
@@ -336,12 +335,11 @@ SubscribeTrigMsgNode* dequeue_subscribe_trig_message() {
     return messageNode;
 }
 
-SubscribeReplyInfo query_subscription(SubscribeTrigMsgNode* subscribeTrigMsgNode) {
-    SubscribeReplyInfo subscribeReplyInfo;
-
+SubscriptionListNode* query_subscription(SubscribeTrigMsgNode* subscribeTrigMsgNode) {
+    
     char* vectorBP = vector_base_path(subscribeTrigMsgNode->db, subscribeTrigMsgNode->collection);
     char* subscriptionBP = subscription_base_path(subscribeTrigMsgNode->db, subscribeTrigMsgNode->collection);
-    querySubscriptionSL(subscriptionBP, vectorBP, subscribeTrigMsgNode->vectorHash);
+    SubscriptionListNode* subscriptionListNode = querySubscriptionSL(subscriptionBP, vectorBP, subscribeTrigMsgNode->vectorHash);
     free(vectorBP);
     free(subscriptionBP);
 
@@ -349,7 +347,7 @@ SubscribeReplyInfo query_subscription(SubscribeTrigMsgNode* subscribeTrigMsgNode
     // subscribeReplyInfo.client_id = node.clientID;
     // subscribeReplyInfo.vector_hash = node.vectorHash;
 
-    return subscribeReplyInfo;
+    return subscriptionListNode;
 }
 
 void free_subscribe_trig_messag_queue() {
@@ -368,6 +366,41 @@ void free_subscribe_trig_messag_queue() {
     pthread_cond_destroy(&subscribeTrigMsgQueue.cond);
 
     logWriter(LOG_DEBUG, "adaptor freeSubscribeTrigMessagQueue completed");
+}
+
+char* subscription_message(char* vector_hash, char* query_hash) {
+    logWriter(LOG_DEBUG, "adaptor subscription_message started");
+
+    if(vector_hash == NULL || query_hash == NULL) {
+        logWriter(LOG_DEBUG, "vector hash or query hash is NULL");
+        return NULL;
+    }
+
+    StringBuilder resultSB;
+    initStringBuilder(&resultSB, 10);
+
+    char errCode[5];
+    snprintf(errCode, sizeof(errCode), "%d", 0);
+
+    appendToStringBuilder(&resultSB, "{\"code\": ");
+    appendToStringBuilder(&resultSB, errCode);
+    appendToStringBuilder(&resultSB, ", \"message\": \"");
+    appendToStringBuilder(&resultSB, SUCESS_MSG);
+    appendToStringBuilder(&resultSB, ", \"vector_hash\": \"");
+    appendToStringBuilder(&resultSB, vector_hash);
+    appendToStringBuilder(&resultSB, ", \"query_hash\": \"");
+    appendToStringBuilder(&resultSB, query_hash);
+    appendToStringBuilder(&resultSB, "\"");
+    appendToStringBuilder(&resultSB, "}");
+    char* result = strdup(resultSB.data);
+    freeStringBuilder(&resultSB);
+
+    if (result == NULL) {
+        logWriter(LOG_ERROR, "Memory allocation failed for result");
+    }
+
+    logWriter(LOG_DEBUG, "adaptor subscription_message completed");
+    return result;
 }
 
 char* collection_list_rs_to_string(CollectionListRS* rs) {

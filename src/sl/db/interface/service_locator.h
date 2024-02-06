@@ -17,5 +17,5 @@ GetSubscriptionRS getSubscriptionSL(char* filename, char* hash);
 CountRS subscriptionCountSL(char* location);
 SubscriptionListRS subscriptionListSL(const char* location);
 Response unsubscribeSL(char* filename);
-void querySubscriptionSL(char* s_base_location, char* v_base_location, char* v_hash);
+SubscriptionListNode* querySubscriptionSL(char* s_base_location, char* v_base_location, char* v_hash);
 

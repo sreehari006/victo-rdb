@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../../sl/db/interface/service_locator.h"
+
 #define MAX_ACCESS_INDEX_TYPES  25
 
 typedef struct ClientInfo {
@@ -25,5 +27,6 @@ typedef struct SubscribeReplyInfo {
 char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo);
 void init_subscribe_trig_queue();
 SubscribeTrigMsgNode* dequeue_subscribe_trig_message();
-SubscribeReplyInfo query_subscription(SubscribeTrigMsgNode* subscribeTrigMsgNode);
+SubscriptionListNode* query_subscription(SubscribeTrigMsgNode* subscribeTrigMsgNode);
 void free_subscribe_trig_messag_queue();
+char* subscription_message(char* vector_hash, char* query_hash);
