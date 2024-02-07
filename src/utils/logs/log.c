@@ -1,22 +1,41 @@
-#include<stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
+#include <stdbool.h>
 #include <pthread.h>
-#include "interface/log.h"
-#include "../ds/interface/hashmap.h"
-#include "../time/interface/timestamp.h"
+#include "./includes/log_proto.h"
+#include "../ds/includes/hashmap_proto.h"
+#include "../time/includes/timestamp_proto.h"
 
-static FILE* logfile;
-static int serverLogLevel;
-static LogMessageQueue messageQueue;
-static HashMap threadRegister;
-static bool terminateThreads = false;
+typedef struct LogMessageNode {
+    int log_level;
+    char* thread_uuid;
+    char* message;
+    char* time_stamp;
+    struct LogMessageNode* next;
+} LogMessageNode;
+
+typedef struct {
+    LogMessageNode* head;
+    pthread_mutex_t mutex;
+    pthread_cond_t  cond;
+} LogMessageQueue;
 
 typedef struct LogInfoParams {
-    pthread_t parentId;
+    pthread_t parent_id;
     int log_level;
     char* message;
 } LogInfoParams;
 
-char* getLogLevelString(int code) {
+static FILE* log_file;
+static int server_log_level;
+static LogMessageQueue message_queue;
+static HashMap thread_register;
+static bool terminate_threads = false;
+
+char* get_log_level_string(int code) {
     switch (code) {
         case 0: return "DEBUG";
                 break;
@@ -32,35 +51,35 @@ char* getLogLevelString(int code) {
     }
 }
 
-int getLogLevelCode(char* loglevelStr) {
-    if(strcmp(loglevelStr, "DEBUG") == 0) {
+int get_log_level_code(char* log_level_str) {
+    if(strcmp(log_level_str, "DEBUG") == 0) {
         return LOG_DEBUG;
-    } else if(strcmp(loglevelStr, "INFO") == 0) {
+    } else if(strcmp(log_level_str, "INFO") == 0) {
         return LOG_INFO;
-    } else if(strcmp(loglevelStr, "WARN") == 0) {
+    } else if(strcmp(log_level_str, "WARN") == 0) {
         return LOG_WARN;
-    } else if(strcmp(loglevelStr, "ERROR") == 0) {
+    } else if(strcmp(log_level_str, "ERROR") == 0) {
         return LOG_ERROR;
-    } else if(strcmp(loglevelStr, "CRTITICAL") == 0) {
+    } else if(strcmp(log_level_str, "CRTITICAL") == 0) {
         return LOG_CRITICAL;
     } else {
         return -1;
     }
 }
 
-void freeLogMessageNode(LogMessageNode* node) {
+void free_log_message_node(LogMessageNode* node) {
     node->message = NULL;
-    free(node->threadUUID);
+    free(node->thread_uuid);
     free(node->message);
-    free(node->timeStamp);
+    free(node->time_stamp);
     free(node);
 }
 
-void freeLogThreadRegisterNode(void* value) {
+void free_message_node_value(void* value) {
     free(value);
 }
 
-void enqueueLogMessage(const int log_level, char* threadUUID, char* message, char* timeStamp) {
+void enqueue_log_message(const int log_level, char* thread_uuid, char* message, char* time_stamp) {
     LogMessageNode* newNode = (LogMessageNode*)malloc(sizeof(LogMessageNode));
     if (newNode == NULL) {
         printf("XX Failed to allocate memory for a new message node XX \n");
@@ -68,65 +87,65 @@ void enqueueLogMessage(const int log_level, char* threadUUID, char* message, cha
     }
 
     newNode->log_level = log_level;
-    newNode->threadUUID = strdup(threadUUID);
+    newNode->thread_uuid = strdup(thread_uuid);
     newNode->message = strdup(message);
-    newNode->timeStamp = strdup(timeStamp);
+    newNode->time_stamp = strdup(time_stamp);
     newNode->next = NULL;
 
-    pthread_mutex_lock(&messageQueue.mutex);
+    pthread_mutex_lock(&message_queue.mutex);
 
-    if (messageQueue.head == NULL) {
-        messageQueue.head = newNode;
+    if (message_queue.head == NULL) {
+        message_queue.head = newNode;
     } else {
-        LogMessageNode* current = messageQueue.head;
+        LogMessageNode* current = message_queue.head;
         while (current->next != NULL) {
             current = current->next;
         }
         current->next = newNode;
     }
 
-    pthread_cond_signal(&messageQueue.cond);
-    pthread_mutex_unlock(&messageQueue.mutex);
+    pthread_cond_signal(&message_queue.cond);
+    pthread_mutex_unlock(&message_queue.mutex);
 }
 
-LogMessageNode dequeueLogMessage() {
+LogMessageNode dequeue_log_message() {
     LogMessageNode messageNode;
-    pthread_mutex_lock(&messageQueue.mutex);
+    pthread_mutex_lock(&message_queue.mutex);
 
-    while (messageQueue.head == NULL) {
-        pthread_cond_wait(&messageQueue.cond, &messageQueue.mutex);
+    while (message_queue.head == NULL) {
+        pthread_cond_wait(&message_queue.cond, &message_queue.mutex);
     }
 
-    LogMessageNode* head = messageQueue.head;
+    LogMessageNode* head = message_queue.head;
     messageNode.log_level = head->log_level;
     messageNode.message = strdup(head->message);
-    messageNode.threadUUID = strdup(head->threadUUID);
-    messageNode.timeStamp = strdup(head->timeStamp);
+    messageNode.thread_uuid = strdup(head->thread_uuid);
+    messageNode.time_stamp = strdup(head->time_stamp);
 
-    messageQueue.head = head->next;
-    freeLogMessageNode(head);
+    message_queue.head = head->next;
+    free_log_message_node(head);
 
-    pthread_mutex_unlock(&messageQueue.mutex);
+    pthread_mutex_unlock(&message_queue.mutex);
 
     return messageNode;
 }
 
-void* logReaderThreadFunction(void* arg) {
+void* log_reader_TF(void* arg) {
     while (1) {
-        LogMessageNode messageNode = dequeueLogMessage();
+        LogMessageNode messageNode = dequeue_log_message();
     
-        char* log_level_str = getLogLevelString(messageNode.log_level);
-        if(log_level_str && messageNode.log_level >= serverLogLevel) {
+        char* log_level_str = get_log_level_string(messageNode.log_level);
+        if(log_level_str && messageNode.log_level >= server_log_level) {
             
-            if(logfile != NULL && fprintf(logfile, "%s %s %s %s\n", messageNode.timeStamp, log_level_str, messageNode.threadUUID, messageNode.message) >= 0) {
-                fflush(logfile);
+            if(log_file != NULL && fprintf(log_file, "%s %s %s %s\n", messageNode.time_stamp, log_level_str, messageNode.thread_uuid, messageNode.message) >= 0) {
+                fflush(log_file);
             } else {
-                printf("%s %s %s %s\n", messageNode.timeStamp, log_level_str, messageNode.threadUUID, messageNode.message);
+                printf("%s %s %s %s\n", messageNode.time_stamp, log_level_str, messageNode.thread_uuid, messageNode.message);
             }
 
         }
 
-        if (terminateThreads && messageQueue.head == NULL) {
+        if (terminate_threads && message_queue.head == NULL) {
             pthread_exit(NULL);
         }
     }
@@ -134,50 +153,50 @@ void* logReaderThreadFunction(void* arg) {
     return NULL;
 }
 
-void initLogUtil(char* log_level, const char* path) {
-    char logFilePath[strlen(path) + strlen("/log.txt") + 1];
-    strcpy(logFilePath, path);
-    strcat(logFilePath, "/log.txt");
+void vt__init_log_util(char* log_level, const char* path) {
+    char log_file_path[strlen(path) + strlen("/log.txt") + 1];
+    strcpy(log_file_path, path);
+    strcat(log_file_path, "/log.txt");
     
-    messageQueue.head = NULL;
-    pthread_mutex_init(&messageQueue.mutex, NULL);
-    pthread_cond_init(&messageQueue.cond, NULL);
+    message_queue.head = NULL;
+    pthread_mutex_init(&message_queue.mutex, NULL);
+    pthread_cond_init(&message_queue.cond, NULL);
 
-    initializeHashMap(&threadRegister);
+    vt__initialize_hashmap(&thread_register);
 
-    logfile = fopen(logFilePath, "a");
-    if (logfile == NULL) {
+    log_file = fopen(log_file_path, "a");
+    if (log_file == NULL) {
         printf("XX Error opening log file for writing. XX \n");
     }
 
-    serverLogLevel = getLogLevelCode(log_level);
+    server_log_level = get_log_level_code(log_level);
 
     pthread_t reader;
-    if (pthread_create(&reader, NULL, logReaderThreadFunction, NULL) != 0) {
+    if (pthread_create(&reader, NULL, log_reader_TF, NULL) != 0) {
         pthread_join(reader, NULL);
-        logWriter(LOG_INFO, "Error creating thread for async log.\n");
+        vt__log_writer(LOG_INFO, "Error creating thread for async log.\n");
     } else {
-        logWriter(LOG_INFO, "Log message reader Thread Started.\n");
+        vt__log_writer(LOG_INFO, "Log message reader Thread Started.\n");
     }
 
-    logWriter(LOG_INFO, "log initLogUtil completed.\n");
+    vt__log_writer(LOG_INFO, "log initLogUtil completed.\n");
 }
 
-void* logWriterThreadFunction(void* arg) {
+void* log_writerTF(void* arg) {
     LogInfoParams* params = (LogInfoParams*) arg;
 
     char buffer[25]; 
-    snprintf(buffer, sizeof(buffer), "%p", (void *) params->parentId);
+    snprintf(buffer, sizeof(buffer), "%p", (void *) params->parent_id);
 
-    char* threadUUID = (char*) getHashMap(&threadRegister, buffer);
-    if(threadUUID == NULL) {
-        threadUUID = buffer;
+    char* thread_uuid = (char*) vt__get_hashmap(&thread_register, buffer);
+    if(thread_uuid == NULL) {
+        thread_uuid = buffer;
     }
 
-    char timestampString[30];  
-    timestampToString(timestampString, sizeof(timestampString));
+    char timestamp_string[30];  
+    vt__timestamp_to_string(timestamp_string, sizeof(timestamp_string));
 
-    enqueueLogMessage(params->log_level, threadUUID, params->message, timestampString);
+    enqueue_log_message(params->log_level, thread_uuid, params->message, timestamp_string);
 
     free(params->message);
     free(params);
@@ -185,57 +204,57 @@ void* logWriterThreadFunction(void* arg) {
     return NULL;
 }
 
-void logWriter(const int log_level, const char* message) {
-    if(log_level < serverLogLevel) {
+void vt__log_writer(const int log_level, const char* message) {
+    if(log_level < server_log_level) {
         return;
     }
 
-    pthread_t parentId, writer;
-    parentId = pthread_self();
+    pthread_t parent_id, writer;
+    parent_id = pthread_self();
 
     LogInfoParams* params = malloc(sizeof(LogInfoParams));
-    params->parentId = parentId;
+    params->parent_id = parent_id;
     params->log_level = log_level; 
     params->message = strdup(message);
 
-    if (pthread_create(&writer, NULL, logWriterThreadFunction, (void*) params) != 0) {
+    if (pthread_create(&writer, NULL, log_writerTF, (void*) params) != 0) {
         printf("Error creating child thread during log writer\n");
     }
 }
 
 
-void freeLogUtil() {
-    terminateThreads = true;
+void vt__free_log_util() {
+    terminate_threads = true;
 
-    cleanupValueFunc cleanupValueFuncPtr = (cleanupValueFunc) freeLogThreadRegisterNode;
-    cleanupHashMap(&threadRegister, cleanupValueFuncPtr);
+    cleanup_val_func cleanup_func_ptr = (cleanup_val_func) free_message_node_value;
+    vt__cleanup_hashmap(&thread_register, cleanup_func_ptr);
 
-    LogMessageNode* current = messageQueue.head;
+    LogMessageNode* current = message_queue.head;
     while (current != NULL) {
         LogMessageNode* nextNode = current->next;
-        free(current->threadUUID);
+        free(current->thread_uuid);
         free(current->message);
         free(current);
         current = nextNode;
     }
-    messageQueue.head = NULL; 
+    message_queue.head = NULL; 
 
-    pthread_mutex_destroy(&messageQueue.mutex);
-    pthread_cond_destroy(&messageQueue.cond);
+    pthread_mutex_destroy(&message_queue.mutex);
+    pthread_cond_destroy(&message_queue.cond);
 
     printf("** Log util resources cleanup successfull. **\n");
 
-    if(fclose(logfile) != 0) {
+    if(fclose(log_file) != 0) {
         printf("XX Error closing Log File. XX\n");
     }
 }
 
-void setLogThreadRegisterUUID(char* threadID, char* UUID) {
-    char* uuidCopy = strdup(UUID);
-    insertHashMap(&threadRegister, threadID, uuidCopy, strlen(uuidCopy) + 1);
+void vt__set_thread_id_on_register(char* thread_id, char* uuid) {
+    char* uuid_copy = strdup(uuid);
+    vt__insert_hashmap(&thread_register, thread_id, uuid_copy, strlen(uuid_copy) + 1);
 }
 
-void removeLogThreadRegisterUUID(char* threadID) {
-    cleanupValueFunc cleanupValueFuncPtr = (cleanupValueFunc) freeLogThreadRegisterNode;
-    deleteHashMap(&threadRegister, threadID, cleanupValueFuncPtr);
+void vt__remove_thread_id_from_register(char* thread_id) {
+    cleanup_val_func cleanup_func_ptr = (cleanup_val_func) free_message_node_value;
+    vt__delete_hashmap(&thread_register, thread_id, cleanup_func_ptr);
 }

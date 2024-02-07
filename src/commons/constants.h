@@ -1,3 +1,4 @@
+#define VT_FILE_SEPERATOR                       "/"
 #define VICTO_FILE_EXT                          ".victo"
 #define SUSCRIP_FILE_EXT                        ".vsub"
 #define DB                                      "db"

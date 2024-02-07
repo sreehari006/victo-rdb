@@ -3,7 +3,7 @@
 #include <time.h>
 #include <string.h>
 
-void timestampToString(char *buffer, size_t bufferSize) {
+void vt__timestamp_to_string(char *buffer, size_t bufferSize) {
     struct timeval currentTime;
     gettimeofday(&currentTime, NULL);
 

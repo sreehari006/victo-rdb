@@ -4,21 +4,21 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "src/servers/commons/interface/globals.h"
-#include "src/servers/websock/interface/server.h"
-#include "src/sl/db/interface/db_config.h"
-#include "src/servers/auth/interface/auth.h"
-#include "src/utils/logs/interface/log.h"
-#include "src/utils/strings/interface/string_builder.h"
+#include "src/servers/commons/includes/globals_proto.h"
+#include "src/servers/websock/includes/server_proto.h"
+#include "src/registry/includes/db_config_sl_proto.h"
+#include "src/servers/auth/includes/auth_proto.h"
+#include "src/utils/logs/includes/log_proto.h"
+#include "src/utils/strings/includes/string_builder_proto.h"
 
 void sigint_handler(int sig) {
-    logWriter(LOG_INFO, "Server resource cleanup");
-    stopWebSockServer();
+    vt__log_writer(LOG_INFO, "Server resource cleanup");
+    stop_websock_server();
     sleep(3);
-    cleanupWebSocketParams();
-    freeAuthUtil();
+    free_websocket_params();
+    free_auth_util();
     sleep(2);
-    freeLogUtil();
+    vt__free_log_util();
 }
 
 int main(int argc, char *argv[]) {
@@ -26,22 +26,21 @@ int main(int argc, char *argv[]) {
     WebsocketParams params;
     int i=1;
     
-    params.dbBasePath = NULL;
-    params.ipAddress = strdup("127.0.0.1");
+    params.ip_address = strdup("127.0.0.1");
     params.port = 2018;
-    params.enableAuth = false;
+    params.enable_auth = false;
     
-    
+    char* victo_base_path;
     while(i<argc) {
         if(strncmp(argv[i], "-", 1) == 0) {
             if(strcmp(argv[i], "-d") == 0) {
-                params.dbServerPath = strdup(argv[i+1]);
+                victo_base_path = strdup(argv[i+1]);
                 i++;
             } else if(strcmp(argv[i], "-i") == 0) {
-                params.ipAddress = strdup(argv[i+1]);
+                params.ip_address = strdup(argv[i+1]);
                 i++;
             } else if(strcmp(argv[i], "-p") == 0) {
-                if(isValidInteger(argv[i+1])) {
+                if(vt__is_valid_integer(argv[i+1])) {
                     params.port = atoi(argv[i+1]);
                 }
                 i++;
@@ -49,7 +48,7 @@ int main(int argc, char *argv[]) {
                 log_level = strdup(argv[i+1]);
                 i++;
             } else if(strcmp(argv[i], "-a") == 0) {
-                params.enableAuth = (argv[i+1] != NULL && strcasecmp(argv[i+1], "true") == 0) ? true : false;
+                params.enable_auth = (argv[i+1] != NULL && strcasecmp(argv[i+1], "true") == 0) ? true : false;
                 i++;
             }
         }
@@ -57,9 +56,17 @@ int main(int argc, char *argv[]) {
         i++;
     }
     
-    signal(SIGINT, sigint_handler);
+    // signal(SIGINT, sigint_handler);
 
-    if(params.dbServerPath && initDBConfigSL(params.dbServerPath)) {
+    if(victo_base_path) {
+        init_victo_config_sl(victo_base_path);
+        char* victo_base_path = get_victo_base_path_sl();
+        char* db_base_path = get_db_base_path_sl();
+        char* logs_base_path = get_logs_base_path_sl();
+        char* auth_base_path = get_auth_base_path_sl();
+    }
+
+    /* if(params.dbServerPath && initDBConfigSL(params.dbServerPath)) {
         params.dbBasePath = getDBBasePathSL(params.dbServerPath);
         char* dbLogPath = getDBLogPathSL(params.dbServerPath);
         char* authPath = getDBAuthPathSL(params.dbServerPath);
@@ -88,7 +95,7 @@ int main(int argc, char *argv[]) {
         startWebSockServer();
     } else {
         logWriter(LOG_CRITICAL, "Invalid server configuration.");
-    }
+    } */
 
     return 0;
 }

@@ -1,59 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "interface/globals.h"
-#include "../../utils/logs/interface/log.h"
+#include "./includes/globals_proto.h"
+#include "../../utils/logs/includes/log_proto.h"
 
-static WebsocketParams websocketParams;
+static WebsocketParams websocket_params;
 static bool isInitialized = false;  
 
-void setWebSocketParams(WebsocketParams params) {
-    logWriter(LOG_DEBUG, "globals setWebSocketParams started");
+void set_websocket_params(WebsocketParams params) {
+    vt__log_writer(LOG_DEBUG, "globals setWebSocketParams started");
     if (!isInitialized) {
-        websocketParams.dbServerPath = strdup(params.dbServerPath);
-        websocketParams.dbBasePath = strdup(params.dbBasePath);
-        websocketParams.ipAddress = strdup(params.ipAddress);
-        websocketParams.port = params.port;
-        websocketParams.maxStackSize = params.maxStackSize;
-        websocketParams.enableAuth = params.enableAuth;
+        websocket_params.ip_address = strdup(params.ip_address);
+        websocket_params.port = params.port;
+        websocket_params.enable_auth = params.enable_auth;
         isInitialized = true;
     }
-    logWriter(LOG_DEBUG, "globals setWebSocketParams completed");  
+    vt__log_writer(LOG_DEBUG, "globals setWebSocketParams completed");  
 }
 
-char* getDatabasePath() {
-    logWriter(LOG_DEBUG, "globals getDatabasePath started");
-    logWriter(LOG_DEBUG, "globals getDatabasePath completed");
-    return websocketParams.dbBasePath;
+bool is_auth_enabled() {
+    vt__log_writer(LOG_DEBUG, "globals getEnableAuth started");
+    vt__log_writer(LOG_DEBUG, "globals getEnableAuth completed");
+    return websocket_params.enable_auth;
 }
 
-bool getEnableAuth() {
-    logWriter(LOG_DEBUG, "globals getEnableAuth started");
-    logWriter(LOG_DEBUG, "globals getEnableAuth completed");
-    return websocketParams.enableAuth;
+char* get_websock_init_IP() {
+    vt__log_writer(LOG_DEBUG, "globals getWebsockInitIP started");
+    vt__log_writer(LOG_DEBUG, "globals getWebsockInitIP completed");
+    return websocket_params.ip_address;
 }
 
-char* getWebsockInitIP() {
-    logWriter(LOG_DEBUG, "globals getWebsockInitIP started");
-    logWriter(LOG_DEBUG, "globals getWebsockInitIP completed");
-    return websocketParams.ipAddress;
+int get_websock_init_port() {
+    vt__log_writer(LOG_DEBUG, "globals getWebsockInitPort started");
+    vt__log_writer(LOG_DEBUG, "globals getWebsockInitPort completed");
+    return websocket_params.port;
 }
 
-int getWebsockInitPort() {
-    logWriter(LOG_DEBUG, "globals getWebsockInitPort started");
-    logWriter(LOG_DEBUG, "globals getWebsockInitPort completed");
-    return websocketParams.port;
-}
-
-void cleanupWebSocketParams() {
-    logWriter(LOG_DEBUG, "globals cleanupWebSocketParams started");
+void free_websocket_params() {
+    vt__log_writer(LOG_DEBUG, "globals cleanupWebSocketParams started");
 
     if (isInitialized) {
-        free(websocketParams.dbServerPath);
-        free(websocketParams.dbBasePath);
-        free(websocketParams.ipAddress);
+        free(websocket_params.ip_address);
         isInitialized = false;
     }
     
-    logWriter(LOG_DEBUG, "globals cleanupWebSocketParams completed");
+    vt__log_writer(LOG_DEBUG, "globals cleanupWebSocketParams completed");
 }

@@ -1,0 +1,1 @@
+void vt__timestamp_to_string(char *buffer, int bufferSize);

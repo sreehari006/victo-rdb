@@ -1,0 +1,12 @@
+void init_victo_config(const char* location);
+char* get_victo_base_path();
+char* get_db_base_path();
+char* get_logs_base_path();
+char* get_auth_base_path();
+void free_victo_config();
+char* get_collection_base_path(const char* db);
+char* get_collection_full_path(const char* db, const char* collection);
+char* get_vector_base_path(const char* db, const char* collection);
+char* get_vector_full_path(const char* db, const char* collection, const char* hash);
+char* get_subscription_base_path(const char* db, const char* collection);
+char* get_subscription_full_path(const char* db, const char* collection, const char* hash);
