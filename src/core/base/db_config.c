@@ -36,20 +36,18 @@ void init_victo_config(const char* location) {
         perror("The base path creation for logs failed.");
         exit(EXIT_FAILURE);
     }
-    char log_path[strlen(location) + strlen(LOGS) + 1];
-    strcpy(log_path, location);
-    strcat(log_path, VT_FILE_SEPERATOR);
-    strcat(log_path, LOGS);
+    strcpy(logs_base_path, location);
+    strcat(logs_base_path, VT_FILE_SEPERATOR);
+    strcat(logs_base_path, LOGS);
 
     auth_base_path = (char*)malloc(strlen(location) + strlen(AUTH) + 2);
     if(auth_base_path == NULL) {
         perror("The base path creation for auth data failed.");
         exit(EXIT_FAILURE);
     }
-    char auth_path[strlen(location) + strlen(AUTH) + 1];
-    strcpy(auth_path, location);
-    strcat(auth_path, VT_FILE_SEPERATOR);
-    strcat(auth_path, AUTH);
+    strcpy(auth_base_path, location);
+    strcat(auth_base_path, VT_FILE_SEPERATOR);
+    strcat(auth_base_path, AUTH);
 
     if(!vt__dir_exists(db_base_path)) {
         if(mkdir(db_base_path, 0777) != 0) {
@@ -58,15 +56,15 @@ void init_victo_config(const char* location) {
         }
     }
 
-    if(!vt__dir_exists(log_path)) {
-        if(mkdir(log_path, 0777) != 0) {
+    if(!vt__dir_exists(logs_base_path)) {
+        if(mkdir(logs_base_path, 0777) != 0) {
             perror("The base path creation for logs failed.");
             exit(EXIT_FAILURE);
         }
     }
 
-    if(!vt__dir_exists(auth_path)) {
-        if(mkdir(auth_path, 0777) != 0) {
+    if(!vt__dir_exists(auth_base_path)) {
+        if(mkdir(auth_base_path, 0777) != 0) {
             perror("The base path creation for auth data failed.");
             exit(EXIT_FAILURE);
         }

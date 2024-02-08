@@ -156,11 +156,12 @@ PutVectorRS put_vector_local(char* filename, char* ai_model, char* hash, int vdi
     PutVectorRS rs;
     Node node;
 
+
     strncpy(node.ai_model, ai_model, 64);
     strncpy(node.hash, hash, 64);
     strncpy(node.normal, normal, 2);
     node.vdim = vdim;
-    
+
     for (int i=0; i<vdim; i++) {
         node.vp[i] = vp[i];
     }
@@ -199,7 +200,6 @@ PutVectorRS put_vector(char* db, char* collection, char* ai_model, char* hash, i
         }
     }
 
-
     if(is_normal) {
         double* n_vp = normalize_vector(vdim, vp);
 
@@ -228,7 +228,6 @@ GetVectorRS get_vector(char* db, char* collection, char* hash) {
     FILE* infile;
     infile = fopen(filename, "rb");
     if (infile == NULL) {
-        // printf("\nError opening file\n");
         rs.errCode = FILE_OPEN_ERROR_CODE;
         rs.errMsg = strdup(FILE_OPEN_ERROR_MSG);
         return rs;
@@ -252,7 +251,6 @@ GetVectorRS get_vector_local(char* filename) {
     FILE* infile;
     infile = fopen(filename, "rb");
     if (infile == NULL) {
-        // printf("\nError opening file\n");
         rs.errCode = FILE_OPEN_ERROR_CODE;
         rs.errMsg = strdup(FILE_OPEN_ERROR_MSG);
         return rs;

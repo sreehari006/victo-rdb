@@ -26,6 +26,6 @@ typedef struct SubscribeReplyInfo {
 char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo);
 void init_subscribe_trig_queue();
 SubscribeTrigMsgNode* dequeue_subscribe_trig_message();
-SubscriptionListNode* query_subscription(SubscribeTrigMsgNode* subscribeTrigMsgNode);
+SubscriptionListNode* _query_subscription(SubscribeTrigMsgNode* subscribeTrigMsgNode);
 void free_subscribe_trig_messag_queue();
 char* subscription_message(char* vector_hash, char* query_hash);

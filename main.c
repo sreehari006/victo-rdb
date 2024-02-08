@@ -11,7 +11,7 @@
 #include "src/utils/logs/includes/log_proto.h"
 #include "src/utils/strings/includes/string_builder_proto.h"
 
-void sigint_handler(int sig) {
+void vt__shutdown() {
     vt__log_writer(LOG_INFO, "Server resource cleanup");
     stop_websock_server();
     sleep(3);
@@ -19,6 +19,9 @@ void sigint_handler(int sig) {
     free_auth_util();
     sleep(2);
     vt__free_log_util();
+}
+void sigint_handler(int sig) {
+    vt__shutdown();
 }
 
 int main(int argc, char *argv[]) {
@@ -56,7 +59,7 @@ int main(int argc, char *argv[]) {
         i++;
     }
     
-    // signal(SIGINT, sigint_handler);
+    signal(SIGINT, sigint_handler);
 
     if(victo_base_path) {
         init_victo_config_sl(victo_base_path);
@@ -64,6 +67,36 @@ int main(int argc, char *argv[]) {
         char* db_base_path = get_db_base_path_sl();
         char* logs_base_path = get_logs_base_path_sl();
         char* auth_base_path = get_auth_base_path_sl();
+
+        vt__init_log_util(log_level, logs_base_path);
+        sleep(2);
+
+        char sys_thread_id[25]; 
+        snprintf(sys_thread_id, sizeof(sys_thread_id), "%p", (void *) pthread_self());
+        vt__set_thread_id_on_register(sys_thread_id, "base");
+
+        printf("** Starting server running..... **\n");
+        vt__log_writer(LOG_INFO, "Staring Victo server instance");
+        vt__log_writer(LOG_INFO, "Victo Server Path: ");
+        vt__log_writer(LOG_INFO, victo_base_path);
+        vt__log_writer(LOG_INFO, "DB Base Path: ");
+        vt__log_writer(LOG_INFO, db_base_path);
+        vt__log_writer(LOG_INFO, "Log Path: ");
+        vt__log_writer(LOG_INFO, logs_base_path);
+        vt__log_writer(LOG_INFO, "Auth Data Path: ");
+        vt__log_writer(LOG_INFO, auth_base_path);
+
+        init_auth_util(auth_base_path);
+        sleep(2);
+
+        free(auth_base_path);
+        free(logs_base_path);
+        free(db_base_path);
+        free(victo_base_path);
+
+        set_websocket_params(params);
+        start_websock_server();
+
     }
 
     /* if(params.dbServerPath && initDBConfigSL(params.dbServerPath)) {
@@ -73,20 +106,6 @@ int main(int argc, char *argv[]) {
         
         initLogUtil(log_level, dbLogPath);
         free(dbLogPath);
-
-        sleep(2);
-        char sysThreadID[25]; 
-        snprintf(sysThreadID, sizeof(sysThreadID), "%p", (void *) pthread_self());
-        setLogThreadRegisterUUID(sysThreadID, "base");
-
-        printf("** Starting server running..... **\n");
-        logWriter(LOG_INFO, "Staring Victo server instance");
-        logWriter(LOG_INFO, "DB Server Path: ");
-        logWriter(LOG_INFO, params.dbServerPath);
-        logWriter(LOG_INFO, "DB Base Path: ");
-        logWriter(LOG_INFO, params.dbBasePath);
-        logWriter(LOG_INFO, "DB Log Path: ");
-        logWriter(LOG_INFO, dbLogPath);
 
         initAuthUtil(authPath);
         free(authPath);

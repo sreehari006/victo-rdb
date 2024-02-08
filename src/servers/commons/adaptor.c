@@ -202,7 +202,7 @@ SubscribeTrigMsgNode* dequeue_subscribe_trig_message() {
     messageNode->collection = strdup(head->collection);
     messageNode->vectorHash = strdup(head->vectorHash);
     messageNode->clientID = strdup(head->clientID);
-    
+
     subscribeTrigMsgQueue.head = head->next;
 
     pthread_mutex_unlock(&subscribeTrigMsgQueue.mutex);
@@ -479,8 +479,13 @@ char* subscription_rs_to_string(GetSubscriptionRS* rs) {
         vt__append_to_string_uilder(&resultSB, vp);
         free(vp);
         vt__append_to_string_uilder(&resultSB, "]");
-        vt__append_to_string_uilder(&resultSB, ", \"query_options\": [");
-        vt__append_to_string_uilder(&resultSB, "]");
+        vt__append_to_string_uilder(&resultSB, ", \"qOps\": {");
+                /* vt__append_to_string_uilder(&resultSB, "\"vd_method\": ");
+                        vt__append_to_string_uilder(&resultSB, "\", \"logical_op\": ");
+                                vt__append_to_string_uilder(&resultSB, "\", \"k_value\": ");
+                                        vt__append_to_string_uilder(&resultSB, "\", \"p_value\": ");
+                                        vt__append_to_string_uilder(&resultSB, "\""); */
+        vt__append_to_string_uilder(&resultSB, "}");
     }
 
     vt__append_to_string_uilder(&resultSB, "}");
@@ -1417,16 +1422,16 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         JsonNode* queryOptionsNode = vt__search_json(argsNode, "qOps");
                         
                         JsonNode* vdMethodNode = vt__search_json(queryOptionsNode, "vd_method");
-                        queryOptions.vector_distance_method = (vdMethodNode != NULL && !vt__is_valid_integer(vdMethodNode->value)) ? atoi(vdMethodNode->value): 0;
+                        queryOptions.vector_distance_method = (vdMethodNode != NULL && vt__is_valid_integer(vdMethodNode->value)) ? atoi(vdMethodNode->value): 0;
                         
                         JsonNode* limitNode = vt__search_json(queryOptionsNode, "limit");
-                        queryOptions.query_limit = (limitNode != NULL && !vt__is_valid_integer(vdMethodNode->value)) ? atoi(limitNode->value): -99;
+                        queryOptions.query_limit = (limitNode != NULL && vt__is_valid_integer(vdMethodNode->value)) ? atoi(limitNode->value): -99;
                         
                         JsonNode* logicalOpNode = vt__search_json(queryOptionsNode, "logical_op");
-                        queryOptions.query_logical_op = (logicalOpNode != NULL && !vt__is_valid_integer(vdMethodNode->value))? atoi(logicalOpNode->value): 0;
+                        queryOptions.query_logical_op = (logicalOpNode != NULL && vt__is_valid_integer(vdMethodNode->value))? atoi(logicalOpNode->value): 0;
                         
                         JsonNode* queryValueNode = vt__search_json(queryOptionsNode, "k_value");
-                        double query_value = (queryValueNode != NULL && !vt__is_valid_integer(vdMethodNode->value)) ? strtod(queryValueNode->value, &errptr): 0;
+                        double query_value = (queryValueNode != NULL) ? strtod(queryValueNode->value, &errptr): 0;
                         if (*errptr != '\0') {
                             query_value = 0;
                         }   
@@ -1538,13 +1543,13 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         JsonNode* queryOptionsNode = vt__search_json(argsNode, "qOps");
                         
                         JsonNode* vdMethodNode = vt__search_json(queryOptionsNode, "vd_method");
-                        queryOptions.vector_distance_method = (vdMethodNode != NULL && !vt__is_valid_integer(vdMethodNode->value)) ? atoi(vdMethodNode->value): 0;
+                        queryOptions.vector_distance_method = (vdMethodNode != NULL && vt__is_valid_integer(vdMethodNode->value)) ? atoi(vdMethodNode->value): 0;
                                                
                         JsonNode* logicalOpNode = vt__search_json(queryOptionsNode, "logical_op");
-                        queryOptions.query_logical_op = (logicalOpNode != NULL && !vt__is_valid_integer(vdMethodNode->value))? atoi(logicalOpNode->value): 0;
+                        queryOptions.query_logical_op = (logicalOpNode != NULL && vt__is_valid_integer(vdMethodNode->value))? atoi(logicalOpNode->value): 0;
                         
                         JsonNode* queryValueNode = vt__search_json(queryOptionsNode, "k_value");
-                        double query_value = (queryValueNode != NULL && !vt__is_valid_integer(vdMethodNode->value)) ? strtod(queryValueNode->value, &errptr): 0;
+                        double query_value = queryValueNode != NULL ? strtod(queryValueNode->value, &errptr): 0;
                         if (*errptr != '\0') {
                             query_value = 0;
                         }   

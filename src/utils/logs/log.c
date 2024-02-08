@@ -178,7 +178,6 @@ void vt__init_log_util(char* log_level, const char* path) {
     } else {
         vt__log_writer(LOG_INFO, "Log message reader Thread Started.\n");
     }
-
     vt__log_writer(LOG_INFO, "log initLogUtil completed.\n");
 }
 

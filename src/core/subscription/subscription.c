@@ -23,7 +23,7 @@ PutSubscriptionRS do_subscribe(char* client_id, char* filename, char* ai_model, 
     node.queryOptions.query_value = queryOptions.query_value;
     node.queryOptions.query_logical_op = queryOptions.query_logical_op;
     node.queryOptions.p_value = queryOptions.p_value;
-    
+
     for (int i=0; i<vdim; i++) {
         node.vp[i] = vp[i];
     }
@@ -35,7 +35,7 @@ PutSubscriptionRS do_subscribe(char* client_id, char* filename, char* ai_model, 
         rs.errMsg = strdup(FILE_OPEN_ERROR_MSG);
         return rs;
     }
-    if(fwrite(&node, sizeof(Node), 1, outfile) == 1) {
+    if(fwrite(&node, sizeof(SubscriptionNode), 1, outfile) == 1) {
         rs.errCode = SUCCESS_CODE;
         rs.errMsg = strdup(SUCESS_MSG);
         rs.hash = strdup(node.hash);
@@ -102,6 +102,7 @@ GetSubscriptionRS get_subscription(char* db, char* collection, char* hash) {
     rs.errCode = SUCCESS_CODE;
     rs.errMsg = strdup(SUCESS_MSG);
     rs.node = node;
+    rs.node.queryOptions = node.queryOptions;
     
     free(filename);
     return rs;
@@ -153,6 +154,7 @@ SubscriptionListRS subscription_list(char* db, char* collection) {
     SubscriptionListRS rs;
 
     char* location = get_subscription_base_path(db, collection);
+    
     if(vt__dir_exists(location)) {
         rs.errCode = SUCCESS_CODE;
         rs.errMsg = strdup(SUCESS_MSG);
@@ -171,10 +173,11 @@ SubscriptionListNode* query_subscription(char* db, char* collection, char* v_has
     SubscriptionListNode* subscriptionMessageList;
     char* s_base_location = get_subscription_base_path(db, collection);
     char* filename = get_vector_full_path(db, collection, v_hash);
-    GetVectorRS vectorRS = get_vector(filename);
+    GetVectorRS vectorRS = get_vector_local(filename);
+    
     if(vectorRS.errCode == 0) {
         SubscriptionListRS listRs = subscription_list(db, collection);
-        if(listRs.errCode == 0) {
+        if(listRs.errCode == 0 && listRs.subscriptions) {
             int i=0; 
             while(listRs.subscriptions[i] != NULL) {
                 GetSubscriptionRS subscriptionRS = get_subscription(db, collection, listRs.subscriptions[i]);
@@ -222,9 +225,7 @@ SubscriptionListNode* query_subscription(char* db, char* collection, char* v_has
                                     newNode->next = subscriptionMessageList;  
                                     subscriptionMessageList = newNode;                       
                                 }
-
                             }
-
                             // printf("%s %s %s\n", vectorRS.node.hash, subscriptionRS.node.hash, subscriptionRS.node.client_id);
                         }
                     }

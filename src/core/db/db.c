@@ -8,12 +8,19 @@
 #include <sys/types.h>
 #include <errno.h>
 
+#include "../base/includes/db_config_proto.h"
 #include "../../ds/datastructures.h"
 #include "../../commons/constants.h"
 
 __attribute__((visibility("hidden"))) 
-Response add_new_db(const char* location) {
+Response add_new_db(const char* db) {
     Response rs;
+
+    char* base_path = get_db_base_path();
+    char location[strlen(base_path) + strlen(db) + 2];
+    strcpy(location, base_path);
+    strcat(location, "/");
+    strcat(location, db);
 
     char collections[strlen(location) + strlen(COLLECTIONS) + 1];
     strcpy(collections, location);
