@@ -14,20 +14,22 @@ PutSubscriptionRS do_subscribe(char* client_id, char* filename, char* ai_model, 
     PutSubscriptionRS rs;
     SubscriptionNode node;
 
+
     strncpy(node.client_id, client_id, 37);
     strncpy(node.ai_model, ai_model, 64);
     strncpy(node.hash, hash, 64);
     strncpy(node.normal, normal, 2);
     node.vdim = vdim;
-    node.queryOptions.vector_distance_method = queryOptions.vector_distance_method;
-    node.queryOptions.query_value = queryOptions.query_value;
-    node.queryOptions.query_logical_op = queryOptions.query_logical_op;
-    node.queryOptions.p_value = queryOptions.p_value;
+    node.vector_distance_method = queryOptions.vector_distance_method;
+    node.query_value = queryOptions.query_value;
+    node.query_logical_op = queryOptions.query_logical_op;
+    node.p_value = queryOptions.p_value;
 
     for (int i=0; i<vdim; i++) {
         node.vp[i] = vp[i];
     }
 
+    
     FILE* outfile;
     outfile = fopen(filename, "wb");
     if (outfile == NULL) {
@@ -41,6 +43,7 @@ PutSubscriptionRS do_subscribe(char* client_id, char* filename, char* ai_model, 
         rs.hash = strdup(node.hash);
         return rs;
     }
+
 
     rs.errCode = FILE_WRITE_ERROR_CODE;
     rs.errMsg = strdup(FILE_WRITE_ERROR_MSG);
@@ -102,8 +105,14 @@ GetSubscriptionRS get_subscription(char* db, char* collection, char* hash) {
     rs.errCode = SUCCESS_CODE;
     rs.errMsg = strdup(SUCESS_MSG);
     rs.node = node;
-    rs.node.queryOptions = node.queryOptions;
+    /* rs.node.queryOptions.vector_distance_method = node.queryOptions.vector_distance_method;
+    rs.node.queryOptions.query_logical_op = node.queryOptions.query_logical_op;
+    rs.node.queryOptions.query_value = node.queryOptions.query_value;
+    rs.node.queryOptions.p_value = node.queryOptions.p_value; */
+
+    // printf("%d %d %f %f \n", rs.node.queryOptions.vector_distance_method, rs.node.queryOptions.query_logical_op, rs.node.queryOptions.query_value, rs.node.queryOptions.p_value);
     
+
     free(filename);
     return rs;
 } 
@@ -183,10 +192,10 @@ SubscriptionListNode* query_subscription(char* db, char* collection, char* v_has
                 GetSubscriptionRS subscriptionRS = get_subscription(db, collection, listRs.subscriptions[i]);
                 if(subscriptionRS.errCode == 0) {
                     QueryOptions queryOptions;
-                    queryOptions.query_logical_op = subscriptionRS.node.queryOptions.query_logical_op;
-                    queryOptions.query_value = subscriptionRS.node.queryOptions.query_value;
-                    queryOptions.vector_distance_method = subscriptionRS.node.queryOptions.vector_distance_method;
-                    queryOptions.p_value = subscriptionRS.node.queryOptions.p_value;
+                    queryOptions.query_logical_op = subscriptionRS.node.query_logical_op;
+                    queryOptions.query_value = subscriptionRS.node.query_value;
+                    queryOptions.vector_distance_method = subscriptionRS.node.vector_distance_method;
+                    queryOptions.p_value = subscriptionRS.node.p_value;
                     queryOptions.query_limit = 0;
                     queryOptions.include_fault = false;
                     queryOptions.order = -99;

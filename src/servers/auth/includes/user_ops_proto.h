@@ -32,6 +32,5 @@ typedef struct User {
 } User;
 
 Response add_user(User* user);
-Response update_user(char* user_name, User* user);
 User* authenticate(char* user_name, char* password);
 Response delete_user(char* user_name);

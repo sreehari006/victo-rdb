@@ -15,7 +15,7 @@ struct ClientData {
 struct ServerData {
     int server_socket;
     struct ClientData client_connection[MAX_CLIENTS];
-    int isRunning;
+    int is_running;
 };
 
 struct WebSocketFrame {
@@ -43,7 +43,7 @@ void nullify_client_connection(int i) {
 }
 void stop_websock_server() {
     vt__log_writer(LOG_DEBUG, "server stopWebSockServer started");
-    serverData.isRunning = 0;
+    serverData.is_running = 0;
     
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (serverData.client_connection[i].client_socket != 0) {
@@ -145,8 +145,8 @@ bool handle_client_connection(int client_socket, int client_index) {
         strncpy(auth_token, auth_key_start, BUFFER_SIZE);
         free(auth_key_copy);
 
-        const char* authTokenStripped = auth_token + strlen("Basic ");
-        if(authTokenStripped == NULL) {
+        const char* auth_token_stripped = auth_token + strlen("Basic ");
+        if(auth_token_stripped == NULL) {
             vt__log_writer(LOG_ERROR, "Invalid WebSocket handshake request. Invalid auth token.");
             return false;            
         }
@@ -154,12 +154,12 @@ bool handle_client_connection(int client_socket, int client_index) {
         char *decoded;
         size_t decoded_len;
 
-        vt__base64_decode(authTokenStripped, &decoded, &decoded_len);
+        vt__base64_decode(auth_token_stripped, &decoded, &decoded_len);
         if (decoded) {
             char* user_name = strtok(decoded, ":");
             char* password = strtok(NULL, ":");
-            char* passwordHash = vt__sha256(password);
-            User* user = authenticate(user_name, passwordHash);
+            char* password_hash = vt__sha256(password);
+            User* user = authenticate(user_name, password_hash);
             free(decoded);
             if(user == NULL) {
                 vt__log_writer(LOG_ERROR, "Invalid WebSocket handshake request. Authentication failed.");
@@ -240,10 +240,10 @@ void send_websocket_frame(int socket, const char *data, unsigned char opcode) {
 void *parse_client_message_TF(void *arg) {
     vt__log_writer(LOG_INFO, "server parse_client_message_TF started");
 
-    char sysThreadID[25]; 
-    snprintf(sysThreadID, sizeof(sysThreadID), "%p", (void *) pthread_self());
-    char* threadUUID = vt__get_uuid();
-    vt__set_thread_id_on_register(sysThreadID, threadUUID);
+    char sys_thread_id[25]; 
+    snprintf(sys_thread_id, sizeof(sys_thread_id), "%p", (void *) pthread_self());
+    char* thread_uuid = vt__get_uuid();
+    vt__set_thread_id_on_register(sys_thread_id, thread_uuid);
 
     vt__log_writer(LOG_DEBUG, "Inside threadFunciton for processing the client message");
     
@@ -357,7 +357,7 @@ void *parse_client_message_TF(void *arg) {
             clientInfo.user_access[i] = serverData.client_connection[data->client_index].user_access[i];
         }
 
-        char* result = do_db_ops(threadUUID, frame.payload, clientInfo);
+        char* result = do_db_ops(thread_uuid, frame.payload, clientInfo);
         if(result != NULL) {
             vt__log_writer(LOG_INFO, "Send query result back to client");
             send_websocket_frame(data->sd, result, 0x01);
@@ -365,7 +365,7 @@ void *parse_client_message_TF(void *arg) {
         } else {
             vt__log_writer(LOG_WARN, "Query result is empty");
             char null_result[100] = "{\"response_id\": \"";
-            strcat(null_result, threadUUID);
+            strcat(null_result, thread_uuid);
             strcat(null_result, "\", \"Error\":\"Unknown Error\"}");
             send_websocket_frame(data->sd, null_result, 0x01);
         }
@@ -399,9 +399,9 @@ void *parse_client_message_TF(void *arg) {
     free(client_message);
     free(data);
     vt__log_writer(LOG_INFO, "server parse_client_message_TF completed");
-    free(threadUUID);
+    free(thread_uuid);
     sleep(1);
-    vt__remove_thread_id_from_register(sysThreadID);
+    vt__remove_thread_id_from_register(sys_thread_id);
 
     pthread_exit(NULL);
 }
@@ -435,26 +435,15 @@ void *subscribe_TF(void *arg) {
     while (1) {
 
         SubscribeTrigMsgNode* subscribeTrigMsgNode = dequeue_subscribe_trig_message();
-        pthread_t processSubscriptionThread;
-        if (pthread_create(&processSubscriptionThread, NULL, process_subscribeTF, subscribeTrigMsgNode) != 0) {
+        pthread_t process_subscription_thread;
+        if (pthread_create(&process_subscription_thread, NULL, process_subscribeTF, subscribeTrigMsgNode) != 0) {
             vt__log_writer(LOG_CRITICAL, "Error creating a thread for processing subscription");
             exit(EXIT_FAILURE);
         } else {
-            // char sysThreadID[25]; 
-            // snprintf(sysThreadID, sizeof(sysThreadID), "%p", subscriptionThread);
-            // vt__set_thread_id_on_register(sysThreadID, "subscriber");
             vt__log_writer(LOG_INFO, "New thread created for processing subscription: ");
         }
 
-        /* SubscribeReplyInfo subscribeReplyInfo = querySubscription();
-        for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (serverData.client_connection[i].client_socket > 0 && strcmp(serverData.client_connection[i].client_id, subscribeReplyInfo.client_id) == 0) {
-                send_websocket_frame(serverData.client_connection[i].client_socket, subscribeReplyInfo.vector_hash, 0x01);
-                printf("Queued Hash: %s %d %s %s\n", serverData.client_connection[i].client_id, serverData.client_connection[i].client_socket, subscribeReplyInfo.vector_hash, subscribeReplyInfo.client_id);
-            } 
-        } */
-
-        if(!serverData.isRunning) {
+        if(!serverData.is_running) {
             break;
         }
 
@@ -464,9 +453,9 @@ void *subscribe_TF(void *arg) {
 }
 
 void start_websock_server() {
-    char sysThreadID[25]; 
-    snprintf(sysThreadID, sizeof(sysThreadID), "%p", (void *) pthread_self());
-    vt__set_thread_id_on_register(sysThreadID, "main");
+    char sys_thread_id[25]; 
+    snprintf(sys_thread_id, sizeof(sys_thread_id), "%p", (void *) pthread_self());
+    vt__set_thread_id_on_register(sys_thread_id, "main");
 
     vt__log_writer(LOG_DEBUG, "server startWebSockServer started");
     int max_socket, activity, sd;
@@ -500,20 +489,20 @@ void start_websock_server() {
     }
 
     init_subscribe_trig_queue();
-    pthread_t subscriptionThread;
-    if (pthread_create(&subscriptionThread, NULL, subscribe_TF, NULL) != 0) {
+    pthread_t subscription_thread;
+    if (pthread_create(&subscription_thread, NULL, subscribe_TF, NULL) != 0) {
         vt__log_writer(LOG_CRITICAL, "Error creating a thread for subscription");
         exit(EXIT_FAILURE);
     } else {
-        char sysThreadID[25]; 
-        snprintf(sysThreadID, sizeof(sysThreadID), "%p", subscriptionThread);
-        vt__set_thread_id_on_register(sysThreadID, "subscriber");
+        char sys_thread_id[25]; 
+        snprintf(sys_thread_id, sizeof(sys_thread_id), "%p", subscription_thread);
+        vt__set_thread_id_on_register(sys_thread_id, "subscriber");
         vt__log_writer(LOG_INFO, "New thread created for handling subscription: ");
     }
 
     vt__log_writer(LOG_DEBUG, "Listening for incoming connections and message");
-    serverData.isRunning = 1;
-    while (serverData.isRunning) {    
+    serverData.is_running = 1;
+    while (serverData.is_running) {    
         FD_ZERO(&readfds);
         FD_SET(serverData.server_socket, &readfds);
         max_socket = serverData.server_socket;

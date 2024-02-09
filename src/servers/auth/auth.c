@@ -190,7 +190,7 @@ Response add_user(User* user) {
 }
 
 
-Response update_user(char* user_name, User* user) {
+Response update_user(char* user_id, User* user) {
     vt__log_writer(LOG_DEBUG, "auth updateUser started");
     
     Response rs;
@@ -207,7 +207,7 @@ Response update_user(char* user_name, User* user) {
 
     User currentUser;
     while (fread(&currentUser, sizeof(User), 1, file) == 1) {
-        if (strcmp(currentUser.name, user_name) == 0) {
+        if (strcmp(currentUser.uuid, user_id) == 0) {
             fseek(file, -sizeof(User), SEEK_CUR);
             if(fwrite(user, sizeof(User), 1, file) != 1) {
                 rs.errCode = FAILED_CODE;

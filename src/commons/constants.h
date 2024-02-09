@@ -35,6 +35,9 @@
 #define VECTOR_DELETE_FAILED_ERROR_CODE         301
 #define VECTOR_DELETE_FAILED_ERROR_MSG          "Error deleting Vector"
 
+#define SUBSCRIPTION_DELETE_FAILED_ERROR_CODE   601
+#define SUBSCRIPTION_FAILED_ERROR_MSG           "Error deleting subscription"
+
 #define COLLECTION_EXIST_ERROR_CODE             400
 #define COLLECTION_EXIST_ERROR_MSG              "Collection already exist"
 #define COLLECTION_CREATE_FAILED_ERROR_CODE     401

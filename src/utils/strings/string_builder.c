@@ -7,7 +7,7 @@ void vt__init_string_builder(StringBuilder *builder, size_t initial_capacity) {
     builder->capacity = initial_capacity;
 }
 
-void vt__append_to_string_uilder(StringBuilder *builder, const char *str) {
+void vt__append_to_string_builder(StringBuilder *builder, const char *str) {
     size_t strLength = strlen(str);
     
     while (builder->length + strLength + 1 > builder->capacity) {

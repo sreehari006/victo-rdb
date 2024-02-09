@@ -100,8 +100,11 @@ typedef struct SubscriptionNode {
     char hash[64];
     char normal[2];
     int vdim;
+    int vector_distance_method;
+    int query_logical_op;
+    double query_value;
+    double p_value;
     double vp[2048];
-    SubscriptionQueryOptions queryOptions;
 } SubscriptionNode;
 
 typedef struct SubscriptionListRS {

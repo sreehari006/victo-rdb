@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.27.1)
 project(victo VERSION 1.0.1)
 
 # Set the build type to Debug
-set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Debug)
 
 find_package(OpenSSL REQUIRED)
 
@@ -17,7 +17,7 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 add_executable(${PROJECT_NAME}-exe main.c)
 
 # Add the -g flag for debugging information
-target_compile_options(${PROJECT_NAME}-exe PRIVATE -g)
+# target_compile_options(${PROJECT_NAME}-exe PRIVATE -g)
 
 add_subdirectory(src)
 

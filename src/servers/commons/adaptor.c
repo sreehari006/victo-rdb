@@ -95,11 +95,11 @@ char* response_to_string(Response* rs) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
-    vt__append_to_string_uilder(&resultSB, "\"}");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\"}");
 
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -124,13 +124,13 @@ char* count_rs_to_string(CountRS* rs) {
     char count[20];
     snprintf(count, sizeof(count), "%d", rs->count);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
-    vt__append_to_string_uilder(&resultSB, "\", \"count\": ");
-    vt__append_to_string_uilder(&resultSB, count);
-    vt__append_to_string_uilder(&resultSB, "}");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\", \"count\": ");
+    vt__append_to_string_builder(&resultSB, count);
+    vt__append_to_string_builder(&resultSB, "}");
 
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -221,9 +221,7 @@ SubscriptionListNode* _query_subscription(SubscribeTrigMsgNode* subscribeTrigMsg
     SubscriptionListNode* subscriptionListNode = query_subscription_sl(subscribeTrigMsgNode->db, subscribeTrigMsgNode->collection, subscribeTrigMsgNode->vectorHash);
     
     vt__log_writer(LOG_DEBUG, "adaptor query_subscription completed");
-    // subscribeReplyInfo.client_id = node.clientID;
-    // subscribeReplyInfo.vector_hash = node.vectorHash;
-
+    
     return subscriptionListNode;
 }
 
@@ -259,16 +257,16 @@ char* subscription_message(char* vector_hash, char* query_hash) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", 0);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, SUCESS_MSG);
-    vt__append_to_string_uilder(&resultSB, ", \"vector_hash\": \"");
-    vt__append_to_string_uilder(&resultSB, vector_hash);
-    vt__append_to_string_uilder(&resultSB, ", \"query_hash\": \"");
-    vt__append_to_string_uilder(&resultSB, query_hash);
-    vt__append_to_string_uilder(&resultSB, "\"");
-    vt__append_to_string_uilder(&resultSB, "}");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, SUCESS_MSG);
+    vt__append_to_string_builder(&resultSB, ", \"vector_hash\": \"");
+    vt__append_to_string_builder(&resultSB, vector_hash);
+    vt__append_to_string_builder(&resultSB, ", \"query_hash\": \"");
+    vt__append_to_string_builder(&resultSB, query_hash);
+    vt__append_to_string_builder(&resultSB, "\"");
+    vt__append_to_string_builder(&resultSB, "}");
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
 
@@ -289,23 +287,23 @@ char* collection_list_rs_to_string(CollectionListRS* rs) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
-    vt__append_to_string_uilder(&resultSB, "\"");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\"");
 
     if(rs->errCode == 0) {
-        vt__append_to_string_uilder(&resultSB, ", \"collections\": [");
+        vt__append_to_string_builder(&resultSB, ", \"collections\": [");
         if(rs->collections != NULL) {
             char* collections = string_array_to_string(rs->collections);
-            vt__append_to_string_uilder(&resultSB, collections);
+            vt__append_to_string_builder(&resultSB, collections);
             free(collections);
         }
-        vt__append_to_string_uilder(&resultSB, "]");
+        vt__append_to_string_builder(&resultSB, "]");
     }
 
-    vt__append_to_string_uilder(&resultSB, "}");
+    vt__append_to_string_builder(&resultSB, "}");
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
 
@@ -326,23 +324,23 @@ char* vector_list_rs_to_string(VectorListRS* rs) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
-    vt__append_to_string_uilder(&resultSB, "\"");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\"");
 
     if(rs->errCode == 0) {
-        vt__append_to_string_uilder(&resultSB, ", \"vectors\": [");
+        vt__append_to_string_builder(&resultSB, ", \"vectors\": [");
         if(rs->vectors != NULL) {
             char* vectors = string_array_to_string(rs->vectors);
-            vt__append_to_string_uilder(&resultSB, vectors);
+            vt__append_to_string_builder(&resultSB, vectors);
             free(vectors);
         } 
-        vt__append_to_string_uilder(&resultSB, "]");
+        vt__append_to_string_builder(&resultSB, "]");
     }
 
-    vt__append_to_string_uilder(&resultSB, "}");
+    vt__append_to_string_builder(&resultSB, "}");
 
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -364,23 +362,23 @@ char* subscription_list_rs_to_string(SubscriptionListRS* rs) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
-    vt__append_to_string_uilder(&resultSB, "\"");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\"");
 
     if(rs->errCode == 0) {
-        vt__append_to_string_uilder(&resultSB, ", \"subscriptions\": [");
+        vt__append_to_string_builder(&resultSB, ", \"subscriptions\": [");
         if(rs->subscriptions != NULL) {
             char* subscriptions = string_array_to_string(rs->subscriptions);
-            vt__append_to_string_uilder(&resultSB, subscriptions);
+            vt__append_to_string_builder(&resultSB, subscriptions);
             free(subscriptions);
         } 
-        vt__append_to_string_uilder(&resultSB, "]");
+        vt__append_to_string_builder(&resultSB, "]");
     }
 
-    vt__append_to_string_uilder(&resultSB, "}");
+    vt__append_to_string_builder(&resultSB, "}");
 
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -402,11 +400,11 @@ char* vector_rs_to_string(GetVectorRS* rs) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
-    vt__append_to_string_uilder(&resultSB, "\"");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\"");
 
     if(rs->errCode == 0) {
         Node node = rs->node;
@@ -415,21 +413,21 @@ char* vector_rs_to_string(GetVectorRS* rs) {
         char dimension[20];
         snprintf(dimension, sizeof(dimension), "%d", node.vdim);
 
-        vt__append_to_string_uilder(&resultSB, ", \"ai_model\": \"");
-        vt__append_to_string_uilder(&resultSB, node.ai_model);
-        vt__append_to_string_uilder(&resultSB, "\", \"hash\": \"");
-        vt__append_to_string_uilder(&resultSB, node.hash);
-        vt__append_to_string_uilder(&resultSB, "\", \"is_normal\": \"");
-        vt__append_to_string_uilder(&resultSB, node.normal);
-        vt__append_to_string_uilder(&resultSB, "\", \"dimension\": ");
-        vt__append_to_string_uilder(&resultSB, dimension);
-        vt__append_to_string_uilder(&resultSB, ", \"vp\": [");
-        vt__append_to_string_uilder(&resultSB, vp);
+        vt__append_to_string_builder(&resultSB, ", \"ai_model\": \"");
+        vt__append_to_string_builder(&resultSB, node.ai_model);
+        vt__append_to_string_builder(&resultSB, "\", \"hash\": \"");
+        vt__append_to_string_builder(&resultSB, node.hash);
+        vt__append_to_string_builder(&resultSB, "\", \"is_normal\": \"");
+        vt__append_to_string_builder(&resultSB, node.normal);
+        vt__append_to_string_builder(&resultSB, "\", \"dimension\": ");
+        vt__append_to_string_builder(&resultSB, dimension);
+        vt__append_to_string_builder(&resultSB, ", \"vp\": [");
+        vt__append_to_string_builder(&resultSB, vp);
         free(vp);
-        vt__append_to_string_uilder(&resultSB, "]");
+        vt__append_to_string_builder(&resultSB, "]");
     }
 
-    vt__append_to_string_uilder(&resultSB, "}");
+    vt__append_to_string_builder(&resultSB, "}");
 
     
     char* result = strdup(resultSB.data);
@@ -452,11 +450,11 @@ char* subscription_rs_to_string(GetSubscriptionRS* rs) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
-    vt__append_to_string_uilder(&resultSB, "\"");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\"");
 
     if(rs->errCode == 0) {
         SubscriptionNode node = rs->node;
@@ -465,30 +463,43 @@ char* subscription_rs_to_string(GetSubscriptionRS* rs) {
         char dimension[20];
         snprintf(dimension, sizeof(dimension), "%d", node.vdim);
 
-        vt__append_to_string_uilder(&resultSB, ", \"client_id\": \"");
-        vt__append_to_string_uilder(&resultSB, node.client_id);
-        vt__append_to_string_uilder(&resultSB, "\", \"ai_model\": \"");
-        vt__append_to_string_uilder(&resultSB, node.ai_model);
-        vt__append_to_string_uilder(&resultSB, "\", \"hash\": \"");
-        vt__append_to_string_uilder(&resultSB, node.hash);
-        vt__append_to_string_uilder(&resultSB, "\", \"is_normal\": \"");
-        vt__append_to_string_uilder(&resultSB, node.normal);
-        vt__append_to_string_uilder(&resultSB, "\", \"dimension\": ");
-        vt__append_to_string_uilder(&resultSB, dimension);
-        vt__append_to_string_uilder(&resultSB, ", \"vp\": [");
-        vt__append_to_string_uilder(&resultSB, vp);
+        vt__append_to_string_builder(&resultSB, ", \"client_id\": \"");
+        vt__append_to_string_builder(&resultSB, node.client_id);
+        vt__append_to_string_builder(&resultSB, "\", \"ai_model\": \"");
+        vt__append_to_string_builder(&resultSB, node.ai_model);
+        vt__append_to_string_builder(&resultSB, "\", \"hash\": \"");
+        vt__append_to_string_builder(&resultSB, node.hash);
+        vt__append_to_string_builder(&resultSB, "\", \"is_normal\": \"");
+        vt__append_to_string_builder(&resultSB, node.normal);
+        vt__append_to_string_builder(&resultSB, "\", \"dimension\": ");
+        vt__append_to_string_builder(&resultSB, dimension);
+        vt__append_to_string_builder(&resultSB, ", \"qOps\": {");
+
+        char vd_method[20];
+        snprintf(vd_method, sizeof(vd_method), "%d", node.vector_distance_method);
+        char logical_op[20];
+        snprintf(logical_op, sizeof(logical_op), "%d", node.query_logical_op);
+        char k_value[20];
+        snprintf(k_value, sizeof(k_value), "%f", node.query_value);
+        char p_value[20];
+        snprintf(p_value, sizeof(p_value), "%f", node.p_value);
+
+        vt__append_to_string_builder(&resultSB, "\"vd_method\": ");
+        vt__append_to_string_builder(&resultSB, vd_method);
+        vt__append_to_string_builder(&resultSB, ", \"logical_op\": ");
+        vt__append_to_string_builder(&resultSB, logical_op);
+        vt__append_to_string_builder(&resultSB, ", \"k_value\": ");
+        vt__append_to_string_builder(&resultSB, k_value);
+        vt__append_to_string_builder(&resultSB, ", \"p_value\": ");
+        vt__append_to_string_builder(&resultSB, p_value);
+        vt__append_to_string_builder(&resultSB, "}");
+        vt__append_to_string_builder(&resultSB, ", \"vp\": [");
+        vt__append_to_string_builder(&resultSB, vp);
         free(vp);
-        vt__append_to_string_uilder(&resultSB, "]");
-        vt__append_to_string_uilder(&resultSB, ", \"qOps\": {");
-                /* vt__append_to_string_uilder(&resultSB, "\"vd_method\": ");
-                        vt__append_to_string_uilder(&resultSB, "\", \"logical_op\": ");
-                                vt__append_to_string_uilder(&resultSB, "\", \"k_value\": ");
-                                        vt__append_to_string_uilder(&resultSB, "\", \"p_value\": ");
-                                        vt__append_to_string_uilder(&resultSB, "\""); */
-        vt__append_to_string_uilder(&resultSB, "}");
+        vt__append_to_string_builder(&resultSB, "]");
     }
 
-    vt__append_to_string_uilder(&resultSB, "}");
+    vt__append_to_string_builder(&resultSB, "}");
 
     
     char* result = strdup(resultSB.data);
@@ -511,15 +522,15 @@ char* put_vector_rs_to_string(PutVectorRS* rs) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
     if(rs->errCode == 0) {
-        vt__append_to_string_uilder(&resultSB, "\", \"hash\": \"");
-        vt__append_to_string_uilder(&resultSB, rs->hash);
+        vt__append_to_string_builder(&resultSB, "\", \"hash\": \"");
+        vt__append_to_string_builder(&resultSB, rs->hash);
     }
-    vt__append_to_string_uilder(&resultSB, "\"}");
+    vt__append_to_string_builder(&resultSB, "\"}");
     
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -541,15 +552,15 @@ char* put_subscription_rs_to_string(PutSubscriptionRS* rs) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
     if(rs->errCode == 0) {
-        vt__append_to_string_uilder(&resultSB, "\", \"hash\": \"");
-        vt__append_to_string_uilder(&resultSB, rs->hash);
+        vt__append_to_string_builder(&resultSB, "\", \"hash\": \"");
+        vt__append_to_string_builder(&resultSB, rs->hash);
     }
-    vt__append_to_string_uilder(&resultSB, "\"}");
+    vt__append_to_string_builder(&resultSB, "\"}");
     
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -571,11 +582,11 @@ char* query_vector_rs_to_string(QueryVectorRS* rs) {
     char errCode[5];
     snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
-    vt__append_to_string_uilder(&resultSB, "\"");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\"");
 
     char dimension[20];
     snprintf(dimension, sizeof(dimension), "%d", rs->vdim);
@@ -583,17 +594,17 @@ char* query_vector_rs_to_string(QueryVectorRS* rs) {
     char distance[20];
     snprintf(distance, sizeof(distance), "%f", rs->distance);
 
-    vt__append_to_string_uilder(&resultSB, ", \"ai_model\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->ai_model);
-    vt__append_to_string_uilder(&resultSB, "\", \"hash\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->hash);
-    vt__append_to_string_uilder(&resultSB, "\", \"is_normal\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->normal);
-    vt__append_to_string_uilder(&resultSB, "\", \"dimension\": ");
-    vt__append_to_string_uilder(&resultSB, dimension);
-    vt__append_to_string_uilder(&resultSB, ", \"distance\": ");
-    vt__append_to_string_uilder(&resultSB, distance);   
-    vt__append_to_string_uilder(&resultSB, "}");
+    vt__append_to_string_builder(&resultSB, ", \"ai_model\": \"");
+    vt__append_to_string_builder(&resultSB, rs->ai_model);
+    vt__append_to_string_builder(&resultSB, "\", \"hash\": \"");
+    vt__append_to_string_builder(&resultSB, rs->hash);
+    vt__append_to_string_builder(&resultSB, "\", \"is_normal\": \"");
+    vt__append_to_string_builder(&resultSB, rs->normal);
+    vt__append_to_string_builder(&resultSB, "\", \"dimension\": ");
+    vt__append_to_string_builder(&resultSB, dimension);
+    vt__append_to_string_builder(&resultSB, ", \"distance\": ");
+    vt__append_to_string_builder(&resultSB, distance);   
+    vt__append_to_string_builder(&resultSB, "}");
 
     
     char* result = strdup(resultSB.data);
@@ -633,32 +644,32 @@ char* query_vector_wrapper_rs_to_string(QueryVectorRSWrapper* rs) {
         faultVectorRS[i] = query_vector_rs_to_string(&rs->faultVectorRS[i]);
     }
 
-    vt__append_to_string_uilder(&resultSB, "{\"code\": ");
-    vt__append_to_string_uilder(&resultSB, errCode);
-    vt__append_to_string_uilder(&resultSB, ", \"message\": \"");
-    vt__append_to_string_uilder(&resultSB, rs->errMsg);
-    vt__append_to_string_uilder(&resultSB, "\", \"query_count\": ");
-    vt__append_to_string_uilder(&resultSB, queryCount);
-    vt__append_to_string_uilder(&resultSB, ", \"fault_count\": ");
-    vt__append_to_string_uilder(&resultSB, faultCount);
-    vt__append_to_string_uilder(&resultSB, ", \"vectors\": [");
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\", \"query_count\": ");
+    vt__append_to_string_builder(&resultSB, queryCount);
+    vt__append_to_string_builder(&resultSB, ", \"fault_count\": ");
+    vt__append_to_string_builder(&resultSB, faultCount);
+    vt__append_to_string_builder(&resultSB, ", \"vectors\": [");
     for(int i=0; i<rs->queryCount; i++) {
-        vt__append_to_string_uilder(&resultSB, queryVectorRS[i]);
+        vt__append_to_string_builder(&resultSB, queryVectorRS[i]);
         if(i<rs->queryCount-1) {
-            vt__append_to_string_uilder(&resultSB, ", ");
+            vt__append_to_string_builder(&resultSB, ", ");
         }
         free(queryVectorRS[i]);
     }
     
-    vt__append_to_string_uilder(&resultSB, "], \"fault\": [");
+    vt__append_to_string_builder(&resultSB, "], \"fault\": [");
         for(int i=0; i<rs->faultCount; i++) {
-        vt__append_to_string_uilder(&resultSB, faultVectorRS[i]);
+        vt__append_to_string_builder(&resultSB, faultVectorRS[i]);
         if(i<rs->faultCount-1) {
-            vt__append_to_string_uilder(&resultSB, ", ");
+            vt__append_to_string_builder(&resultSB, ", ");
         }
         free(faultVectorRS[i]);
     }
-    vt__append_to_string_uilder(&resultSB, "]}");
+    vt__append_to_string_builder(&resultSB, "]}");
     
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -774,6 +785,15 @@ GetSubscriptionRS _get_subscription(char* db, char* collection, char* hash) {
     vt__log_writer(LOG_DEBUG, "adaptor get_subscription started");
 
     GetSubscriptionRS rs = get_subscription_sl(db, collection, hash);
+    
+    vt__log_writer(LOG_DEBUG, "adaptor get_subscription completed");
+    return rs;
+}
+
+Response _delete_subscription(char* db, char* collection, char* hash) {
+    vt__log_writer(LOG_DEBUG, "adaptor get_subscription started");
+
+    Response rs = unsubscribe_sl(db, collection, hash);
     
     vt__log_writer(LOG_DEBUG, "adaptor get_subscription completed");
     return rs;
@@ -897,16 +917,16 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
     StringBuilder clientResponseSB;
     vt__init_string_builder(&clientResponseSB, 10);
 
-    vt__append_to_string_uilder(&metadataSB, "\"metadata\": [");
-    vt__append_to_string_uilder(&metadataSB, "{\"response_id\": \"");
+    vt__append_to_string_builder(&metadataSB, "\"metadata\": [");
+    vt__append_to_string_builder(&metadataSB, "{\"response_id\": \"");
     char* responseID = strdup(threadUUID);
-    vt__append_to_string_uilder(&metadataSB, responseID);
+    vt__append_to_string_builder(&metadataSB, responseID);
     free(responseID);
-    vt__append_to_string_uilder(&metadataSB, "\"}");
+    vt__append_to_string_builder(&metadataSB, "\"}");
 
-    vt__append_to_string_uilder(&errorSB, "\"error\": [");
-    vt__append_to_string_uilder(&resultSB, "\"result\": [");
-    vt__append_to_string_uilder(&clientResponseSB, "{");
+    vt__append_to_string_builder(&errorSB, "\"error\": [");
+    vt__append_to_string_builder(&resultSB, "\"result\": [");
+    vt__append_to_string_builder(&clientResponseSB, "{");
 
     char* db = get_victo_base_path_sl();
 
@@ -917,10 +937,10 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
     vt__log_writer(LOG_INFO, "Check whether the DB path and Payload is valid");
     if(db == NULL) {
         vt__log_writer(LOG_ERROR, "The base path provided for DB is NULL");
-        vt__append_to_string_uilder(&errorSB, "\"Invalid server state. Please restart the server with valid configuration.\"");     
+        vt__append_to_string_builder(&errorSB, "\"Invalid server state. Please restart the server with valid configuration.\"");     
     } else if(root == NULL) {
         vt__log_writer(LOG_WARN, "The query provided is not a valid JSON"); 
-        vt__append_to_string_uilder(&errorSB, "\"Invalid Query (JSON format)\"");     
+        vt__append_to_string_builder(&errorSB, "\"Invalid Query (JSON format)\"");     
     } else {
             vt__log_writer(LOG_INFO, "The provided DB path and Payload is valid");
             JsonNode* opNode =  vt__search_json(root, "op");
@@ -938,15 +958,15 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     JsonNode* nameNode = vt__search_json(argsNode, "name");
                     if(nameNode == NULL || nameNode->value == NULL) {
                         vt__log_writer(LOG_WARN, "Missing parameter: name or, name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: name\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: name\"");
                     } 
 
                     JsonNode* passwordNode = vt__search_json(argsNode, "password");
                     if(passwordNode == NULL || passwordNode->value == NULL) {
                         vt__log_writer(LOG_WARN, "Missing parameter: password or, password provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: password\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: password\"");
                     } 
 
                     if(!isError) {
@@ -956,12 +976,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }
                     }
 
@@ -971,8 +991,8 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     JsonNode* dbNode = vt__search_json(argsNode, "db");
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
 
                     if(!isError) {
@@ -982,12 +1002,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }
                     }
 
@@ -997,15 +1017,15 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
 
                     JsonNode* collectionNode = vt__search_json(argsNode, "collection");
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(!isError) {
@@ -1015,12 +1035,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }
                     }
 
@@ -1030,16 +1050,16 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
 
                     JsonNode* collectionNode = vt__search_json(argsNode, "collection");
                     
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(!isError) {
@@ -1049,12 +1069,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }
                     }
                     
@@ -1064,8 +1084,8 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     }
 
                     if(!isError) {
@@ -1075,12 +1095,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }
                     }
 
@@ -1090,8 +1110,8 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     }
 
                     if(!isError) {
@@ -1108,12 +1128,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }
                     }
 
@@ -1125,20 +1145,20 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
 
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(hashNode == NULL || hashNode->value == NULL || !vt__is_valid_obj_name(hashNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: vector (hash) or, vector (hash) provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
                     } 
 
                     if(!isError) {
@@ -1148,12 +1168,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }
                     }
 
@@ -1163,15 +1183,15 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
 
                     JsonNode* collectionNode = vt__search_json(argsNode, "collection");
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(!isError) {
@@ -1181,12 +1201,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }
                     }
 
@@ -1196,15 +1216,15 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
 
                     JsonNode* collectionNode = vt__search_json(argsNode, "collection");
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(!isError) {
@@ -1221,12 +1241,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }                
                     }
 
@@ -1238,20 +1258,20 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
                     
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(hashNode == NULL || hashNode->value == NULL || !vt__is_valid_obj_name(hashNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: vector (hash) or, vector (hash) provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
                     } 
                     if(!isError) {
                         GetVectorRS rs = _get_vector(dbNode->value, collectionNode->value, hashNode->value); 
@@ -1260,12 +1280,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }          
                     }
 
@@ -1280,28 +1300,28 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
                     
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(aiModelNode == NULL || aiModelNode->value == NULL) {
                         vt__log_writer(LOG_WARN, "Missing parameter: ai_model");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
                     } 
 
                     int vdim = 0;
 
                     if(vdimNode == NULL || vdimNode->value == NULL || !vt__is_valid_integer(vdimNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: vector dimension (vdim)");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
                     } else {
                         vdim = atoi(vdimNode->value);
                     }
@@ -1309,8 +1329,8 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     double vp[vdim];
                     if(vpNode == NULL) {
                         vt__log_writer(LOG_WARN, "Missing parameter: vector points (vp)");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: vector points (vp)\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector points (vp)\"");
                     } else {
                         int i=0;
                         while(i<vdim && vpNode->children[i] != NULL) {
@@ -1320,8 +1340,8 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                             if (*errptr != '\0') {
                                 vt__log_writer(LOG_WARN, "Invalid vector points: ");
                                 vt__log_writer(LOG_WARN, errptr);
-                                (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                                vt__append_to_string_uilder(&errorSB, "\"Invalid vector points\"");
+                                (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                                vt__append_to_string_builder(&errorSB, "\"Invalid vector points\"");
                                 break;
                             }
                             i++;
@@ -1346,12 +1366,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                             vt__log_writer(LOG_INFO, "Added new node to subscribe queue");
                             enqueue_subscribe_trig_message(dbNode->value, collectionNode->value, rs.hash, clientInfo.client_id);
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }  
                         free(rs.errMsg);
                         free(rs.hash);
@@ -1368,35 +1388,35 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
                     
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
                     
                     if(aiModelNode == NULL || aiModelNode->value == NULL) {
                         vt__log_writer(LOG_WARN, "Missing parameter: ai_model");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
                     } 
                     
                     int vdim = 0; 
                     if(vdimNode == NULL || vdimNode->value == NULL || !vt__is_valid_integer(vdimNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: vector dimension (vdim)");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
                     } else {
                         vdim = atoi(vdimNode->value);
                     }
                     
                     if(vpNode == NULL) {
                         vt__log_writer(LOG_WARN, "Missing parameter: vector points (vp)");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: vector points (vp)\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector points (vp)\"");
                     } 
                     
                     double vp[vdim];
@@ -1408,8 +1428,8 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                             if (*errptr != '\0') {
                                 vt__log_writer(LOG_WARN, "Invalid vector points");
                                 vt__log_writer(LOG_WARN, errptr);
-                                (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                                vt__append_to_string_uilder(&errorSB, "\"Invalid vector points\"");
+                                (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                                vt__append_to_string_builder(&errorSB, "\"Invalid vector points\"");
                                 break;
                             }
                             i++;
@@ -1463,12 +1483,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         } 
                     }
 
@@ -1483,35 +1503,35 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
                     
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(aiModelNode == NULL || aiModelNode->value == NULL) {
                         vt__log_writer(LOG_WARN, "Missing parameter: ai_model");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: ai model (ai_model)\"");
                     } 
 
                     int vdim = 0;
                     if(vdimNode == NULL || vdimNode->value == NULL || !vt__is_valid_integer(vdimNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: vector dimension (vdim)");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector dimension (vdim)\"");
                     } else {
                         vdim = atoi(vdimNode->value);
                     }
 
                     if(vpNode == NULL) {
                         vt__log_writer(LOG_WARN, "Missing parameter: vector points (vp)");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: vector points (vp)\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector points (vp)\"");
                     } 
 
                     double vp[vdim];
@@ -1524,8 +1544,8 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                             if (*errptr != '\0') {
                                 vt__log_writer(LOG_WARN, "Invalid vector points: ");
                                 vt__log_writer(LOG_WARN, errptr);
-                                (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                                vt__append_to_string_uilder(&errorSB, "\"Invalid vector points\"");
+                                (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                                vt__append_to_string_builder(&errorSB, "\"Invalid vector points\"");
                                 break;
                             }
                             i++;
@@ -1548,7 +1568,7 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         JsonNode* logicalOpNode = vt__search_json(queryOptionsNode, "logical_op");
                         queryOptions.query_logical_op = (logicalOpNode != NULL && vt__is_valid_integer(vdMethodNode->value))? atoi(logicalOpNode->value): 0;
                         
-                        JsonNode* queryValueNode = vt__search_json(queryOptionsNode, "k_value");
+                        JsonNode* queryValueNode = vt__search_json(queryOptionsNode, "query_value");
                         double query_value = queryValueNode != NULL ? strtod(queryValueNode->value, &errptr): 0;
                         if (*errptr != '\0') {
                             query_value = 0;
@@ -1569,12 +1589,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         char* result = put_subscription_rs_to_string(&rs);
 
                         if(result != NULL) {
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }  
                         free(rs.errMsg);
                     }
@@ -1587,20 +1607,20 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
                     
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(hashNode == NULL || hashNode->value == NULL || !vt__is_valid_obj_name(hashNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: vector (hash) or, vector (hash) provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
                     } 
                     if(!isError) {
                         GetSubscriptionRS rs = _get_subscription(dbNode->value, collectionNode->value, hashNode->value); 
@@ -1609,12 +1629,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }          
                     }
 
@@ -1624,15 +1644,15 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
 
                     JsonNode* collectionNode = vt__search_json(argsNode, "collection");
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(!isError) {
@@ -1649,12 +1669,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }                
                     }
 
@@ -1664,15 +1684,15 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     
                     if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
                     } 
 
                     JsonNode* collectionNode = vt__search_json(argsNode, "collection");
                     if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
                         vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
                     } 
 
                     if(!isError) {
@@ -1682,34 +1702,73 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
-                            vt__append_to_string_uilder(&resultSB, result);
+                            vt__append_to_string_builder(&resultSB, result);
                             free(result);
                         } else {
                             isError = true;
                             vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
-                            vt__append_to_string_uilder(&errorSB, "\"Internal server error\"");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
                         }
+                    }
+
+                } else if(strcmp(op, "delete") == 0 && strcmp(obj, "subscription") == 0) {
+                    vt__log_writer(LOG_INFO, "Begin get subscription");
+                    JsonNode* collectionNode = vt__search_json(argsNode, "collection");
+                    JsonNode* hashNode = vt__search_json(argsNode, "hash");
+                    JsonNode* dbNode = vt__search_json(argsNode, "db");
+                    
+                    if(dbNode == NULL || dbNode->value == NULL || !vt__is_valid_obj_name(dbNode->value)) {
+                        vt__log_writer(LOG_WARN, "Missing parameter: db or, db name provided is invalid");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: db or, db name provided is invalid\"");
+                    } 
+                    
+                    if(collectionNode == NULL || collectionNode->value == NULL || !vt__is_valid_obj_name(collectionNode->value)) {
+                        vt__log_writer(LOG_WARN, "Missing parameter: collection or, collection name provided is invalid");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: collection or, collection name provided is invalid\"");
+                    } 
+
+                    if(hashNode == NULL || hashNode->value == NULL || !vt__is_valid_obj_name(hashNode->value)) {
+                        vt__log_writer(LOG_WARN, "Missing parameter: vector (hash) or, vector (hash) provided is invalid");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
+                    } 
+                    if(!isError) {
+                        Response rs = _delete_subscription(dbNode->value, collectionNode->value, hashNode->value); 
+                        char* result = response_to_string(&rs);
+                        free(rs.errMsg);
+
+                        if(result != NULL) {
+                            vt__log_writer(LOG_INFO, "Added result to resultSB");
+                            vt__append_to_string_builder(&resultSB, result);
+                            free(result);
+                        } else {
+                            isError = true;
+                            vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
+                        }          
                     }
 
                 } else {
                     if(strcmp(op, "empty") == 0) {
                         vt__log_writer(LOG_WARN, "Operation was missing in the payload");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Invalid Operation\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Invalid Operation\"");
                     } else  if(strcmp(obj, "empty") == 0) {
                         vt__log_writer(LOG_WARN, "DB Object provided in the payload is invalid");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Operation on invalid Object\"");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Operation on invalid Object\"");
                     } else {
                         vt__log_writer(LOG_WARN, "Operation and DB object is missing in the payload");
-                        (isError) ? vt__append_to_string_uilder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_uilder(&errorSB, "\"Invalid query\"");            
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Invalid query\"");            
                     }
                 }
 
             } else {
                 vt__log_writer(LOG_WARN, "Authorization failure");
-                vt__append_to_string_uilder(&errorSB, "\"Authorization failure\"");     
+                vt__append_to_string_builder(&errorSB, "\"Authorization failure\"");     
             }
 
             vt__free_json(root);
@@ -1717,24 +1776,24 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
     free(clientInfo.client_id);
     
-    vt__append_to_string_uilder(&metadataSB, "]");
-    vt__append_to_string_uilder(&clientResponseSB, metadataSB.data);
+    vt__append_to_string_builder(&metadataSB, "]");
+    vt__append_to_string_builder(&clientResponseSB, metadataSB.data);
     vt__free_string_builder(&metadataSB);
     vt__log_writer(LOG_DEBUG, "Added metadata to client response");
-    vt__append_to_string_uilder(&clientResponseSB, ", ");
+    vt__append_to_string_builder(&clientResponseSB, ", ");
     
-    vt__append_to_string_uilder(&resultSB, "]");
-    vt__append_to_string_uilder(&clientResponseSB, resultSB.data);
+    vt__append_to_string_builder(&resultSB, "]");
+    vt__append_to_string_builder(&clientResponseSB, resultSB.data);
     vt__free_string_builder(&resultSB);
     vt__log_writer(LOG_DEBUG, "Added db operation result to client response");
-    vt__append_to_string_uilder(&clientResponseSB, ", ");
+    vt__append_to_string_builder(&clientResponseSB, ", ");
 
-    vt__append_to_string_uilder(&errorSB, "]");
-    vt__append_to_string_uilder(&clientResponseSB, errorSB.data);
+    vt__append_to_string_builder(&errorSB, "]");
+    vt__append_to_string_builder(&clientResponseSB, errorSB.data);
     vt__free_string_builder(&errorSB);
     vt__log_writer(LOG_DEBUG, "Added errors if any to client response");
 
-    vt__append_to_string_uilder(&clientResponseSB, "}");
+    vt__append_to_string_builder(&clientResponseSB, "}");
 
     result = strdup(clientResponseSB.data);
     vt__free_string_builder(&clientResponseSB);

@@ -99,11 +99,11 @@ char* get_collection_base_path(char* db) {
     StringBuilder resultSB;
     vt__init_string_builder(&resultSB, 10);
 
-    vt__append_to_string_uilder(&resultSB, get_db_base_path());
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, db);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, COLLECTIONS);
+    vt__append_to_string_builder(&resultSB, get_db_base_path());
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, db);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, COLLECTIONS);
 
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -121,13 +121,13 @@ char* get_collection_full_path(const char* db, const char* collection) {
     StringBuilder resultSB;
     vt__init_string_builder(&resultSB, 10);
 
-    vt__append_to_string_uilder(&resultSB, get_db_base_path());
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, db);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, COLLECTIONS);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, collection);
+    vt__append_to_string_builder(&resultSB, get_db_base_path());
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, db);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, COLLECTIONS);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, collection);
 
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -146,15 +146,15 @@ char* get_vector_base_path(char* db, char* collection) {
     StringBuilder resultSB;
     vt__init_string_builder(&resultSB, 10);
 
-    vt__append_to_string_uilder(&resultSB, get_db_base_path());
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, db);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, COLLECTIONS);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, collection);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, VECTORS);
+    vt__append_to_string_builder(&resultSB, get_db_base_path());
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, db);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, COLLECTIONS);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, collection);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, VECTORS);
 
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -173,18 +173,18 @@ char* get_vector_full_path(char* db, char* collection, char* hash) {
     StringBuilder resultSB;
     vt__init_string_builder(&resultSB, 10);
 
-    vt__append_to_string_uilder(&resultSB, get_db_base_path());
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, db);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, COLLECTIONS);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, collection);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, VECTORS);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, hash);
-    vt__append_to_string_uilder(&resultSB, VICTO_FILE_EXT);
+    vt__append_to_string_builder(&resultSB, get_db_base_path());
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, db);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, COLLECTIONS);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, collection);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, VECTORS);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, hash);
+    vt__append_to_string_builder(&resultSB, VICTO_FILE_EXT);
 
 
     char* result = strdup(resultSB.data);
@@ -204,15 +204,15 @@ char* get_subscription_base_path(char* db, char* collection) {
     StringBuilder resultSB;
     vt__init_string_builder(&resultSB, 10);
 
-    vt__append_to_string_uilder(&resultSB, get_db_base_path());
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, db);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, COLLECTIONS);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, collection);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, SUBSCRIPTIONS);
+    vt__append_to_string_builder(&resultSB, get_db_base_path());
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, db);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, COLLECTIONS);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, collection);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, SUBSCRIPTIONS);
 
     char* result = strdup(resultSB.data);
     vt__free_string_builder(&resultSB);
@@ -231,18 +231,18 @@ char* get_subscription_full_path(char* db, char* collection, char* hash) {
     StringBuilder resultSB;
     vt__init_string_builder(&resultSB, 10);
 
-    vt__append_to_string_uilder(&resultSB, get_db_base_path());
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, db);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, COLLECTIONS);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, collection);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, SUBSCRIPTIONS);
-    vt__append_to_string_uilder(&resultSB, "/");
-    vt__append_to_string_uilder(&resultSB, hash);
-    vt__append_to_string_uilder(&resultSB, SUSCRIP_FILE_EXT);
+    vt__append_to_string_builder(&resultSB, get_db_base_path());
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, db);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, COLLECTIONS);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, collection);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, SUBSCRIPTIONS);
+    vt__append_to_string_builder(&resultSB, "/");
+    vt__append_to_string_builder(&resultSB, hash);
+    vt__append_to_string_builder(&resultSB, SUSCRIP_FILE_EXT);
 
 
     char* result = strdup(resultSB.data);
