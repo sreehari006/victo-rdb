@@ -16,10 +16,13 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 # add_library(${PROJECT_NAME} SHARED main.c)
 add_executable(${PROJECT_NAME}-exe main.c)
 
+# Add the -g flag for debugging information
+# target_compile_options(${PROJECT_NAME}-exe PRIVATE -g)
+
 add_subdirectory(src)
 
 
-# target_link_libraries(${PROJECT_NAME} src engine servers utils m ${OPENSSL_LIBRARIES} ${OPENSSL_SSL_LIBRARIES})
+# target_link_libraries(${PROJECT_NAME} src core servers utils m ${OPENSSL_LIBRARIES} ${OPENSSL_SSL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}-exe src m ${OPENSSL_LIBRARIES} ${OPENSSL_SSL_LIBRARIES})
 
 

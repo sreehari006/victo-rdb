@@ -35,4 +35,4 @@ COPY --from=builder /app/build/victo-exe /app/exe
 EXPOSE 8080
 
 # Set the entry point for the container
-ENTRYPOINT ["/app/exe/victo-exe", "-d", "/app/victodb", "-i", "0.0.0.0", "-p", "8080", "-a", "false"]
+ENTRYPOINT ["/app/exe/victo-exe", "-d", "/app/victodb", "-i", "0.0.0.0", "-p", "8080", "-a", "true"]

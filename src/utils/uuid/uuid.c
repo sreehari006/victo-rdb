@@ -1,4 +1,8 @@
-#include "interface/uuid.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <time.h>
+#include <string.h>
 
 typedef struct {
     uint32_t time_low;
@@ -32,7 +36,7 @@ long long current_time_nanoseconds() {
 }
 
 
-char* getUUID() {
+char* vt__get_uuid() {
     srand((unsigned int) current_time_nanoseconds());
 
     UUID this_uuid;

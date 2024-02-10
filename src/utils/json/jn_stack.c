@@ -1,35 +1,38 @@
-#include "interface/stack.h"
-#include "../logs/interface/log.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "./includes/stack_proto.h"
+#include "../logs/includes/log_proto.h"
 
-void initializeJNS(JsonNodeStack *stack) {
+void vt__initialize_JNS(JsonNodeStack *stack) {
     stack->top = -1; 
 }
 
-int isEmptyJNS(JsonNodeStack *stack) {
+int vt__is_empty_JNS(JsonNodeStack *stack) {
     return stack->top == -1;
 }
 
-int isFullJNS(JsonNodeStack *stack) {
+int vt__is_full_JNS(JsonNodeStack *stack) {
     return stack->top == STACK_MAX_SIZE - 1;
 }
 
-int pushJNS(JsonNodeStack *stack, JsonNode* node) {
-        if (isFullJNS(stack)) {
-        logWriter(LOG_WARN, "jn_stack pushJNS Stack overflow");
+int vt__push_JNS(JsonNodeStack *stack, JsonNode* node) {
+        if (vt__is_full_JNS(stack)) {
+        vt__log_writer(LOG_WARN, "jn_stack pushJNS Stack overflow");
         return -1;
     }
     stack->top++;
     stack->items[stack->top] = node;
     if (stack->items[stack->top] == NULL) {
-        logWriter(LOG_ERROR, "jn_stakc pushJNS Memory allocation failed");
+        vt__log_writer(LOG_ERROR, "jn_stakc pushJNS Memory allocation failed");
         return -1;
     }
     return 0;
 }
 
-JsonNode* popJNS(JsonNodeStack *stack) {
-    if (isEmptyJNS(stack)) {
-        logWriter(LOG_WARN, "jn_stack popJNS Stack is empty");
+JsonNode* vt__pop_JNS(JsonNodeStack *stack) {
+    if (vt__is_empty_JNS(stack)) {
+        vt__log_writer(LOG_WARN, "jn_stack popJNS Stack is empty");
         return NULL;
     }
     JsonNode *value = stack->items[stack->top];
@@ -37,16 +40,16 @@ JsonNode* popJNS(JsonNodeStack *stack) {
     return value;
 }
 
-JsonNode* peekJNS(JsonNodeStack *stack) {
-    if (isEmptyJNS(stack)) {
-        logWriter(LOG_WARN, "jn_stack peekJNS Stack is empty");
+JsonNode* vt__peek_JNS(JsonNodeStack *stack) {
+    if (vt__is_empty_JNS(stack)) {
+        vt__log_writer(LOG_WARN, "jn_stack peekJNS Stack is empty");
         return NULL;
     }
     return stack->items[stack->top];
 }
 
-void freeJNS(JsonNodeStack *stack) {
-    while (!isEmptyJNS(stack)) {
-        free(popJNS(stack));
+void vt__free_JNS(JsonNodeStack *stack) {
+    while (!vt__is_empty_JNS(stack)) {
+        free(vt__pop_JNS(stack));
     }
 }

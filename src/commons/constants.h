@@ -1,4 +1,6 @@
+#define VT_FILE_SEPERATOR                       "/"
 #define VICTO_FILE_EXT                          ".victo"
+#define SUSCRIP_FILE_EXT                        ".vsub"
 #define DB                                      "db"
 #define LOGS                                    "logs"
 #define AUTH                                    "auth"
@@ -33,6 +35,9 @@
 #define VECTOR_DELETE_FAILED_ERROR_CODE         301
 #define VECTOR_DELETE_FAILED_ERROR_MSG          "Error deleting Vector"
 
+#define SUBSCRIPTION_DELETE_FAILED_ERROR_CODE   601
+#define SUBSCRIPTION_FAILED_ERROR_MSG           "Error deleting subscription"
+
 #define COLLECTION_EXIST_ERROR_CODE             400
 #define COLLECTION_EXIST_ERROR_MSG              "Collection already exist"
 #define COLLECTION_CREATE_FAILED_ERROR_CODE     401
@@ -66,8 +71,6 @@
 #define MINKOWSKI_DISTANCE                      3
 #define DOT_PRODUCT                             4
 
-#define USER_ALREADY_EXIST_CODE                 1
-#define USER_ALREADY_EXIST_MSG                  "User already exist"
 
 
 

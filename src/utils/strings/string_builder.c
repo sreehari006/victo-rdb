@@ -1,16 +1,13 @@
-#include <regex.h>
-#include <stdbool.h>
-#include <limits.h>
-#include "interface/string_builder.h"
+#include "./includes/string_builder_proto.h"
 
-void initStringBuilder(StringBuilder *builder, size_t initialCapacity) {
-    builder->data = (char *)malloc(initialCapacity * sizeof(char));
+void vt__init_string_builder(StringBuilder *builder, size_t initial_capacity) {
+    builder->data = (char *)malloc(initial_capacity * sizeof(char));
     builder->data[0] = '\0';
     builder->length = 0;
-    builder->capacity = initialCapacity;
+    builder->capacity = initial_capacity;
 }
 
-void appendToStringBuilder(StringBuilder *builder, const char *str) {
+void vt__append_to_string_builder(StringBuilder *builder, const char *str) {
     size_t strLength = strlen(str);
     
     while (builder->length + strLength + 1 > builder->capacity) {
@@ -22,14 +19,14 @@ void appendToStringBuilder(StringBuilder *builder, const char *str) {
     builder->length += strLength;
 }
 
-void freeStringBuilder(StringBuilder *builder) {
+void vt__free_string_builder(StringBuilder *builder) {
     free(builder->data);
     builder->data = NULL;
     builder->length = 0;
     builder->capacity = 0;
 }
 
-bool isValidObjName(char *str) {
+bool vt__is_valid_obj_name(char *str) {
     if (str[0] == '\0') {
         return false;
     }
@@ -57,7 +54,7 @@ bool isValidObjName(char *str) {
     return true;
 }
 
-bool isValidInteger(const char *str) {
+bool vt__is_valid_integer(const char *str) {
     char *endptr;
     strtol(str, &endptr, 10);
     return (*endptr == '\0' || *endptr == '\n');

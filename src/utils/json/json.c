@@ -3,13 +3,28 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "interface/stack.h"
-#include "../logs/interface/log.h"
+#include "./includes/stack_proto.h"
+#include "../logs/includes/log_proto.h"
 
-JsonNode* createJsonNode(JsonNode* parent, char* type, char* key, char* value) {
+typedef enum {
+    TOKEN_NONE,
+    TOKEN_STRING,
+    TOKEN_NUMBER,
+    TOKEN_TRUE,
+    TOKEN_FALSE,
+    TOKEN_NULL,
+    TOKEN_COLON,
+    TOKEN_COMMA,
+    TOKEN_LBRACE,
+    TOKEN_RBRACE,
+    TOKEN_LBRACKET,
+    TOKEN_RBRACKET
+} TokenType;
+
+JsonNode* create_json_node(JsonNode* parent, char* type, char* key, char* value) {
     JsonNode* newNode = (JsonNode*) malloc(sizeof(JsonNode));
     if (newNode == NULL) {
-        logWriter(LOG_ERROR, "json createJsonNode Memory allocation failed");
+        vt__log_writer(LOG_ERROR, "json createJsonNode Memory allocation failed");
         return NULL;
     }
 
@@ -19,21 +34,21 @@ JsonNode* createJsonNode(JsonNode* parent, char* type, char* key, char* value) {
     newNode->value = value;
     newNode->childIndex = 0;
 
-        return newNode;
+    return newNode;
 }
 
-void addJsonChild(JsonNode* parent, JsonNode* child) {
+void add_json_child(JsonNode* parent, JsonNode* child) {
     if(parent != NULL && child != NULL) {
         int i = parent->childIndex;
         parent->children[i] = child;
         parent->children[i+1] = NULL;
         parent->childIndex = i + 1;
     } else {
-        logWriter(LOG_ERROR, "json addJsonChild either parent or child node is empty");
+        vt__log_writer(LOG_ERROR, "json addJsonChild either parent or child node is empty");
     }
 }
 
-const char *tokenTypeToString(TokenType type) {
+const char *token_type_to_string(TokenType type) {
     switch (type) {
         case TOKEN_NONE: return "NONE";
         case TOKEN_STRING: return "STRING";
@@ -52,26 +67,26 @@ const char *tokenTypeToString(TokenType type) {
 }
 
 
-void nullifyCharArray(char arr[]) {
+void nullify_char_array(char arr[]) {
     for (int i=0; i<1024; i++) {
         arr[i] = '\0';
     }
 }
 
-char prevNonSpaceChar(int index, char* jsonStr) {
+char prev_non_space_char(int index, char* json_str) {
     int i = index-1;
-    while(i>0 && isspace(jsonStr[i])) {
+    while(i>0 && isspace(json_str[i])) {
         i--;
     }
-    return jsonStr[i];
+    return json_str[i];
 }
 
-void printJson(JsonNode* node) {
+void vt__print_json(JsonNode* node) {
     int i=0;
     while(node->children[i]!=NULL) {
         if(strcmp(node->children[i]->type, "object") == 0 || strcmp(node->children[i]->type, "array") == 0) {
             printf("%s: %s \n", node->children[i]->key, node->children[i]->type);
-            printJson(node->children[i]);
+            vt__print_json(node->children[i]);
         } else{
             printf("%s: %s \n", node->children[i]->key, node->children[i]->value);
         }
@@ -79,7 +94,7 @@ void printJson(JsonNode* node) {
     }
 }
 
-JsonNode* searchJson(JsonNode* node, char* key) {
+JsonNode* vt__search_json(JsonNode* node, char* key) {
     JsonNode* resultNode = NULL;
 
     if(node == NULL)
@@ -97,11 +112,11 @@ JsonNode* searchJson(JsonNode* node, char* key) {
     return resultNode;
 }
 
-void freeJson(JsonNode* node) {
+void vt__free_json(JsonNode* node) {
     int i=0;
     while(node->children[i]!=NULL) {
         if(strcmp(node->children[i]->type, "object") == 0 || strcmp(node->children[i]->type, "array") == 0) {
-            freeJson(node->children[i]);
+            vt__free_json(node->children[i]);
         } else {
             free(node->children[i]);
         }
@@ -112,52 +127,52 @@ void freeJson(JsonNode* node) {
 
 }
 
-JsonNode* loadJson(char* jsonStr) {
-    logWriter(LOG_DEBUG, "json loadJson started");
+JsonNode* vt__load_json(char* json_str) {
+    vt__log_writer(LOG_DEBUG, "json loadJson started");
 
     JsonNode* root = NULL;
-    bool isString = false;
-    char tokenBuffer[1024];
+    bool is_string = false;
+    char token_buffer[1024];
     int token_i = 0;
-    int firstNonCharIndex=0;
-    bool isError = false;
+    int first_non_char_index=0;
+    bool is_error = false;
 
-    while(isspace(jsonStr[firstNonCharIndex])) {
-        firstNonCharIndex++;
+    while(isspace(json_str[first_non_char_index])) {
+        first_non_char_index++;
     }
 
-    if(jsonStr[firstNonCharIndex] != '{' && jsonStr[firstNonCharIndex] != '[') {
+    if(json_str[first_non_char_index] != '{' && json_str[first_non_char_index] != '[') {
         return root;
     }
 
     JsonNodeStack jsonNodeStack;
-    initializeJNS(&jsonNodeStack);
+    vt__initialize_JNS(&jsonNodeStack);
 
     DynamicStringStack keyTracker;
-    initializeDSS(&keyTracker);
+    vt__initialize_DSS(&keyTracker);
 
-    for(int i=firstNonCharIndex; jsonStr[i] != '\0'; i++) {
-        char c = jsonStr[i];
+    for(int i=first_non_char_index; json_str[i] != '\0'; i++) {
+        char c = json_str[i];
         if(!isspace(c)) {
-            if(c == '\\' && jsonStr[i+1] == '\"') {
-                tokenBuffer[token_i] = c;
-                tokenBuffer[token_i++] = '\"';
+            if(c == '\\' && json_str[i+1] == '\"') {
+                token_buffer[token_i] = c;
+                token_buffer[token_i++] = '\"';
                 i++;
                 continue;
             }
 
             if(c=='\"') {
-                if(!isString && token_i > 0) {
-                    isError = true;
+                if(!is_string && token_i > 0) {
+                    is_error = true;
                     break;
                 }
-                isString = !isString;
+                is_string = !is_string;
                 continue;
             } 
 
-            if(isString) {
+            if(is_string) {
                 if(c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',') {
-                    tokenBuffer[token_i] = c;
+                    token_buffer[token_i] = c;
                     token_i++;
                     continue;
                 }
@@ -165,227 +180,227 @@ JsonNode* loadJson(char* jsonStr) {
 
             switch (c) {
                 case '{': 
-                    if(isEmptyJNS(&jsonNodeStack) == 1) {
-                        JsonNode* thisNode = createJsonNode(NULL, "object", NULL, NULL);
+                    if(vt__is_empty_JNS(&jsonNodeStack) == 1) {
+                        JsonNode* thisNode = create_json_node(NULL, "object", NULL, NULL);
                         if(thisNode == NULL) {
-                            isError = true;
+                            is_error = true;
                             break;
                         }
 
-                        int response = pushJNS(&jsonNodeStack, thisNode);
+                        int response = vt__push_JNS(&jsonNodeStack, thisNode);
                         if(response < 0) {
-                            isError = true;
+                            is_error = true;
                             break;
                         } 
                         root = thisNode;
                     } else {
-                        JsonNode* topNode = peekJNS(&jsonNodeStack);
+                        JsonNode* topNode = vt__peek_JNS(&jsonNodeStack);
                         if(topNode == NULL) {
-                            isError = true;
+                            is_error = true;
                             break;                              
                         }
-                        char* key = popDSS(&keyTracker);
+                        char* key = vt__pop_DSS(&keyTracker);
                         if(key == NULL) {
-                            isError = true;
+                            is_error = true;
                             break;                                 
                         }                        
-                        JsonNode* thisNode = createJsonNode(topNode, "object", key, NULL);
+                        JsonNode* thisNode = create_json_node(topNode, "object", key, NULL);
                         if(thisNode == NULL) {
-                            isError = true;
+                            is_error = true;
                             break;
                         }
-                        addJsonChild(topNode, thisNode);
-                        int response = pushJNS(&jsonNodeStack, thisNode);
+                        add_json_child(topNode, thisNode);
+                        int response = vt__push_JNS(&jsonNodeStack, thisNode);
                         if(response < 0) {
-                            isError = true;
+                            is_error = true;
                             break;
                         } 
                     }
                     break;
                 case '}': {
-                        char p = prevNonSpaceChar(i, jsonStr);
+                        char p = prev_non_space_char(i, json_str);
                         if(p != '}' && p != ']') {
-                            JsonNode* topNode = peekJNS(&jsonNodeStack);
+                            JsonNode* topNode = vt__peek_JNS(&jsonNodeStack);
                             if(topNode == NULL) {
-                                isError = true;
+                                is_error = true;
                                 break;                              
                             }
-                            char* key = popDSS(&keyTracker);
+                            char* key = vt__pop_DSS(&keyTracker);
                             if(key == NULL) {
-                                isError = true;
+                                is_error = true;
                                 break;                                 
                             }
-                            char* value = strdup(tokenBuffer);
-                            JsonNode* child = createJsonNode(topNode, "primitive", key, value);
+                            char* value = strdup(token_buffer);
+                            JsonNode* child = create_json_node(topNode, "primitive", key, value);
                             if(child == NULL) {
-                                isError = true;
+                                is_error = true;
                                 break;
                             }
-                            addJsonChild(topNode, child);
+                            add_json_child(topNode, child);
                             token_i=0; 
-                            nullifyCharArray(tokenBuffer); 
+                            nullify_char_array(token_buffer); 
                         }
-                        JsonNode* node = popJNS(&jsonNodeStack);
+                        JsonNode* node = vt__pop_JNS(&jsonNodeStack);
                         if(node == NULL) {
-                            isError = true;
+                            is_error = true;
                             break; 
                         }
                     }
                     break;
                 case '[': 
-                    if(isEmptyJNS(&jsonNodeStack) == 1) {
-                        JsonNode* thisNode = createJsonNode(NULL, "array", NULL, NULL);
+                    if(vt__is_empty_JNS(&jsonNodeStack) == 1) {
+                        JsonNode* thisNode = create_json_node(NULL, "array", NULL, NULL);
                         if(thisNode == NULL) {
-                            isError = true;
+                            is_error = true;
                             break; 
                         }
-                        int response = pushJNS(&jsonNodeStack, thisNode);
+                        int response = vt__push_JNS(&jsonNodeStack, thisNode);
                         if(response < 0) {
-                            isError = true;
+                            is_error = true;
                             break;
                         } 
                         root = thisNode;
                     } else {
-                        JsonNode* topNode = peekJNS(&jsonNodeStack);
+                        JsonNode* topNode = vt__peek_JNS(&jsonNodeStack);
                         if(topNode == NULL) {
-                            isError = true;
+                            is_error = true;
                             break;                              
                         }
-                        char* key = popDSS(&keyTracker);
+                        char* key = vt__pop_DSS(&keyTracker);
                         if(key == NULL) {
-                            isError = true;
+                            is_error = true;
                             break;                                 
                         }       
-                        JsonNode* thisNode = createJsonNode(topNode, "array", key, NULL);
+                        JsonNode* thisNode = create_json_node(topNode, "array", key, NULL);
                         if(thisNode == NULL) {
-                            isError = true;
+                            is_error = true;
                             break; 
                         }
-                        addJsonChild(topNode, thisNode);
-                        int response = pushJNS(&jsonNodeStack, thisNode);
+                        add_json_child(topNode, thisNode);
+                        int response = vt__push_JNS(&jsonNodeStack, thisNode);
                         if(response < 0) {
-                            isError = true;
+                            is_error = true;
                             break;
                         }
                     }
-                    int response = pushDSS(&keyTracker, "0");
+                    int response = vt__push_DSS(&keyTracker, "0");
                     if(response < 0) {
-                        isError = true;
+                        is_error = true;
                     }
                     break;
                 case ']': {
-                        char p = prevNonSpaceChar(i, jsonStr);
+                        char p = prev_non_space_char(i, json_str);
                         if(p != '}' && p != ']'){
-                            JsonNode* topNode = peekJNS(&jsonNodeStack);
+                            JsonNode* topNode = vt__peek_JNS(&jsonNodeStack);
                             if(topNode == NULL) {
-                                isError = true;
+                                is_error = true;
                                 break;                              
                             }
-                            char* key = popDSS(&keyTracker);
+                            char* key = vt__pop_DSS(&keyTracker);
                             if(key == NULL) {
-                                isError = true;
+                                is_error = true;
                                 break;                                 
                             }       
-                            char* value = strdup(tokenBuffer);
-                            JsonNode* child = createJsonNode(topNode, "primitive", key, value);
+                            char* value = strdup(token_buffer);
+                            JsonNode* child = create_json_node(topNode, "primitive", key, value);
                             if(child == NULL) {
-                                isError = true;
+                                is_error = true;
                                 break; 
                             }
-                            addJsonChild(topNode, child);
+                            add_json_child(topNode, child);
                             token_i=0; 
-                            nullifyCharArray(tokenBuffer); 
+                            nullify_char_array(token_buffer); 
                         }
-                        JsonNode* node = popJNS(&jsonNodeStack);
+                        JsonNode* node = vt__pop_JNS(&jsonNodeStack);
                         if(node == NULL) {
-                            isError = true;
+                            is_error = true;
                         }
                     }
                     break;
                 case ':': {
-                        int response = pushDSS(&keyTracker, tokenBuffer);
+                        int response = vt__push_DSS(&keyTracker, token_buffer);
                         if(response < 0) {
-                            isError = true;
+                            is_error = true;
                             break;
                         }
                         token_i=0; 
-                        nullifyCharArray(tokenBuffer); 
+                        nullify_char_array(token_buffer); 
                     }
                     break;
                 case ',': {
-                        char p = prevNonSpaceChar(i, jsonStr);
+                        char p = prev_non_space_char(i, json_str);
                         if(p != '}' && p != ']'){
-                            JsonNode* topNode = peekJNS(&jsonNodeStack);
+                            JsonNode* topNode = vt__peek_JNS(&jsonNodeStack);
                             if(topNode == NULL) {
-                                isError = true;
+                                is_error = true;
                                 break;                                 
                             }       
 
                             if(strcmp(topNode->type, "object") == 0) {
-                                char* key = popDSS(&keyTracker);
+                                char* key = vt__pop_DSS(&keyTracker);
                                 if(key == NULL) {
-                                    isError = true;
+                                    is_error = true;
                                     break;                                 
                                 }       
-                                char* value = strdup(tokenBuffer);
-                                JsonNode* child = createJsonNode(topNode, "primitive", key, value);
+                                char* value = strdup(token_buffer);
+                                JsonNode* child = create_json_node(topNode, "primitive", key, value);
                                 if(child == NULL) {
-                                    isError = true;
+                                    is_error = true;
                                     break; 
                                 }
-                                addJsonChild(topNode, child);
+                                add_json_child(topNode, child);
                             }
 
                             
                             if(strcmp(topNode->type, "array") == 0) {
-                                char* key = popDSS(&keyTracker);
+                                char* key = vt__pop_DSS(&keyTracker);
                                 if(key == NULL) {
-                                    isError = true;
+                                    is_error = true;
                                     break;                                 
                                 }   
-                                char* value = strdup(tokenBuffer);
-                                JsonNode* child = createJsonNode(topNode, "primitive", key, value);
+                                char* value = strdup(token_buffer);
+                                JsonNode* child = create_json_node(topNode, "primitive", key, value);
                                 if(child == NULL) {
-                                    isError = true;
+                                    is_error = true;
                                     break; 
                                 }
-                                addJsonChild(topNode, child);
+                                add_json_child(topNode, child);
                                 
                                 char nextKey[4];
                                 sprintf(nextKey, "%d", atoi(key)+1);
-                                int response = pushDSS(&keyTracker, nextKey);
+                                int response = vt__push_DSS(&keyTracker, nextKey);
                                 if(response < 0) {
-                                    isError = true;
+                                    is_error = true;
                                     break;
                                 }
                             }
                             
                             token_i=0; 
-                            nullifyCharArray(tokenBuffer); 
+                            nullify_char_array(token_buffer); 
                         }
                     }
                     break;
                 default:
-                    tokenBuffer[token_i] = c;
+                    token_buffer[token_i] = c;
                     token_i++;
             }
-            if(isError) {
+            if(is_error) {
                 break;
             }
         } else{
-            if(isString) {
-                tokenBuffer[token_i] = c;
+            if(is_string) {
+                token_buffer[token_i] = c;
                 token_i++;
             }
         }
     }
 
-    freeDSS(&keyTracker);
+    vt__free_DSS(&keyTracker);
 
-    if(isError) {
+    if(is_error) {
         return NULL;    
     }
 
-    logWriter(LOG_DEBUG, "json loadJson completed");
+    vt__log_writer(LOG_DEBUG, "json loadJson completed");
     return root;
 }
