@@ -831,24 +831,31 @@ Response _add_user(char* userName, char* password) {
     User* user = (User*)malloc(sizeof(User));
 
     char* uuid = vt__get_uuid();
+    char* hashPassword = vt__sha256(password);
     strcpy(user->name, userName);
-    strcpy(user->password, vt__sha256(password));
+    strcpy(user->password, hashPassword);
     strcpy(user->uuid, uuid);
-    user->user_access[USER_ACCESS_INDEX] = USER_ACCESS_NO_ACCESS;
+    user->user_access[USER_ACCESS_INDEX] = USER_ACCESS_CHANGE_PASS_SELF;
     user->user_access[DB_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
     user->user_access[COLLECTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
     user->user_access[VECTOR_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
     user->user_access[SUBSCRIPTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
     
     Response rs = add_user_sl(user);
-    
-    free(userName);
-    free(password);
     free(uuid);
-
+    free(hashPassword);
     free(user);
+
     vt__log_writer(LOG_DEBUG, "adaptor add_user completed");
 
+    return rs;
+}
+
+
+Response _change_password(char* uuid, char* user_name, char* current_pass, char* new_pass, bool self) {
+    vt__log_writer(LOG_DEBUG, "adaptor _change_password started");
+    Response rs = change_password_sl(uuid, user_name, current_pass, new_pass, self);
+    vt__log_writer(LOG_DEBUG, "adaptor _change_password completed");
     return rs;
 }
 
@@ -879,6 +886,10 @@ bool verifyAccess(char* op, char* obj, ClientInfo ClientInfo) {
         access = ClientInfo.user_access[VECTOR_ACCESS_INDEX] & USER_ACCESS_READ_MULTIPLE_ACCESS;
     } else if(strcmp(op,"add") == 0 && strcmp(obj, "user") == 0) {
         access = ClientInfo.user_access[USER_ACCESS_INDEX] & USER_ACCESS_WRITE_ACCESS;
+    } else if(strcmp(op,"ch_pass") == 0 && strcmp(obj, "user") == 0) {
+        access = ClientInfo.user_access[USER_ACCESS_INDEX] & USER_ACCESS_CHANGE_PASS_OTHERS;
+    } else if(strcmp(op,"ch_my_pass") == 0 && strcmp(obj, "user") == 0) {
+        access = ClientInfo.user_access[USER_ACCESS_INDEX] & USER_ACCESS_CHANGE_PASS_SELF;
     } else if(strcmp(op,"add") == 0 && strcmp(obj, "subscription") == 0) {
         access = ClientInfo.user_access[SUBSCRIPTION_ACCESS_INDEX] & USER_ACCESS_WRITE_ACCESS;
     } else if(strcmp(op,"get") == 0 && strcmp(obj, "subscription") == 0) {
@@ -971,6 +982,52 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                     if(!isError) {
                         Response rs = _add_user(nameNode->value, passwordNode->value); 
+                        char* result = response_to_string(&rs);
+                        free(rs.errMsg);
+
+                        if(result != NULL) {
+                            vt__log_writer(LOG_INFO, "Added result to resultSB");
+                            vt__append_to_string_builder(&resultSB, result);
+                            free(result);
+                        } else {
+                            isError = true;
+                            vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
+                        }
+                    }
+
+                } else if((strcmp(op, "ch_pass") == 0 || strcmp(op, "ch_my_pass") == 0)  && strcmp(obj, "user") == 0) {
+                    vt__log_writer(LOG_INFO, "Begin add user");
+
+                    JsonNode* nameNode = vt__search_json(argsNode, "name");
+                    if(nameNode == NULL || nameNode->value == NULL) {
+                        vt__log_writer(LOG_WARN, "Missing parameter: name or, name provided is invalid");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: name\"");
+                    } 
+
+                    JsonNode* passwordNode = vt__search_json(argsNode, "password");
+                    if(passwordNode == NULL || passwordNode->value == NULL) {
+                        vt__log_writer(LOG_WARN, "Missing parameter: password or, password provided is invalid");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: password\"");
+                    } 
+
+                    JsonNode* newPasswordNode = vt__search_json(argsNode, "new_password");
+                    if(newPasswordNode == NULL || newPasswordNode->value == NULL) {
+                        vt__log_writer(LOG_WARN, "Missing parameter: new_password or, new_password provided is invalid");
+                        (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: new_password\"");
+                    } 
+
+                    if(!isError) {
+                        bool self = true;
+
+                        if(strcmp(op, "ch_pass") == 0) {
+                            self = false;    
+                        }
+
+                        Response rs = _change_password(clientInfo.client_id, nameNode->value, passwordNode->value, newPasswordNode->value, self); 
                         char* result = response_to_string(&rs);
                         free(rs.errMsg);
 

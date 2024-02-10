@@ -13,6 +13,8 @@
 #define USER_ACCESS_DELETE_ACCESS               16
 #define USER_ACCESS_COUNT_ACCESS                32
 #define USER_ACCESS_LIST_ACCESS                 64   
+#define USER_ACCESS_CHANGE_PASS_SELF            128
+#define USER_ACCESS_CHANGE_PASS_OTHERS          256
 
 #define USER_ACCESS_INDEX                       0
 #define DB_ACCESS_INDEX                         1
@@ -32,5 +34,6 @@ typedef struct User {
 } User;
 
 Response add_user(User* user);
+Response change_password(char* uuid, char* user_name, char* current_pass, char* new_pass, bool self);
 User* authenticate(char* user_name, char* password);
 Response delete_user(char* user_name);

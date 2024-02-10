@@ -149,6 +149,31 @@ bool find_user(char* user_name) {
     return userExist;
 }
 
+User* get_user(char* user_name, char* password) {
+    pthread_mutex_lock(&file_mutex);
+
+    FILE* file = fopen(auth_file, "rb");
+    if (file == NULL) {
+        pthread_mutex_unlock(&file_mutex);
+        vt__log_writer(LOG_ERROR, "Error find user. Can't open auth data.");
+        return NULL;
+    }
+
+    User* current_user = (User*)malloc (sizeof(User));
+    while (fread(current_user, sizeof(User), 1, file) == 1) {
+        if (strcmp(current_user->name, user_name) == 0 && strcmp(current_user->password, password) == 0) {
+            fclose(file);
+            pthread_mutex_unlock(&file_mutex);
+            return current_user;
+        }
+    }
+
+    fclose(file);
+    pthread_mutex_unlock(&file_mutex);
+
+    return NULL;
+}
+
 Response add_user(User* user) {
     vt__log_writer(LOG_DEBUG, "auth addUser started");
 
@@ -189,7 +214,6 @@ Response add_user(User* user) {
     return rs;
 }
 
-
 Response update_user(char* user_id, User* user) {
     vt__log_writer(LOG_DEBUG, "auth updateUser started");
     
@@ -227,6 +251,32 @@ Response update_user(char* user_id, User* user) {
     
     vt__log_writer(LOG_DEBUG, "auth updateUser completed");
 
+    return rs;
+}
+
+Response change_password(char* uuid, char* user_name, char* current_pass, char* new_pass, bool self) {
+    Response rs;
+
+    User* current_user = get_user(strdup(user_name), vt__sha256(current_pass));
+    if(current_user == NULL) {
+        rs.errCode = FAILED_CODE;
+        rs.errMsg = strdup(FAILED_MSG);
+        return rs;
+    }
+
+    if(self) {
+        if(strcasecmp(uuid, current_user->uuid) != 0) {
+            rs.errCode = FAILED_CODE;
+            rs.errMsg = strdup(FAILED_MSG);
+            return rs;            
+        }
+    } else{
+        uuid = current_user->uuid;
+    }
+
+    strcpy(current_user->password, vt__sha256(new_pass));
+
+    rs = update_user(uuid, current_user);
     return rs;
 }
 
