@@ -7,7 +7,6 @@
 #define COLLECTIONS                             "collections"
 #define VECTORS                                 "vectors"
 #define SUBSCRIPTIONS                           "subscriptions"
-#define VP_MAX                                  2048
 
 #define SUCCESS_CODE                            0
 #define SUCESS_MSG                              "SUCCESS"

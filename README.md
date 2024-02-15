@@ -8,6 +8,54 @@ Victo is a realtime AI Native Database for effeciently storing and retriving vec
 
 We hope you enjoy using Victo.
 
+<a name="readme-top"></a>
+
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+        <a href="#get-started">Get Started</a>
+        <ul>
+            <li><a href="#build">Build</a></li>
+            <li><a href="#docker-support">Docker Support</a></li>
+        </ul>
+    </li>
+    <li><a href="#technologies-and-concepts">Technologies and Concepts</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li>
+        <a href="#db-operations-and-syntax">DB Operations and Syntax</a>
+        <ul>
+            <li><a href="#add-a-database">Add a database</a></li>
+            <li><a href="#add-User">Add User</a></li>
+            <li><a href="#change-password-for-self">Change password for self</a></li>
+            <li><a href="#change-password-for-another-user-as-admin">Change password for another User as Admin</a></li>
+            <li><a href="#add-a-collection">Add a collection</a></li>
+            <li><a href="#delete-a-collection">Delete a collection</a></li>
+            <li><a href="#list-total-number-of-collections-in-a-database">List total number of collections in a database</a></li>
+            <li><a href="#list-all-collections-in-a-database">List all collections in a database</a></li>
+            <li><a href="#add-a-vector-to-a-collection">Add a vector to a collection</a></li>
+            <li><a href="#retrive-a-vector—froma-collection">Retrive a vector from a collection</a></li>
+            <li><a href="#delete-a-vector-in-a-collection">Delete a vector in a collection</a></li>
+            <li><a href="#list-total-number-of-vectors-in-a-collection">List total number of vectors in a collection</a></li> 
+            <li><a href="#list-all-vectors-in-a-collection">List all vectors in a collection</a></li>
+            <li><a href="#query-a-vector">Query a vector</a></li> 
+            <li><a href="#add-a-subscription">Add a Subscription</a></li> 
+            <li><a href="#retrive-a-subscription—froma-collection">Retrive a subscription from a collection</a></li> 
+            <li><a href="#delete-a-subscription-in-a-collection">Delete a subscription in a collection</a></li>
+            <li><a href="#list-total-number-of-subscriptions-in-a-collection">List total number of subscriptions in a collection</a></li> 
+            <li><a href="#list-all-subscriptions-in-a-collection">List all subscriptions in a collection</a></li>
+        </ul>
+    </li>
+    <li><a href="#practical-use-cases">Practical use cases</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#version">Version</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgements">Acknowledgements</a></li>
+  </ol>
+</details>
+
 # Get Started
 
 <div align="center"><h4>The current version of Victo works only in Unix and Unix-like OS</h4></div>
@@ -15,6 +63,8 @@ We hope you enjoy using Victo.
 ## Prerequisites
 1. GCC
 2. CMake (VERSION 3.27.1)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Build
 
@@ -49,13 +99,16 @@ It is in this path the actual victo database objects and files are stored in the
 |         |                                                       |                   |                                                    | WARN          |
 |         |                                                       |                   |                                                    | ERROR         |
 |         |                                                       |                   |                                                    | CRITICAL      |
-|   -a    | Enable authentication and authorization               | No (as of v1.2.1) | false                                              | true or false |       
+|   -a    | Enable authentication and authorization               | No                | false                                              | true or false | 
+|   -s    | Enable subscription                                   | No                | true                                               | true or false |      
 
 
-7. By default, the db server is started listening on port 2018. We can connect to the server with any websocket client using the URL as below
+7. By default, the db server is started listening on port 2018. We can connect to the victo sb server with any websocket client using the URL as below
 ```
 ws://<host-ip>:2018/
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Docker Support
 
@@ -69,14 +122,24 @@ docker run --name some-name -p <host-port>:8080 -v <host-path>:/app/victodb  -d 
 ```
 ... where "some-name" is the name you want to provide to the container. Inside the container Victo runs on port 8080. <host-port> is the port on host machine that you want to map to the container port. <host-path> is the path on host machine where the volume data is stored. "tag" is the version of Victo that you want to run.
 
+The default ENTRPOINT for Victo docker image is 
+```
+ENTRYPOINT ["/app/exe/victo-exe", "-d", "/app/victodb", "-i", "0.0.0.0", "-p", "8080"]
+```
+However, you cna overwrite the ENTRYPOINT based on the details summarized under "Build" section above, point 6.
+
 For more detail, please visit [https://hub.docker.com/repository/docker/sreehari006/victo/general](https://hub.docker.com/repository/docker/sreehari006/victo/general)
 
-# Technologies/Concepts
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+# Technologies and Concepts
 1. AI and Vector analysis
 2. WebSockets and Socket programming
 3. JSON parser
 4. Abstract Syntax Tree
 5. UUID generator
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # How it works
 The fundamental components of Victo Database are:
@@ -84,6 +147,10 @@ The fundamental components of Victo Database are:
 * <b>collection: </b>Collection holds a list of vectors
 * <b>vector: </b>Vectors are data points or entities which represent vector embeddings
 * <b>queries: </b>Queries are JSON-like string used to interact with database for storing and retriving db objects. 
+* <b>subscription: </b>Subscription are like queries. It works in a event driven fashion. when there is a new vector added mathcing the criteria of any subscription, the client would be instantly notified.
+* <b>User: </b>User is db user. Valid only if authentication control is enabled on server.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## DB Operations and Syntax
 The following list of DB operations can be executed on the server using any websocket client
@@ -91,13 +158,17 @@ The following list of DB operations can be executed on the server using any webs
 ### Basic structure of a query
 As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic components
 
-| Key     | Description                                           | Valid values                                                  |
-|---------|-------------------------------------------------------|---------------------------------------------------------------|
-| op      | operation on the Database                             | "add" if the obj is db                                        |
-|         |                                                       | "add", "delete", "list" or "count" if obj is collection       |
-|         |                                                       | "put", "get", "list", "count" or "query" if obj is vector     |
-| obj     | Database object on which the operation is executed    | "db" or "collection" or "vector"                              |
-| args    | arguments                                             |                                                               |
+| Key     | Description                                           | Valid values                                                               |
+|---------|-------------------------------------------------------|----------------------------------------------------------------------------|
+| op      | operation on the Database                             | "add" if the obj is db                                                     |
+|         |                                                       | "add", "delete", "list" or "count" if obj is collection                    |
+|         |                                                       | "put", "get", "list", "count", "delete" or "query" if obj is vector        |
+|         |                                                       | "add", "get", "list", "count" or "delete" if obj is subscription           |
+|         |                                                       | "add", "ch_pass", "ch_my_pass" if obj is user                              |
+| obj     | Database object on which the operation is executed    | "db", "collection", "vector", "subscription" or "user"                     |
+| args    | arguments                                             |                                                                            |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Add a database 
 
@@ -135,6 +206,135 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
     ]
 }
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Add User 
+
+#### Request
+```
+{   
+    "op":"add", 
+    "obj":"user", 
+    "args": {
+        "name": <preferred-name>,
+        "password": <preferred-password>
+    }
+}
+```
+
+| Key      | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|----------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| name     | User Name             | Yes               | String        | Any                                             |
+| password | Password              | Yes               | String        | Any                                             |
+
+#### Response
+```
+{
+    "metadata": [
+        {
+            "response_id": <response-id>
+        }
+    ],
+    "result": [
+        {
+            "code": <interger-result-code>,
+            "message": <result-message>
+        }
+    ],
+    "error": [
+        "array-of-error-strings-if-any
+    ]
+}
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Change password for self 
+
+#### Request
+```
+{   
+    "op":"ch_my_pass", 
+    "obj":"user", 
+    "args": {
+        "name": <name>,
+        "password": <password>,
+        "new_password": <preferred-new-password>
+    }
+}
+```
+
+| Key          | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|--------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| name         | User Name             | Yes               | String        | Any                                             |
+| password     | Password              | Yes               | String        | Any                                             |
+| new_password | Password              | Yes               | String        | Any                                             |
+
+#### Response
+```
+{
+    "metadata": [
+        {
+            "response_id": <response-id>
+        }
+    ],
+    "result": [
+        {
+            "code": <interger-result-code>,
+            "message": <result-message>
+        }
+    ],
+    "error": [
+        "array-of-error-strings-if-any
+    ]
+}
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Change password for another User as Admin
+
+#### Request
+```
+{   
+    "op":"ch_pass", 
+    "obj":"user", 
+    "args": {
+        "name": <name>,
+        "password": <password>,
+        "new_password": <preferred-new-password>
+    }
+}
+```
+
+| Key          | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|--------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| name         | User Name             | Yes               | String        | Any                                             |
+| password     | Password              | Yes               | String        | Any                                             |
+| new_password | Password              | Yes               | String        | Any                                             |
+
+#### Response
+```
+{
+    "metadata": [
+        {
+            "response_id": <response-id>
+        }
+    ],
+    "result": [
+        {
+            "code": <interger-result-code>,
+            "message": <result-message>
+        }
+    ],
+    "error": [
+        "array-of-error-strings-if-any
+    ]
+}
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Add a collection 
 
@@ -175,6 +375,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ### Delete a collection 
 
 #### Request
@@ -214,6 +416,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ### List total number of collections in a database 
 
 #### Request
@@ -252,6 +456,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### List all collections in a database 
 
@@ -292,6 +497,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
     ]
 }
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Add a vector to a collection 
 
@@ -339,6 +546,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ### Retrive a vector to a collection 
 
 #### Request
@@ -385,6 +594,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ### Delete a vector in a collection 
 
 #### Request
@@ -426,6 +637,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ### List total number of vectors in a collection 
 
 #### Request
@@ -465,6 +678,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
     ]
 }
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### List all vectors in a collection 
 
@@ -508,6 +723,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ### Query a vector 
 
 #### Request
@@ -521,7 +738,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
         "ai_model": <ai-model-with-which-vector-embeddings-are-generated>,
         "vdim": <vector-dimension">,
         "vp": <array-of-vector-datapoints>
-        "qOps": {
+        "q_ops": {
             "vd_method": <preferred-vector-distance-calculation-method>,
             "k_value": <base-value-for-finding-nearest-vectors>,
             "logical_op": <logic-operation-in-query-comparison-against-kvalue>,
@@ -542,19 +759,19 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 | ai_model        | AI Model                                          | Yes               | String        |                                                 |
 | vdim            | Vector Dimension                                  | Yes               | Integer       |                                                 |
 | vp              | Vector Points                                     | Yes               | Decimal Array |                                                 |
-| vd_method       | Vector Distance Calculation Method                | No                | Integer       | Default value is 0                              |
-|                                                                                                         | 0 - EUCLIDEAN_DISTANCE                          |
-|                                                                                                         | 1 - COSINE_SIMILARITY                           |
-|                                                                                                         | 2 - MANHATTAN_DISTANCE                          |
-|                                                                                                         | 3 - MINKOWSKI_DISTANCE                          |
-|                                                                                                         | 4 - DOT_PRODUCT                                 |
+| vd_method       | Vector Distance Calculation Method                | No                | String        | Default value is EUCLIDEAN_DISTANC              |
+|                                                                                                         | EUCLIDEAN_DISTANCE                              |
+|                                                                                                         | COSINE_SIMILARITY                               |
+|                                                                                                         | MANHATTAN_DISTANCE                              |
+|                                                                                                         | MINKOWSKI_DISTANCE                              |
+|                                                                                                         | DOT_PRODUCT                                     |
 | k_value         | base value used for query on calculated distance  | No                | Decimal       | Default 0.0                                     |
-| logical_op      | logical operation against k_value while query     | No                | Integer       | Default 0                                       |
-|                                                                                                         | 2  - GREATER_THAN_OR_EQUAL_TO                   |
-|                                                                                                         | 1  - GREATER_THAN                               |
-|                                                                                                         | 0  - EQUAL_TO                                   |
-|                                                                                                         | -1 - LESS_THAN                                  |
-|                                                                                                         | -2 - LESS_THAN_OR_EQUAL_TO                      |
+| logical_op      | logical operation against k_value while query     | No                | String        | Default is =                                    |
+|                                                                                                         | >=  - GREATER_THAN_OR_EQUAL_TO                  |
+|                                                                                                         | >  - GREATER_THAN                               |
+|                                                                                                         | =  - EQUAL_TO                                   |
+|                                                                                                         | < - LESS_THAN                                   |
+|                                                                                                         | <= - LESS_THAN_OR_EQUAL_TO                      |
 | limit           | Number of vector points returned                  | No                | Integer       | Positive Integer                                |
 | order           | Ascending or descending based on k_value          | No                | Boolean       | Default is false                                |
 |                                                                                                         | false - Ascending                               |
@@ -612,6 +829,260 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Add a Subscription 
+
+#### Request
+```
+{   
+    "op":"add", 
+    "obj":"subscription", 
+    "args": {
+        "db": <db-name>,
+        "collection": <collection-name>,
+        "ai_model": <ai-model-with-which-vector-embeddings-are-generated>,
+        "vdim": <vector-dimension">,
+        "vp": <array-of-vector-datapoints>,
+        "is_normal": <normalize-vector-points-before-query>,
+        "q_ops": {
+            "vd_method": <preferred-vector-distance-calculation-method>,
+            "k_value": <base-value-for-finding-nearest-vectors>,
+            "logical_op": <logic-operation-in-query-comparison-against-kvalue>,
+            "p_value": <applicable-only-for-minskowski-method>
+        }
+    }
+}
+```
+
+| Key             | Description                                       | Is Mandatory?     | Data Type     | Valid values                                    |
+|-----------------|-----------------------|-------------------|---------------|-----------------------------------------------------------------------------|
+| db              | DB Name                                           | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection      | Collection Name                                   | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| ai_model        | AI Model                                          | Yes               | String        |                                                 |
+| vdim            | Vector Dimension                                  | Yes               | Integer       |                                                 |
+| vp              | Vector Points                                     | Yes               | Decimal Array |                                                 |
+| vd_method       | Vector Distance Calculation Method                | No                | String        | Default value is EUCLIDEAN_DISTANCE             |
+|                                                                                                         | EUCLIDEAN_DISTANCE                              |
+|                                                                                                         | COSINE_SIMILARITY                               |
+|                                                                                                         | MANHATTAN_DISTANCE                              |
+|                                                                                                         | MINKOWSKI_DISTANCE                              |
+|                                                                                                         | DOT_PRODUCT                                     |
+| is_normal       | Normalize vector points before query              | No                | boolean       | true or false. Default: false                   |
+| k_value         | base value used for query on calculated distance  | No                | Decimal       | Default 0.0                                     |
+| logical_op      | logical operation against k_value while query     | No                | String        | Default is =                                    |
+|                                                                                                         | >=  - GREATER_THAN_OR_EQUAL_TO                  |
+|                                                                                                         | >  - GREATER_THAN                               |
+|                                                                                                         | =  - EQUAL_TO                                   |
+|                                                                                                         | < - LESS_THAN                                   |
+|                                                                                                         | <= - LESS_THAN_OR_EQUAL_TO                      |
+| p_value         | Applicable only for Minskowski Method             | Conditional       | Decimal       |                                                 |
+
+#### Response
+```
+{
+    "metadata": [
+        {
+            "response_id": <response-id>
+        }
+    ],
+    "result": [
+        {
+            "code": <interger-result-code>,
+            "message": <result-message>,
+            "hash": <subscription-hash>
+        }
+    ],
+    "error": [
+        "array-of-error-strings-if-any
+    ]
+}
+```
+
+### Retrive a subscription to a collection 
+
+#### Request
+```
+{   
+    "op":"get", 
+    "obj":"subscription", 
+    "args": {
+        "db": <db-name>,
+        "collection": <collection-name>,
+        "hash": <subscription-id>
+    }
+}
+```
+
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| hash        | Subscription ID       | Yes               | UUID          |                                                 |
+
+#### Response
+```
+{
+    "metadata": [
+        {
+            "response_id": <response-id>
+        }
+    ],
+    "result": [
+        {
+            "code": <interger-result-code>,
+            "message": <result-message>,
+            "hash": <uuid>,
+            "client_id": <uuid>,
+            "ai_model": <ai-model>,
+            "dimension": <integer>,
+            "is_normal": <boolean-true-if-normalized-else-false>,
+            "vp": <array-of-decimal-datapoints>
+            "q_ops": {
+                "vd_method": <preferred-vector-distance-calculation-method>,
+                "k_value": <base-value-for-finding-nearest-vectors>,
+                "logical_op": <logic-operation-in-query-comparison-against-kvalue>,
+                "p_value": <applicable-only-for-minskowski-method>             
+            }
+        }
+    ],
+    "error": [
+        "array-of-error-strings-if-any
+    ]
+}
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Delete a subscription in a collection 
+
+#### Request
+```
+{   
+    "op":"get", 
+    "obj":"vector", 
+    "args": {
+        "db": <db-name>,
+        "collection": <collection-name>,
+        "hash": <subscription-id>
+    }
+}
+```
+
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| hash        | Subscription ID       | Yes               | UUID          |                                                 |
+
+#### Response
+```
+{
+    "metadata": [
+        {
+            "response_id": <response-id>
+        }
+    ],
+    "result": [
+        {
+            "code": <interger-result-code>,
+            "message": <result-message>
+        }
+    ],
+    "error": [
+        "array-of-error-strings-if-any
+    ]
+}
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### List total number of subscriptions in a collection 
+
+#### Request
+```
+{   
+    "op":"count", 
+    "obj":"subscription", 
+    "args": {
+        "db": <db-name>,
+        "collection": <collection-name>
+    }
+}
+```
+
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+
+#### Response
+```
+{
+    "metadata": [
+        {
+            "response_id": <response-id>
+        }
+    ],
+    "result": [
+        {
+            "code": <interger-result-code>,
+            "message": <result-message>,
+            "count": <integer>
+        }
+    ],
+    "error": [
+        "array-of-error-strings-if-any
+    ]
+}
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### List all subscriptions in a collection 
+
+#### Request
+```
+{   
+    "op":"list", 
+    "obj":"subscription", 
+    "args": {
+        "db": <db-name>,
+        "collection": <collection-name>
+    }
+}
+```
+
+| Key         | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|-------------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db          | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+| collection  | Collection Name       | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+
+#### Response
+```
+{
+    "metadata": [
+        {
+            "response_id": <response-id>
+        }
+    ],
+    "result": [
+        {
+            "code": <interger-result-code>,
+            "message": <result-message>,
+            "subscriptions": [
+                <array-of-vector-uuids>
+            ]
+        }
+    ],
+    "error": [
+        "array-of-error-strings-if-any
+    ]
+}
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 # Practical usecases
 * NLP
 * Generative AI
@@ -622,16 +1093,26 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 * Machine Learning
 * Social Networks
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ## Roadmap
 - [x] Enhance logging mechanism and Error Handling
+- [x] Enhance DB features
+    - [x] Users accounts and access control
+    - [x] Subscribe on collections
 - [ ] Build scheduler for threads handling db operations
 - [ ] Enable support for secure websockets (wss)
-- [ ] Enhance DB features
-    - [ ] Users accounts and access control
-    - [ ] Subscribe on collections
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Version
-[20 Jan 2024] - 1.2.1 (Latest stable version)
+[15 Feb 2024] - 2.0.0 (Latest stable version)
+Added support for:
+- Authentication
+- User accounts and access control
+- Subscriptions
+
+[26 Jan 2024] - 1.2.1
 Enhanced logging mechanism performance improved
 
 [20 Jan 2024] - 1.2.0
@@ -642,9 +1123,13 @@ Added support for Docker and containerization
 
 [6th Jan 2024] - 1.0.0 
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Contributing
 
@@ -659,12 +1144,18 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 # Contact
 
 Sree Hari 
 eMail - hari.tinyblitz@gmail.com
 LinkedIn - [view_my_profile] (https://www.linkedin.com/in/sree-hari-84911b123/)
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 # Acknowledgements
 
 1. [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>

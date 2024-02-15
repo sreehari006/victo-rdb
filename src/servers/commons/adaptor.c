@@ -9,6 +9,7 @@
 #include "../../registry/includes/db_config_sl_proto.h"
 #include "../../registry/includes/db_ops_sl_proto.h"
 #include "../../registry/includes/user_ops_sl_proto.h"
+#include "../../utils/ds/includes/enums.h"
 
 typedef struct {
     SubscribeTrigMsgNode* head;
@@ -473,22 +474,18 @@ char* subscription_rs_to_string(GetSubscriptionRS* rs) {
         vt__append_to_string_builder(&resultSB, node.normal);
         vt__append_to_string_builder(&resultSB, "\", \"dimension\": ");
         vt__append_to_string_builder(&resultSB, dimension);
-        vt__append_to_string_builder(&resultSB, ", \"qOps\": {");
+        vt__append_to_string_builder(&resultSB, ", \"q_ops\": {");
 
-        char vd_method[20];
-        snprintf(vd_method, sizeof(vd_method), "%d", node.vector_distance_method);
-        char logical_op[20];
-        snprintf(logical_op, sizeof(logical_op), "%d", node.query_logical_op);
         char k_value[20];
         snprintf(k_value, sizeof(k_value), "%f", node.query_value);
         char p_value[20];
         snprintf(p_value, sizeof(p_value), "%f", node.p_value);
 
-        vt__append_to_string_builder(&resultSB, "\"vd_method\": ");
-        vt__append_to_string_builder(&resultSB, vd_method);
-        vt__append_to_string_builder(&resultSB, ", \"logical_op\": ");
-        vt__append_to_string_builder(&resultSB, logical_op);
-        vt__append_to_string_builder(&resultSB, ", \"k_value\": ");
+        vt__append_to_string_builder(&resultSB, "\"vd_method\": \"");
+        vt__append_to_string_builder(&resultSB, to_string_vd_method(node.vector_distance_method));
+        vt__append_to_string_builder(&resultSB, "\", \"logical_op\": \"");
+        vt__append_to_string_builder(&resultSB, to_string_logical_ops(node.query_logical_op));
+        vt__append_to_string_builder(&resultSB, "\", \"k_value\": ");
         vt__append_to_string_builder(&resultSB, k_value);
         vt__append_to_string_builder(&resultSB, ", \"p_value\": ");
         vt__append_to_string_builder(&resultSB, p_value);
@@ -840,6 +837,7 @@ Response _add_user(char* userName, char* password) {
     user->user_access[COLLECTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
     user->user_access[VECTOR_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
     user->user_access[SUBSCRIPTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
+    user->status = USER_STATUS_ACTIVE;
     
     Response rs = add_user_sl(user);
     free(uuid);
@@ -1421,7 +1419,12 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added new node to subscribe queue");
-                            enqueue_subscribe_trig_message(dbNode->value, collectionNode->value, rs.hash, clientInfo.client_id);
+                            if(is_subscription_enabled()) {
+                                enqueue_subscribe_trig_message(dbNode->value, collectionNode->value, rs.hash, clientInfo.client_id);
+                            } else {
+                                vt__log_writer(LOG_DEBUG, "Subscription disabled");
+                            }
+                            
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
                             vt__append_to_string_builder(&resultSB, result);
                             free(result);
@@ -1496,16 +1499,16 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     if(!isError) {       
 
                         QueryOptions queryOptions;
-                        JsonNode* queryOptionsNode = vt__search_json(argsNode, "qOps");
+                        JsonNode* queryOptionsNode = vt__search_json(argsNode, "q_ops");
                         
                         JsonNode* vdMethodNode = vt__search_json(queryOptionsNode, "vd_method");
-                        queryOptions.vector_distance_method = (vdMethodNode != NULL && vt__is_valid_integer(vdMethodNode->value)) ? atoi(vdMethodNode->value): 0;
+                        queryOptions.vector_distance_method = (vdMethodNode != NULL) ? to_int_vd_method(vdMethodNode->value) : 0;
                         
                         JsonNode* limitNode = vt__search_json(queryOptionsNode, "limit");
                         queryOptions.query_limit = (limitNode != NULL && vt__is_valid_integer(vdMethodNode->value)) ? atoi(limitNode->value): -99;
-                        
+
                         JsonNode* logicalOpNode = vt__search_json(queryOptionsNode, "logical_op");
-                        queryOptions.query_logical_op = (logicalOpNode != NULL && vt__is_valid_integer(vdMethodNode->value))? atoi(logicalOpNode->value): 0;
+                        queryOptions.query_logical_op = (logicalOpNode != NULL)? to_int_logical_ops(logicalOpNode->value) : 0;
                         
                         JsonNode* queryValueNode = vt__search_json(queryOptionsNode, "k_value");
                         double query_value = (queryValueNode != NULL) ? strtod(queryValueNode->value, &errptr): 0;
@@ -1617,13 +1620,13 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         bool overwrite = (overwriteNode != NULL && strcasecmp(overwriteNode->value, "true") == 0) ? true : false;
 
                         SubscriptionQueryOptions queryOptions;
-                        JsonNode* queryOptionsNode = vt__search_json(argsNode, "qOps");
+                        JsonNode* queryOptionsNode = vt__search_json(argsNode, "q_ops");
                         
                         JsonNode* vdMethodNode = vt__search_json(queryOptionsNode, "vd_method");
-                        queryOptions.vector_distance_method = (vdMethodNode != NULL && vt__is_valid_integer(vdMethodNode->value)) ? atoi(vdMethodNode->value): 0;
+                        queryOptions.vector_distance_method = (vdMethodNode != NULL) ? to_int_vd_method(vdMethodNode->value): 0;
                                                
                         JsonNode* logicalOpNode = vt__search_json(queryOptionsNode, "logical_op");
-                        queryOptions.query_logical_op = (logicalOpNode != NULL && vt__is_valid_integer(vdMethodNode->value))? atoi(logicalOpNode->value): 0;
+                        queryOptions.query_logical_op = (logicalOpNode != NULL)? to_int_logical_ops(logicalOpNode->value): 0;
                         
                         JsonNode* queryValueNode = vt__search_json(queryOptionsNode, "query_value");
                         double query_value = queryValueNode != NULL ? strtod(queryValueNode->value, &errptr): 0;
@@ -1675,9 +1678,9 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     } 
 
                     if(hashNode == NULL || hashNode->value == NULL || !vt__is_valid_obj_name(hashNode->value)) {
-                        vt__log_writer(LOG_WARN, "Missing parameter: vector (hash) or, vector (hash) provided is invalid");
+                        vt__log_writer(LOG_WARN, "Missing parameter: subscription (hash) or, subscription (hash) provided is invalid");
                         (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: subscription (hash), or subscription (hash) provided is invalid\"");
                     } 
                     if(!isError) {
                         GetSubscriptionRS rs = _get_subscription(dbNode->value, collectionNode->value, hashNode->value); 
@@ -1787,9 +1790,9 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                     } 
 
                     if(hashNode == NULL || hashNode->value == NULL || !vt__is_valid_obj_name(hashNode->value)) {
-                        vt__log_writer(LOG_WARN, "Missing parameter: vector (hash) or, vector (hash) provided is invalid");
+                        vt__log_writer(LOG_WARN, "Missing parameter: subscription (hash) or, subscription (hash) provided is invalid");
                         (isError) ? vt__append_to_string_builder(&errorSB, ", ") : (isError = true);
-                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: vector (hash), or vector (hash) provided is invalid\"");
+                        vt__append_to_string_builder(&errorSB, "\"Missing parameter: subscription (hash), or subscription (hash) provided is invalid\"");
                     } 
                     if(!isError) {
                         Response rs = _delete_subscription(dbNode->value, collectionNode->value, hashNode->value); 

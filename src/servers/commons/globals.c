@@ -13,6 +13,7 @@ void set_websocket_params(WebsocketParams params) {
         websocket_params.ip_address = strdup(params.ip_address);
         websocket_params.port = params.port;
         websocket_params.enable_auth = params.enable_auth;
+        websocket_params.enable_subscripton = params.enable_subscripton;
         isInitialized = true;
     }
     vt__log_writer(LOG_DEBUG, "globals setWebSocketParams completed");  
@@ -22,6 +23,12 @@ bool is_auth_enabled() {
     vt__log_writer(LOG_DEBUG, "globals getEnableAuth started");
     vt__log_writer(LOG_DEBUG, "globals getEnableAuth completed");
     return websocket_params.enable_auth;
+}
+
+bool is_subscription_enabled() {
+    vt__log_writer(LOG_DEBUG, "globals getEnableAuth started");
+    vt__log_writer(LOG_DEBUG, "globals getEnableAuth completed");
+    return websocket_params.enable_subscripton;
 }
 
 char* get_websock_init_IP() {

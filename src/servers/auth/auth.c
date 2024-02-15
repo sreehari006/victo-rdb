@@ -87,6 +87,7 @@ void init_auth_util(const char* path) {
         user.user_access[COLLECTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
         user.user_access[VECTOR_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
         user.user_access[SUBSCRIPTION_ACCESS_INDEX] = USER_ACCESS_FULL_ACCESS;
+        user.status = USER_STATUS_ACTIVE;
 
         vt__log_writer(LOG_INFO, "Admin Password: ");
         vt__log_writer(LOG_INFO, password);

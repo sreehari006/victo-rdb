@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../../ds/datastructures.h"
+#include "../../../commons/datastructures.h"
 
 #define MAX_ACCESS_INDEX_TYPES  25
 

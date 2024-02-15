@@ -9,7 +9,7 @@
 #include <errno.h>
 
 #include "../base/includes/db_config_proto.h"
-#include "../../ds/datastructures.h"
+#include "../../commons/datastructures.h"
 #include "../../commons/constants.h"
 
 __attribute__((visibility("hidden"))) 
