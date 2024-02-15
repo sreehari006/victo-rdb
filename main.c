@@ -103,22 +103,5 @@ int main(int argc, char *argv[]) {
 
     }
 
-    /* if(params.dbServerPath && initDBConfigSL(params.dbServerPath)) {
-        params.dbBasePath = getDBBasePathSL(params.dbServerPath);
-        char* dbLogPath = getDBLogPathSL(params.dbServerPath);
-        char* authPath = getDBAuthPathSL(params.dbServerPath);
-        
-        initLogUtil(log_level, dbLogPath);
-        free(dbLogPath);
-
-        initAuthUtil(authPath);
-        free(authPath);
-
-        setWebSocketParams(params);
-        startWebSockServer();
-    } else {
-        logWriter(LOG_CRITICAL, "Invalid server configuration.");
-    } */
-
     return 0;
 }
