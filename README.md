@@ -16,43 +16,43 @@ We hope you enjoy using Victo.
     <li>
         <a href="#get-started">Get Started</a>
         <ul>
-            <li><a href=“#build”>Build</a></li>
-            <li><a href=“#docker-support">Docker Support</a></li>
+            <li><a href="#build">Build</a></li>
+            <li><a href="#docker-support">Docker Support</a></li>
         </ul>
     </li>
-    <li><a href=“#technologies-and-concepts">Technologies and Concepts</a></li>
-    <li><a href=“#how-it-works">How it works</a></li>
+    <li><a href="#technologies-and-concepts">Technologies and Concepts</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
     <li>
-        <a href=“#db-operations-and-syntax">DB Operations and Syntax</a>
+        <a href="#db-operations-and-syntax">DB Operations and Syntax</a>
         <ul>
-            <li><a href=“#add-a-database”>Add a database</a></li>
-            <li><a href=“#add-User”>Add User</a></li>
-            <li><a href=“#change-password-for-self”>Change password for self</a></li>
-            <li><a href=“#change-password-for-another-user-as-admin”>Change password for another User as Admin</a></li>
-            <li><a href=“#add-a-collection”>Add a collection</a></li>
-            <li><a href=“#delete-a-collection”>Delete a collection</a></li>
-            <li><a href=“#list-total-number-of-collections-in-a-database”>List total number of collections in a database</a></li>
-            <li><a href=“#list-all-collections-in-a-database”>List all collections in a database</a></li>
-            <li><a href=“#add-a-vector-to-a-collection”>Add a vector to a collection</a></li>
-            <li><a href=“#retrive-a-vector—froma-collection”>Retrive a vector from a collection</a></li>
-            <li><a href=“#delete-a-vector-in-a-collection”>Delete a vector in a collection</a></li>
-            <li><a href=“#list-total-number-of-vectors-in-a-collection”>List total number of vectors in a collection</a></li> 
-            <li><a href=“#list-all-vectors-in-a-collection”>List all vectors in a collection</a></li>
-            <li><a href=“#query-a-vector”>Query a vector</a></li> 
-            <li><a href=“#add-a-subscription”>Add a Subscription</a></li> 
-            <li><a href=“#retrive-a-subscription—froma-collection”>Retrive a subscription from a collection</a></li> 
-            <li><a href=“#delete-a-subscription-in-a-collection”>Delete a subscription in a collection</a></li>
-            <li><a href=“#list-total-number-of-subscriptions-in-a-collection”>List total number of subscriptions in a collection</a></li> 
-            <li><a href=“#list-all-subscriptions-in-a-collection”>List all subscriptions in a collection</a></li>
+            <li><a href="#add-a-database">Add a database</a></li>
+            <li><a href="#add-User">Add User</a></li>
+            <li><a href="#change-password-for-self">Change password for self</a></li>
+            <li><a href="#change-password-for-another-user-as-admin">Change password for another User as Admin</a></li>
+            <li><a href="#add-a-collection">Add a collection</a></li>
+            <li><a href="#delete-a-collection">Delete a collection</a></li>
+            <li><a href="#list-total-number-of-collections-in-a-database">List total number of collections in a database</a></li>
+            <li><a href="#list-all-collections-in-a-database">List all collections in a database</a></li>
+            <li><a href="#add-a-vector-to-a-collection">Add a vector to a collection</a></li>
+            <li><a href="#retrive-a-vector—froma-collection">Retrive a vector from a collection</a></li>
+            <li><a href="#delete-a-vector-in-a-collection">Delete a vector in a collection</a></li>
+            <li><a href="#list-total-number-of-vectors-in-a-collection">List total number of vectors in a collection</a></li> 
+            <li><a href="#list-all-vectors-in-a-collection">List all vectors in a collection</a></li>
+            <li><a href="#query-a-vector">Query a vector</a></li> 
+            <li><a href="#add-a-subscription">Add a Subscription</a></li> 
+            <li><a href="#retrive-a-subscription—froma-collection">Retrive a subscription from a collection</a></li> 
+            <li><a href="#delete-a-subscription-in-a-collection">Delete a subscription in a collection</a></li>
+            <li><a href="#list-total-number-of-subscriptions-in-a-collection">List total number of subscriptions in a collection</a></li> 
+            <li><a href="#list-all-subscriptions-in-a-collection">List all subscriptions in a collection</a></li>
         </ul>
     </li>
-    <li><a href=“#practical-use-cases">Practical use cases</a></li>
-    <li><a href=“#roadmap">Roadmap</a></li>
-    <li><a href=“#version">Version</a></li>
-    <li><a href=“#license">License</a></li>
-    <li><a href=“#contributing">Contributing</a></li>
-    <li><a href=“#contact">Contact</a></li>
-    <li><a href=“#acknowledgements">Acknowledgements</a></li>
+    <li><a href="#practical-use-cases">Practical use cases</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#version">Version</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
 
@@ -1106,7 +1106,13 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Version
-[26 Jan 2024] - 1.2.1 (Latest stable version)
+[15 Feb 2024] - 2.0.0 (Latest stable version)
+Added support for:
+- Authentication
+- User accounts and access control
+- Subscriptions
+
+[26 Jan 2024] - 1.2.1
 Enhanced logging mechanism performance improved
 
 [20 Jan 2024] - 1.2.0
