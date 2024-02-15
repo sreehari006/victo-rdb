@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#define VP_DIMENSION_MAX            2048
+
 typedef struct response {
     int errCode;
     char* errMsg;
@@ -31,7 +33,7 @@ typedef struct node {
     char hash[64];
     char normal[2];
     int vdim;
-    double vp[2048];
+    double vp[VP_DIMENSION_MAX];
 } Node;
 
 typedef struct putVectorRS {
@@ -104,7 +106,7 @@ typedef struct SubscriptionNode {
     int query_logical_op;
     double query_value;
     double p_value;
-    double vp[2048];
+    double vp[VP_DIMENSION_MAX];
 } SubscriptionNode;
 
 typedef struct SubscriptionListRS {

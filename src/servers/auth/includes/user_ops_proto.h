@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include "../../../ds/datastructures.h"
+#include "../../../commons/datastructures.h"
 
 #define USER_ALREADY_EXIST_CODE                 1
 #define USER_ALREADY_EXIST_MSG                  "User already exist" 
@@ -22,15 +22,18 @@
 #define VECTOR_ACCESS_INDEX                     3
 #define SUBSCRIPTION_ACCESS_INDEX               4
 
-#define MAX_ACCESS_INDEX_TYPES                 25
+#define MAX_ACCESS_INDEX_TYPES                  25
+
+#define USER_STATUS_ACTIVE                      'A'
+#define USER_STATUS_INACTIVE                    'I'
+#define USER_STATUS_DELETED                     'D'
+
 typedef struct User {
     char name[17];
     char password[65];
     char uuid[37];
     int user_access[MAX_ACCESS_INDEX_TYPES];
-    int dbAccess;
-    int collectionAccess;
-    int vectorAccess;
+    char status;
 } User;
 
 Response add_user(User* user);

@@ -32,6 +32,7 @@ int main(int argc, char *argv[]) {
     params.ip_address = strdup("127.0.0.1");
     params.port = 2018;
     params.enable_auth = false;
+    params.enable_subscripton = true;
     
     char* victo_base_path;
     while(i<argc) {
@@ -52,6 +53,9 @@ int main(int argc, char *argv[]) {
                 i++;
             } else if(strcmp(argv[i], "-a") == 0) {
                 params.enable_auth = (argv[i+1] != NULL && strcasecmp(argv[i+1], "true") == 0) ? true : false;
+                i++;
+            } else if(strcmp(argv[i], "-s") == 0) {
+                params.enable_subscripton = (argv[i+1] != NULL && strcasecmp(argv[i+1], "true") == 0) ? true : false;
                 i++;
             }
         }

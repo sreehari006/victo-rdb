@@ -27,6 +27,7 @@ int vt__push_JNS(JsonNodeStack *stack, JsonNode* node) {
         vt__log_writer(LOG_ERROR, "jn_stakc pushJNS Memory allocation failed");
         return -1;
     }
+    
     return 0;
 }
 
@@ -37,6 +38,7 @@ JsonNode* vt__pop_JNS(JsonNodeStack *stack) {
     }
     JsonNode *value = stack->items[stack->top];
     stack->top--;
+
     return value;
 }
 

@@ -27,6 +27,7 @@ int vt__push_DSS(DynamicStringStack *stack, const char *value) {
         vt__log_writer(LOG_ERROR, "ds_stack pushDSS Memory allocation failed");
         return -1;
     }
+
     return 0;
 }
 
@@ -37,6 +38,7 @@ char* vt__pop_DSS(DynamicStringStack *stack) {
     }
     char *value = stack->items[stack->top];
     stack->top--;
+
     return value;
 }
 

@@ -52,7 +52,10 @@ void stop_websock_server() {
         }
     }
 
-    free_subscribe_trig_messag_queue();
+    if(is_subscription_enabled()) {
+        free_subscribe_trig_messag_queue();
+    }
+    
     close(serverData.server_socket);
     vt__log_writer(LOG_DEBUG, "server stopWebSockServer completed");
 }
@@ -440,7 +443,7 @@ void *subscribe_TF(void *arg) {
             vt__log_writer(LOG_CRITICAL, "Error creating a thread for processing subscription");
             exit(EXIT_FAILURE);
         } else {
-            vt__log_writer(LOG_INFO, "New thread created for processing subscription: ");
+            vt__log_writer(LOG_INFO, "New thread created for processing subscription");
         }
 
         if(!serverData.is_running) {
@@ -458,11 +461,10 @@ void start_websock_server() {
     vt__set_thread_id_on_register(sys_thread_id, "main");
 
     vt__log_writer(LOG_DEBUG, "server startWebSockServer started");
-    int max_socket, activity, sd;
+    int i, max_socket, activity, sd;
     struct sockaddr_in server_addr;
     fd_set master_set, readfds;
-    int i, max_clients = MAX_CLIENTS;
-
+    
     serverData.server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverData.server_socket < 0) {
         vt__log_writer(LOG_CRITICAL, "Socket creation failed");
@@ -484,20 +486,22 @@ void start_websock_server() {
     }
 
     vt__log_writer(LOG_DEBUG, "Initiatize serverData with client sockets and client name");
-    for (i = 0; i < max_clients; i++) {
+    for (i = 0; i < MAX_CLIENTS; i++) {
         nullify_client_connection(i);
     }
 
-    init_subscribe_trig_queue();
-    pthread_t subscription_thread;
-    if (pthread_create(&subscription_thread, NULL, subscribe_TF, NULL) != 0) {
-        vt__log_writer(LOG_CRITICAL, "Error creating a thread for subscription");
-        exit(EXIT_FAILURE);
-    } else {
-        char sys_thread_id[25]; 
-        snprintf(sys_thread_id, sizeof(sys_thread_id), "%p", subscription_thread);
-        vt__set_thread_id_on_register(sys_thread_id, "subscriber");
-        vt__log_writer(LOG_INFO, "New thread created for handling subscription: ");
+    if(is_subscription_enabled()) {
+        init_subscribe_trig_queue();
+        pthread_t subscription_thread;
+        if (pthread_create(&subscription_thread, NULL, subscribe_TF, NULL) != 0) {
+            vt__log_writer(LOG_CRITICAL, "Error creating a thread for subscription");
+            exit(EXIT_FAILURE);
+        } else {
+            char sys_thread_id[25]; 
+            snprintf(sys_thread_id, sizeof(sys_thread_id), "%p", subscription_thread);
+            vt__set_thread_id_on_register(sys_thread_id, "subscriber");
+            vt__log_writer(LOG_INFO, "New thread created for handling subscription: ");
+        }
     }
 
     vt__log_writer(LOG_DEBUG, "Listening for incoming connections and message");
@@ -507,7 +511,7 @@ void start_websock_server() {
         FD_SET(serverData.server_socket, &readfds);
         max_socket = serverData.server_socket;
 
-        for (i = 0; i < max_clients; i++) {
+        for (i = 0; i < MAX_CLIENTS; i++) {
             sd = serverData.client_connection[i].client_socket;
             if (sd > 0) {
                 FD_SET(sd, &readfds);
@@ -542,7 +546,7 @@ void start_websock_server() {
                 }
             }
 
-            for (i = 0; i < max_clients; i++) {
+            for (i = 0; i < MAX_CLIENTS; i++) {
                 if (serverData.client_connection[i].client_socket == 0) {
                     if(handle_client_connection(new_socket, i)) {
                         // serverData.client_connection[i].client_socket = new_socket;
@@ -567,7 +571,7 @@ void start_websock_server() {
             }
         }
 
-       for (i = 0; i < max_clients; i++) {
+       for (i = 0; i < MAX_CLIENTS; i++) {
             sd = serverData.client_connection[i].client_socket;
             if (FD_ISSET(sd, &readfds)) {
                 struct ThreadData* data = malloc(sizeof(struct ThreadData));;

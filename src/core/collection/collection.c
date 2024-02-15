@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include "../../commons/constants.h"
-#include "../../ds/datastructures.h"
+#include "../../commons/datastructures.h"
 #include "../base/includes/db_config_proto.h"
 #include "../file/includes/file_io_proto.h"
 #include "../../utils/files/includes/file_utils_proto.h"
