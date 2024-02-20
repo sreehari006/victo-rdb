@@ -177,7 +177,6 @@ Accept-Language: en-GB,en-US;q=0.9,en;q=0.8
 Sec-WebSocket-Key: <Sec-WebSocket-Key>
 Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits
 Authorization: Basic <base64-encoded-token>
-
 ```
 
 When the server is started for the first time, a default "admin" user with a random password would be created. The password for admin user can be found in the logs while server startup. Please change the password immediately for security reasons.
