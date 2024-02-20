@@ -21,7 +21,8 @@ We hope you enjoy using Victo.
         </ul>
     </li>
     <li><a href="#technologies-and-concepts">Technologies and Concepts</a></li>
-    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#how-it-works">How it works?</a></li>
+    <li><a href="#authentication">Authentication</a></li>
     <li>
         <a href="#db-operations-and-syntax">DB Operations and Syntax</a>
         <ul>
@@ -46,6 +47,7 @@ We hope you enjoy using Victo.
             <li><a href="#list-all-subscriptions-in-a-collection">List all subscriptions in a collection</a></li>
         </ul>
     </li>
+    <li><a href="#logs-and-monitoring">Logs and Monitoring</a></li>
     <li><a href="#practical-use-cases">Practical use cases</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#version">Version</a></li>
@@ -141,14 +143,45 @@ For more detail, please visit [https://hub.docker.com/repository/docker/sreehari
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-# How it works
+# How it works?
 The fundamental components of Victo Database are:
 * <b>db: </b>The basic components which holds a list of collections. Victo databse server can have multiple database objects.
 * <b>collection: </b>Collection holds a list of vectors
-* <b>vector: </b>Vectors are data points or entities which represent vector embeddings
+* <b>vector: </b>Vectors are data points or entities which represent vector embeddings.
 * <b>queries: </b>Queries are JSON-like string used to interact with database for storing and retriving db objects. 
 * <b>subscription: </b>Subscription are like queries. It works in a event driven fashion. when there is a new vector added mathcing the criteria of any subscription, the client would be instantly notified.
 * <b>User: </b>User is db user. Valid only if authentication control is enabled on server.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Authentication
+
+The connection request should have a valid "Authorization Bearer Token" included in the Websocket HTTP(s) request header for authentication.
+
+```
+Authorization: Basic <base64-encoded-token>
+```
+"base64-encoded-token" here is base64 encoded string of "username:password". Kindly note, colon (:) is the delimiter between username and password.
+
+Sample Header:
+```
+GET ws://127.0.0.1:2018/ HTTP/1.1
+Host: 127.0.0.1:2018
+Connection: Upgrade
+Pragma: no-cache
+Cache-Control: no-cache
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Accept-Encoding: gzip, deflate, br
+Accept-Language: en-GB,en-US;q=0.9,en;q=0.8
+Sec-WebSocket-Key: <Sec-WebSocket-Key>
+Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits
+Authorization: Basic <base64-encoded-token>
+```
+
+When the server is started for the first time, a default "admin" user with a random password would be created. The password for admin user can be found in the logs while server startup. Please change the password immediately for security reasons.
+
+With "admin" account, the additional user accounts can be created using <a href="#add-user">Add User</a> query.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -1080,6 +1113,20 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
     ]
 }
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Logs and Monitoring
+
+By default, a log file (log.txt) would be generated under "database-base-path/logs/" location.
+
+The database server can be started with following logger levels using -l flag
+
+- DEBUG: Used for detailed debugging information. 
+- INFO: Used to provide informational messages.
+- WARNING: Used to indicate potential issues or anomalies that are not necessarily errors but might require attention.
+- ERROR: Used to indicate errors that caused the server to behave unexpectedly or incorrectly, but that are not fatal.
+- CRITICAL: Used to indicate critical errors that require immediate attention and might result in the termination of the server.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
