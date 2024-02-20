@@ -1129,6 +1129,8 @@ The database server can be started with following logger levels using -l flag
 - ERROR: Used to indicate errors that caused the server to behave unexpectedly or incorrectly, but that are not fatal.
 - CRITICAL: Used to indicate critical errors that require immediate attention and might result in the termination of the server.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 # Practical usecases
 * NLP
 * Generative AI
