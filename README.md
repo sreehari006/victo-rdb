@@ -22,11 +22,10 @@ We hope you enjoy using Victo.
     </li>
     <li><a href="#technologies-and-concepts">Technologies and Concepts</a></li>
     <li><a href="#how-it-works">How it works?</a></li>
+    <li><a href="#authentication">Authentication</a></li>
     <li>
-        <ol>
-            <a href="#authentication">Authentication</a>
-            <a href="#db-operations-and-syntax">DB Operations and Syntax</a>
-            <ul>
+        <a href="#db-operations-and-syntax">DB Operations and Syntax</a>
+        <ul>
             <li><a href="#add-a-database">Add a database</a></li>
             <li><a href="#add-User">Add User</a></li>
             <li><a href="#change-password-for-self">Change password for self</a></li>
@@ -47,9 +46,8 @@ We hope you enjoy using Victo.
             <li><a href="#list-total-number-of-subscriptions-in-a-collection">List total number of subscriptions in a collection</a></li> 
             <li><a href="#list-all-subscriptions-in-a-collection">List all subscriptions in a collection</a></li>
         </ul>
-        <a href="#logs-and-monitoring">Logs and Monitoring</a>
-        </ol>
     </li>
+    <li><a href="#logs-and-monitoring">Logs and Monitoring</a></li>
     <li><a href="#practical-use-cases">Practical use cases</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#version">Version</a></li>
@@ -1130,8 +1128,6 @@ The database server can be started with following logger levels using -l flag
 - WARNING: Used to indicate potential issues or anomalies that are not necessarily errors but might require attention.
 - ERROR: Used to indicate errors that caused the server to behave unexpectedly or incorrectly, but that are not fatal.
 - CRITICAL: Used to indicate critical errors that require immediate attention and might result in the termination of the server.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Practical usecases
 * NLP
