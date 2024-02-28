@@ -35,20 +35,20 @@ We hope you enjoy using Victo.
             <li><a href="#list-total-number-of-collections-in-a-database">List total number of collections in a database</a></li>
             <li><a href="#list-all-collections-in-a-database">List all collections in a database</a></li>
             <li><a href="#add-a-vector-to-a-collection">Add a vector to a collection</a></li>
-            <li><a href="#retrive-a-vector—froma-collection">Retrive a vector from a collection</a></li>
+            <li><a href="#retrive-a-vector-from-a-collection">Retrive a vector from a collection</a></li>
             <li><a href="#delete-a-vector-in-a-collection">Delete a vector in a collection</a></li>
             <li><a href="#list-total-number-of-vectors-in-a-collection">List total number of vectors in a collection</a></li> 
             <li><a href="#list-all-vectors-in-a-collection">List all vectors in a collection</a></li>
             <li><a href="#query-a-vector">Query a vector</a></li> 
             <li><a href="#add-a-subscription">Add a Subscription</a></li> 
-            <li><a href="#retrive-a-subscription—froma-collection">Retrive a subscription from a collection</a></li> 
+            <li><a href="#retrive-a-subscription-from-a-collection">Retrive a subscription from a collection</a></li> 
             <li><a href="#delete-a-subscription-in-a-collection">Delete a subscription in a collection</a></li>
             <li><a href="#list-total-number-of-subscriptions-in-a-collection">List total number of subscriptions in a collection</a></li> 
             <li><a href="#list-all-subscriptions-in-a-collection">List all subscriptions in a collection</a></li>
         </ul>
     </li>
     <li><a href="#logs-and-monitoring">Logs and Monitoring</a></li>
-    <li><a href="#practical-use-cases">Practical use cases</a></li>
+    <li><a href="#practical-usecases">Practical Usecases</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#version">Version</a></li>
     <li><a href="#license">License</a></li>
@@ -581,7 +581,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Retrive a vector to a collection 
+### Retrive a vector from a collection 
 
 #### Request
 ```
@@ -634,7 +634,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 #### Request
 ```
 {   
-    "op":"get", 
+    "op":"delete", 
     "obj":"vector", 
     "args": {
         "db": <db-name>,
@@ -932,7 +932,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 }
 ```
 
-### Retrive a subscription to a collection 
+### Retrive a subscription from a collection 
 
 #### Request
 ```
@@ -992,8 +992,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 #### Request
 ```
 {   
-    "op":"get", 
-    "obj":"vector", 
+    "op":"delete", 
+    "obj":"subscription", 
     "args": {
         "db": <db-name>,
         "collection": <collection-name>,
@@ -1130,7 +1130,7 @@ The database server can be started with following logger levels using -l flag
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-# Practical usecases
+# Practical Usecases
 * NLP
 * Generative AI
 * Recommender System
