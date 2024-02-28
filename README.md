@@ -634,7 +634,7 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 #### Request
 ```
 {   
-    "op":"get", 
+    "op":"delete", 
     "obj":"vector", 
     "args": {
         "db": <db-name>,
@@ -992,8 +992,8 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
 #### Request
 ```
 {   
-    "op":"get", 
-    "obj":"vector", 
+    "op":"delete", 
+    "obj":"subscription", 
     "args": {
         "db": <db-name>,
         "collection": <collection-name>,
