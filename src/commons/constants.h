@@ -63,13 +63,16 @@
 #define OPERATORS_GREATER_THAN                  1
 #define OPERATORS_GREATER_THAN_OR_EQUAL_TO      2
 
-
 #define EUCLIDEAN_DISTANCE                      0
 #define COSINE_SIMILARITY                       1
 #define MANHATTAN_DISTANCE                      2
 #define MINKOWSKI_DISTANCE                      3
 #define DOT_PRODUCT                             4
 
+#define TIME_METRIC_SEC_VALUE                   1000000.0
+#define TIME_METRIC_SEC_KEY                     "s"
+
+#define SINGLE_SPACE                            " "
 
 
 

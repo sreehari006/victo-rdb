@@ -1,15 +1,16 @@
 #include "./includes/adaptor_proto.h"
 #include "./includes/globals_proto.h"
+#include "../auth/includes/crypto_proto.h"
+#include "../../commons/constants.h"
 #include "../../utils/json/includes/json_proto.h"
 #include "../../utils/strings/includes/string_builder_proto.h"
 #include "../../utils/uuid/includes/uuid_proto.h"
-#include "../../commons/constants.h"
 #include "../../utils/logs/includes/log_proto.h"
-#include "../auth/includes/crypto_proto.h"
 #include "../../registry/includes/db_config_sl_proto.h"
 #include "../../registry/includes/db_ops_sl_proto.h"
 #include "../../registry/includes/user_ops_sl_proto.h"
 #include "../../utils/ds/includes/enums.h"
+#include "../../utils/time/includes/timestamp_proto.h"
 
 typedef struct {
     SubscribeTrigMsgNode* head;
@@ -908,6 +909,9 @@ bool verifyAccess(char* op, char* obj, ClientInfo ClientInfo) {
 char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {    
     vt__log_writer(LOG_DEBUG, "adaptor do_db_ops started");
 
+    struct timeval start, end;
+    vt__gettimeoftheday(&start);
+
     char* result;
 
     vt__log_writer(LOG_DEBUG, "adaptor metadataSB while db operations");
@@ -931,7 +935,7 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
     char* responseID = strdup(threadUUID);
     vt__append_to_string_builder(&metadataSB, responseID);
     free(responseID);
-    vt__append_to_string_builder(&metadataSB, "\"}");
+    vt__append_to_string_builder(&metadataSB, "\", \"response_time\": \"");
 
     vt__append_to_string_builder(&errorSB, "\"error\": [");
     vt__append_to_string_builder(&resultSB, "\"result\": [");
@@ -1836,6 +1840,14 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
 
     free(clientInfo.client_id);
     
+    vt__gettimeoftheday(&end);
+    char* elasped_time = vt__elapsedtime(&start, &end, TIME_METRIC_SEC_VALUE);
+
+    vt__append_to_string_builder(&metadataSB, elasped_time);
+    vt__append_to_string_builder(&metadataSB, "\",\"unit_of_time\":\"");
+    vt__append_to_string_builder(&metadataSB, TIME_METRIC_SEC_KEY);
+    vt__append_to_string_builder(&metadataSB, "\"}");
+    free(elasped_time);
     vt__append_to_string_builder(&metadataSB, "]");
     vt__append_to_string_builder(&clientResponseSB, metadataSB.data);
     vt__free_string_builder(&metadataSB);
