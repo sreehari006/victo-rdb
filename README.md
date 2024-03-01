@@ -1191,7 +1191,11 @@ The database server can be started with following logger levels using -l flag
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Version
-[15 Feb 2024] - 2.0.0 (Latest stable version)
+[01 Mar 2024] - 2.0.1 (Latest stable version)
+Minor release
+- Added support response time in query response
+
+[15 Feb 2024] - 2.0.0
 Added support for:
 - Authentication
 - User accounts and access control
