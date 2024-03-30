@@ -11,6 +11,8 @@
 #include "../base/includes/db_config_proto.h"
 #include "../../commons/datastructures.h"
 #include "../../commons/constants.h"
+#include "../file/includes/file_io_proto.h"
+#include "../../utils/files/includes/file_utils_proto.h"
 
 __attribute__((visibility("hidden"))) 
 Response add_new_db(const char* db) {
@@ -42,6 +44,23 @@ Response add_new_db(const char* db) {
         }
     }
 
+    return rs;
+}
 
+DBListRS db_list() {
+    DBListRS rs;
+    char* location = get_db_base_path();
+
+    if(vt__dir_exists(location)) {
+        rs.errCode = SUCCESS_CODE;
+        rs.errMsg = strdup(SUCESS_MSG);
+        rs.dbs = list_directory(location);
+    } else {
+        rs.errCode = DB_NOT_EXIST_ERROR_CODE;
+        rs.errMsg = strdup(DB_NOT_EXIST_ERROR_MSG);
+        rs.dbs = NULL;
+    }
+
+    free(location);
     return rs;
 }

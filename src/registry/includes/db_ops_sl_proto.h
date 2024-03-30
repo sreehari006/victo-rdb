@@ -1,6 +1,7 @@
 #include "../../commons/datastructures.h"
 
 Response add_new_db_sl(const char* location);
+DBListRS db_list_sl();
 Response add_new_collection_sl(const char* db, const char* collection);
 Response delete_collection_sl(const char* db, const char* collection);
 CountRS collection_count_sl(const char* db);
