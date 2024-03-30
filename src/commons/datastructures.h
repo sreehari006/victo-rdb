@@ -16,6 +16,12 @@ typedef struct countRS {
     int count;
 } CountRS;
 
+typedef struct dbListRS {
+    int errCode;
+    char* errMsg;
+    char** dbs;
+} DBListRS;
+
 typedef struct collectionListRS {
     int errCode;
     char* errMsg;

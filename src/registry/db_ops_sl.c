@@ -8,6 +8,12 @@
 Response add_new_db_sl(const char* location) {
     return add_new_db(location);
 }
+
+DBListRS db_list_sl() {
+    return db_list();
+}
+
+
 Response add_new_collection_sl(const char* db, const char* collection) {
     return add_new_collection(db, collection);
 }

@@ -27,6 +27,7 @@ We hope you enjoy using Victo.
         <a href="#db-operations-and-syntax">DB Operations and Syntax</a>
         <ul>
             <li><a href="#add-a-database">Add a database</a></li>
+            <li><a href="#list-all-database-instances">List all database instances</a></li>
             <li><a href="#add-User">Add User</a></li>
             <li><a href="#change-password-for-self">Change password for self</a></li>
             <li><a href="#change-password-for-another-user-as-admin">Change password for another User as Admin</a></li>
@@ -234,6 +235,45 @@ As mentioned earlier, query is a JSON-like string. Any victo query has 3 basic c
         {
             "code": <interger-result-code>,
             "message": <result-message>
+        }
+    ],
+    "error": [
+        "array-of-error-strings-if-any
+    ]
+}
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### List all database instances
+
+#### Request
+```
+{   
+    "op":"list", 
+    "obj":"db"
+}
+```
+
+| Key     | Description           | Is Mandatory?     | Data Type     | Valid values                                    |
+|---------|-----------------------|-------------------|---------------|-------------------------------------------------|
+| db      | DB Name               | Yes               | String        | Alphanumeric value with hyphen and underscore   |
+
+#### Response
+```
+{
+    "metadata": [
+        {
+            "response_id": <response-id>,
+            "response_time": <response-time>,
+            "unit_of_time": <response-time-metric-measured-in-secs-by-default>            
+        }
+    ],
+    "result": [
+        {
+            "code": <interger-result-code>,
+            "message": <result-message>
+            "db": <list-of-database>
         }
     ],
     "error": [

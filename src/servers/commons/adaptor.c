@@ -317,6 +317,43 @@ char* collection_list_rs_to_string(CollectionListRS* rs) {
     return result;
 }
 
+char* db_list_rs_to_string(DBListRS* rs) {
+    vt__log_writer(LOG_DEBUG, "adaptor db_list_rs_to_string started");
+
+    StringBuilder resultSB;
+    vt__init_string_builder(&resultSB, 10);
+
+    char errCode[5];
+    snprintf(errCode, sizeof(errCode), "%d", rs->errCode);
+
+    vt__append_to_string_builder(&resultSB, "{\"code\": ");
+    vt__append_to_string_builder(&resultSB, errCode);
+    vt__append_to_string_builder(&resultSB, ", \"message\": \"");
+    vt__append_to_string_builder(&resultSB, rs->errMsg);
+    vt__append_to_string_builder(&resultSB, "\"");
+
+    if(rs->errCode == 0) {
+        vt__append_to_string_builder(&resultSB, ", \"db\": [");
+        if(rs->dbs != NULL) {
+            char* collections = string_array_to_string(rs->dbs);
+            vt__append_to_string_builder(&resultSB, collections);
+            free(collections);
+        }
+        vt__append_to_string_builder(&resultSB, "]");
+    }
+
+    vt__append_to_string_builder(&resultSB, "}");
+    char* result = strdup(resultSB.data);
+    vt__free_string_builder(&resultSB);
+
+    if (result == NULL) {
+        vt__log_writer(LOG_ERROR, "Memory allocation failed for result");
+    }
+
+    vt__log_writer(LOG_DEBUG, "adaptor db_list_rs_to_string completed");
+    return result;
+}
+
 char* vector_list_rs_to_string(VectorListRS* rs) {
     vt__log_writer(LOG_DEBUG, "adaptor vector_list_rs_to_string started");
 
@@ -725,6 +762,15 @@ CollectionListRS _list_collection(char* db) {
     return rs;
 }
 
+DBListRS _list_db() {
+    vt__log_writer(LOG_DEBUG, "adaptor list_db started");
+
+    DBListRS rs = db_list_sl();
+    
+    vt__log_writer(LOG_DEBUG, "adaptor list_db completed");
+    return rs;
+}
+
 Response _delete_vector(char* db, char* collection, char* hash) {
     vt__log_writer(LOG_DEBUG, "adaptor delete_vector started");
 
@@ -1092,6 +1138,32 @@ char* do_db_ops(char* threadUUID, char* payload, ClientInfo clientInfo) {
                         char* result = response_to_string(&rs);
                         free(rs.errMsg);
 
+                        if(result != NULL) {
+                            vt__log_writer(LOG_INFO, "Added result to resultSB");
+                            vt__append_to_string_builder(&resultSB, result);
+                            free(result);
+                        } else {
+                            isError = true;
+                            vt__log_writer(LOG_ERROR, "DB Operation is unsuccessful");
+                            vt__append_to_string_builder(&errorSB, "\"Internal server error\"");
+                        }
+                    }
+
+                } else if(strcmp(op, "list") == 0 && strcmp(obj, "db") == 0) {
+                    vt__log_writer(LOG_INFO, "Begin list db");
+
+                    if(!isError) {
+                        DBListRS rs = _list_db(); 
+                        char* result = db_list_rs_to_string(&rs);
+                        int i=0;
+                        if(rs.dbs != NULL) {
+                            while(rs.dbs[i] != NULL) {
+                                free(rs.dbs[i]);
+                                i++;
+                            }
+                            free(rs.dbs);
+                        }
+                        
                         if(result != NULL) {
                             vt__log_writer(LOG_INFO, "Added result to resultSB");
                             vt__append_to_string_builder(&resultSB, result);
